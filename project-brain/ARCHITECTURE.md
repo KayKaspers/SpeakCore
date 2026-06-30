@@ -59,7 +59,12 @@ Siehe [ADR-0001](DECISIONS.md).
 Separater Dienst mit den nötigen Rechten für Docker-/Host-Aktionen. **Einziger** Pfad zu
 privilegierten Operationen (Container anlegen/starten/stoppen, TS3 installieren, Backups
 auf Dateisystemebene, Systemcheck-Sonden). Authentifiziert via Bootstrap-Token, exponiert
-eine minimale, klar definierte HTTP-API. Details: [docs/architecture/agent.md](../docs/architecture/agent.md).
+eine minimale, klar definierte HTTP-API.
+
+**Stand Step 006:** umgesetzt sind ausschließlich **read-only** Endpunkte – `GET /health`,
+`GET /version` und `GET /system/snapshot` (lesende Systemdaten für den Preflight; Docker nur via
+`--version`, **kein** Docker-Socket, keine Steuerung). Privilegierte Aktionen (Container/TS3)
+folgen in späteren Steps. Details: [docs/architecture/agent.md](../docs/architecture/agent.md).
 
 ### 3.4 Adapter Layer
 Generische Abstraktion „Server-Typ". Definiert ein einheitliches Interface (provision, start,

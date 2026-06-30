@@ -80,6 +80,15 @@
 - **Gegenmaßnahmen:** Klare NDF-Dokumentation, modulare Schnitte, Tests, Roadmap-Priorisierung,
   bewusste Reduktion auf TS3.
 
+## R-12 – Agent-Snapshot ohne Token-Schutz
+- **E:** niedrig · **A:** niedrig · **Risiko:** niedrig
+- **Beschreibung:** Ist `AGENT_BOOTSTRAP_TOKEN` nicht gesetzt, ist `GET /system/snapshot`
+  ungeschützt. Bei versehentlicher Exposition könnten **nicht-sensible** Systeminfos (Kerne, RAM,
+  OS, Docker-Version) ausgelesen werden – keine Secrets, keine Steuerung.
+- **Gegenmaßnahmen:** Agent nur im **privaten Compose-Netz**, nie öffentlich exponieren
+  ([ADR-0004](DECISIONS.md)); Token-Gate aktivieren (`AGENT_BOOTSTRAP_TOKEN`); read-only Daten
+  bewusst minimal gehalten (kein Pfad-/ENV-Leak). Spätere Härtung: Token verpflichtend + mTLS.
+
 ## R-10 – i18n-Drift (DE/EN)
 - **E:** mittel · **A:** niedrig · **Risiko:** niedrig
 - **Beschreibung:** Übersetzungen veralten gegenüber dem Code.
@@ -103,3 +112,4 @@
 | R-09 | Komplexität/Bus-Faktor | mittel |
 | R-11 | CSP `'unsafe-inline'` | mittel |
 | R-10 | i18n-Drift | niedrig |
+| R-12 | Agent-Snapshot ohne Token | niedrig |

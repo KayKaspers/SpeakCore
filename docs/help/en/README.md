@@ -7,8 +7,9 @@
 
 - Getting started / Setup Wizard
 - Simple Mode vs. Expert Mode
-- Preflight & Capacity Advisor (traffic-light system 🟢/🟡/🔴) — *core logic available from Step 005;
-  demo at `/systemcheck` with example data, no real measurement yet*
+- Preflight & Capacity Advisor (traffic-light system 🟢/🟡/🔴) — *core logic from Step 005; from
+  Step 006 `/systemcheck` uses real, read-only system data from the agent (CPU/RAM/storage/OS/Docker
+  status), with a fallback to example data when the agent is unreachable*
 - Environment types (Proxmox VM/LXC, Bare Metal, VPS, NAS/Home)
 - Understanding the System Check
 - Connecting an existing TeamSpeak 3 server

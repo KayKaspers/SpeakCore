@@ -32,9 +32,13 @@ Eigenes Core-Modul, das schätzt, was eine Umgebung leisten kann (Ampel 🟢/�
 sinnvoll sind und welche Upgrades empfohlen werden. Die **reine Bewertungslogik** liegt in
 `packages/shared/preflight/` (Typen in `packages/types`) – ohne Host-/DB-/Agent-Abhängigkeit.
 
-- In Step 005 werden **keine echten Hostdaten** gemessen (Demo-/Dummy-Eingabe `ResourceSnapshot`).
 - Richtwerte sind **konservative Empfehlungen, keine Garantie**; unbekannte Werte ergeben nie „grün".
-- Echte Erhebung übernehmen spätere **Agent-Sonden**. Demo-UI: `/systemcheck`.
+- **Ab Step 006:** `/systemcheck` ruft **serverseitig** den read-only Agent-Endpunkt
+  `GET /system/snapshot` ab und füttert echte Werte (CPU/RAM/Speicher/OS/Docker-Status) in
+  `runPreflight()`. Ist der Agent nicht erreichbar, greift ein Demo-/Unknown-Fallback (mit
+  Statusanzeige). Umgebung (Proxmox/LXC) wird **nicht** erkannt → bleibt `unknown`.
+- Der Browser spricht den Agent **nie direkt** an; `runPreflight()` bleibt reine Logik ohne
+  Agent-Abhängigkeit. Details: [agent.md](agent.md).
 
 ## Weiterführend
 

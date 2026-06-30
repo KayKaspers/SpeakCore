@@ -95,6 +95,15 @@
     "disclaimer": "Konservative Empfehlung, keine Garantie. Echte Messungen folgen über den SpeakCore Agent in einem späteren Schritt.",
     "overall": "Systembewertung",
     "backToDashboard": "Zurück zum Dashboard",
+    "agent": {
+      "connected": "Agent verbunden – echte Systemdaten",
+      "incomplete": "Agent verbunden – Daten unvollständig",
+      "unreachable": "Agent nicht erreichbar – Beispieldaten",
+      "systemData": "Erhobene Systemdaten",
+      "osLabel": "Betriebssystem",
+      "archLabel": "Architektur",
+      "nodeLabel": "Node"
+    },
     "severity": {
       "green": "Geeignet",
       "yellow": "Möglich mit Einschränkungen",

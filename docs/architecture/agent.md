@@ -22,6 +22,30 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 - Authentifizierung über generiertes **Bootstrap-Token** ([ADR-0005](../../project-brain/DECISIONS.md)).
 - Strikte Eingabevalidierung – keine ungeprüften Parameter in Docker-/Host-Aufrufe.
 
+### Endpunkte (Stand Step 006)
+
+| Methode | Pfad | Zweck |
+|---------|------|-------|
+| GET | `/health` | Status & Uptime (offen, Liveness) |
+| GET | `/version` | Name/Version/NDF-Step (offen) |
+| GET | `/system/snapshot` | **read-only** Systemdaten für Preflight (Token-gated, wenn gesetzt) |
+
+## `/system/snapshot` – was gelesen wird (Step 006)
+
+**Gelesen (lesend, ungefährlich):** CPU-Kerne & Architektur, RAM gesamt/frei, freier Speicher am
+**Agent-Datenpfad**, OS/Plattform/Release, Node-/Agent-Version, Docker- & Compose-Verfügbarkeit
+(+ Version via `docker --version` / `docker compose version`).
+
+**Ausdrücklich NICHT:** keine Container-Operationen (`ps`/`inspect`/`run`/Start/Stop), **kein
+Docker-Socket** (`/var/run/docker.sock`), keine Portscans, keine Firewall-/Host-Änderungen, keine
+TS3-Verbindung. CLI-Aufrufe nur mit **statischen Argumenten** über `execFile` (keine Shell →
+keine Command-Injection) mit **Timeout**. Ist Docker nicht ermittelbar, lautet der Wert `unknown`
+(nie fälschlich `absent`) – die WebUI mappt das zu „gelb", nie zu falschem „grün".
+
+> Warum kein Docker-Socket? Ein gemounteter Docker-Socket entspricht faktisch Root auf dem Host.
+> Für reine Systeminformationen ist er unnötig und würde die Angriffsfläche massiv erhöhen. Eine
+> sichere Docker-**Verwaltung** (Steuerung) folgt erst in späteren Steps mit eigenem Sicherheitskonzept.
+
 ## Sicherheitsprinzipien
 
 - **Nicht öffentlich exponiert** (privates Compose-Netz / Loopback).

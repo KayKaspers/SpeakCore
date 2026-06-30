@@ -95,6 +95,15 @@
     "disclaimer": "Conservative recommendation, not a guarantee. Real measurements will follow via the SpeakCore Agent in a later step.",
     "overall": "System assessment",
     "backToDashboard": "Back to dashboard",
+    "agent": {
+      "connected": "Agent connected – real system data",
+      "incomplete": "Agent connected – data incomplete",
+      "unreachable": "Agent unreachable – example data",
+      "systemData": "Collected system data",
+      "osLabel": "Operating system",
+      "archLabel": "Architecture",
+      "nodeLabel": "Node"
+    },
     "severity": {
       "green": "Suitable",
       "yellow": "Possible with limitations",

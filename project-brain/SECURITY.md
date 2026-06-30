@@ -82,6 +82,17 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - Eingabevalidierung aller Parameter (keine Shell-Injection in Docker-/Host-Aufrufe).
 - Roadmap-Härtung: mTLS / signierte Requests, Audit jeder privilegierten Operation.
 
+### Read-only-Snapshot (Step 006)
+
+- Der Agent stellt bislang **ausschließlich lesende** Endpunkte bereit; `GET /system/snapshot`
+  liefert ungefährliche Systemdaten (CPU/RAM/Speicher/OS/Node-/Agent-Version, Docker-Verfügbarkeit).
+- **Kein Docker-Socket**, keine Container-Operationen, keine Portscans, keine Host-Änderungen.
+  Docker/Compose nur über `docker --version` / `docker compose version` – `execFile` ohne Shell,
+  **statische Argumente**, **Timeout**. Nicht ermittelbar ⇒ `unknown` (nie `absent`/falsch grün).
+- **Token-Gate:** ist `AGENT_BOOTSTRAP_TOKEN` gesetzt, erfordert `/system/snapshot` ein gültiges
+  Bearer-Token (401 sonst). Ohne Token nur im **privaten Compose-Netz** vorsehen, **nie öffentlich**.
+- Die WebUI ruft den Agent **nur serverseitig** ab; kein Secret/keine Agent-URL gelangt in den Client.
+
 ## 7. Web-Sicherheit
 
 - CSRF-Schutz für state-changing Requests.

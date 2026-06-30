@@ -67,3 +67,6 @@ export * from './adapter';
 
 // Preflight & Capacity Advisor – Typ-Verträge (NDF Step 005).
 export * from './preflight';
+
+// Agent-Systeminformationen (read-only, NDF Step 006).
+export * from './system';

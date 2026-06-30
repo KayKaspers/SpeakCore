@@ -5,6 +5,40 @@
 
 ## [Unreleased]
 
+### NDF Step 006 – Read-only Agent-Sonden für Preflight (2026-06-30)
+
+#### Added
+- **Agent-Endpunkt `GET /system/snapshot`** (read-only): liefert CPU-Kerne/Arch, RAM (gesamt/frei),
+  freien Speicher am Agent-Datenpfad, OS/Plattform/Release, Node-/Agent-Version sowie Docker- &
+  Compose-**Verfügbarkeit + Version** – Letztere **nur** via `docker --version` / `docker compose
+  version` (statische Argumente, `execFile` ohne Shell, Timeout). `/health` & `/version` unverändert.
+- `SystemInfo`-Typvertrag in `packages/types`.
+- Web: `mapSystemInfoToResourceSnapshot()` (reine Mapping-Funktion) + `fetchAgentSnapshot()`
+  (**serverseitig**, Timeout, Token aus Env). `/systemcheck` nutzt jetzt **echte** Agent-Daten und
+  fällt bei Nichterreichbarkeit auf Demo-/Unknown-Daten zurück (Statusanzeige: verbunden /
+  unvollständig / nicht erreichbar) + Karte „Erhobene Systemdaten".
+- **Optionale Token-Auth** auf `/system/snapshot`: ist `AGENT_BOOTSTRAP_TOKEN` gesetzt, wird ein
+  Bearer-Token erzwungen (401 sonst); ohne Token nur im privaten Compose-Netz vorsehen.
+- Tests: Agent-Snapshot (+ Token-Gate + **Quell-Scan auf verbotene Docker-Kommandos**),
+  SystemInfo→ResourceSnapshot-Mapping, „unbekannt ⇒ nie grün", Fallback-Logik. Agent-Test-Runner
+  auf Glob umgestellt.
+
+#### Security
+- Agent führt **keine** Host-/Docker-Steuerung aus, **kein** Docker-Socket, **keine** Container-
+  Operationen, keine Portscans. CLI nur lesend mit statischen Argumenten + Timeout (keine Injection).
+- Docker nicht ermittelbar ⇒ `unknown` (nie fälschlich `absent`/grün). Browser ruft den Agent nie
+  direkt – nur serverseitig über die Web-App.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (42/42).
+- Runtime-Smoke (gebauter Agent): `/system/snapshot` liefert echte read-only Daten (cpuCores, RAM,
+  Speicher, OS, Docker-Version) ohne Crash/Socket.
+
+#### Notes
+- **Keine** Umgebungs­erkennung (Proxmox/LXC) – `environment` bleibt bei echten Daten `unknown`.
+  Netzwerk/Firewall/DNS/Backup werden nicht erhoben ⇒ Bewertung bleibt konservativ (oft „gelb").
+- Sichere Docker-**Verwaltung** (Steuerung) ist ausdrücklich Sache späterer Steps, nicht Step 006.
+
 ### NDF Step 005B – Professional Branding Kit & Design System (2026-06-30)
 
 #### Added

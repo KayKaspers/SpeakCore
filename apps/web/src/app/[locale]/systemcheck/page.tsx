@@ -4,12 +4,15 @@ import { getTranslations } from 'next-intl/server';
 import type { PreflightInput, PreflightSeverity } from '@speakcore/types';
 import { runPreflight } from '@speakcore/shared';
 import { getCurrentUser } from '@/lib/auth';
+import { fetchAgentSnapshot } from '@/lib/agent-client';
+import { isSnapshotComplete, mapSystemInfoToResourceSnapshot } from '@/core/system-snapshot';
 import { BrandMark } from '@/components/BrandMark';
 
 export const dynamic = 'force-dynamic';
 
-// Beispiel-Eingabe (NDF Step 005): KEINE echte Systemmessung. Spätere Agent-Sonden liefern
-// diese Werte; hier dienen sie nur der Demonstration der Bewertungslogik.
+type AgentState = 'connected' | 'incomplete' | 'unreachable';
+
+// Fallback-Eingabe, wenn der Agent nicht erreichbar ist (Demo der Bewertungslogik).
 const DEMO_INPUT: PreflightInput = {
   environment: 'proxmox-lxc',
   profile: 'small',
@@ -23,7 +26,6 @@ const DEMO_INPUT: PreflightInput = {
     dns: 'present',
     ipv4: true,
     backupStorageGb: 20,
-    // uploadMbps bewusst unbekannt
   },
 };
 
@@ -54,7 +56,27 @@ export default async function SystemcheckPage({
   }
 
   const t = await getTranslations('systemcheck');
-  const result = runPreflight(DEMO_INPUT);
+
+  // Read-only Agent-Snapshot serverseitig abrufen; bei Nichterreichbarkeit Demo-Fallback.
+  const agent = await fetchAgentSnapshot();
+  let input: PreflightInput = DEMO_INPUT;
+  let agentState: AgentState = 'unreachable';
+  const info = agent.status === 'connected' ? agent.info : null;
+
+  if (agent.status === 'connected') {
+    const snapshot = mapSystemInfoToResourceSnapshot(agent.info);
+    // Umgebung wird in Step 006 nicht erhoben → konservativ „unknown".
+    input = { environment: 'unknown', profile: 'small', snapshot };
+    agentState = isSnapshotComplete(snapshot) ? 'connected' : 'incomplete';
+  }
+
+  const result = runPreflight(input);
+
+  const agentBadge: Record<AgentState, string> = {
+    connected: 'bg-sc-success/15 text-sc-success',
+    incomplete: 'bg-sc-warning/15 text-sc-warning',
+    unreachable: 'bg-sc-warning/15 text-sc-warning',
+  };
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -66,8 +88,10 @@ export default async function SystemcheckPage({
         <p className="mt-1 text-sc-sm text-sc-text-secondary">
           {t('subtitle')} · {t('intro')}
         </p>
-        <p className="mt-2 inline-block rounded-sc-sm bg-sc-warning/15 px-2 py-1 text-sc-caption text-sc-warning">
-          {t('demoNotice')}
+        <p
+          className={`mt-2 inline-block rounded-sc-sm px-2 py-1 text-sc-caption ${agentBadge[agentState]}`}
+        >
+          {t(`agent.${agentState}`)}
         </p>
       </header>
 
@@ -83,6 +107,41 @@ export default async function SystemcheckPage({
           </span>
         </div>
       </section>
+
+      {/* Erhobene Systemdaten (nur bei verbundenem Agent) */}
+      {info && (
+        <section className="mb-6 rounded-sc-lg border border-white/10 bg-sc-surface p-6">
+          <h2 className="mb-3 text-sc-h2 font-medium text-sc-text-primary">{t('agent.systemData')}</h2>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sc-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('agent.osLabel')}</dt>
+              <dd className="text-sc-text-primary">
+                {info.os.platform} {info.os.release}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('agent.archLabel')}</dt>
+              <dd className="text-sc-text-primary">{info.arch}</dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('category.cpu')}</dt>
+              <dd className="text-sc-text-primary">{info.cpuCores}</dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('category.ram')}</dt>
+              <dd className="text-sc-text-primary">{info.memory.totalGb} GB</dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('category.docker')}</dt>
+              <dd className="text-sc-text-primary">{info.docker.version ?? t('details.unknown')}</dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('agent.nodeLabel')}</dt>
+              <dd className="font-mono text-sc-text-primary">{info.nodeVersion}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
 
       <div className="grid gap-6 sm:grid-cols-2">
         {/* Dienste */}
