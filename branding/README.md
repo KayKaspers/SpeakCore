@@ -1,38 +1,44 @@
-# SpeakCore – Branding & Design-System
+# SpeakCore – Brand Kit & Design-System
 
 > Corporate-Design-Konzept: [project-brain/BRANDING.md](../project-brain/BRANDING.md).
-> Dieses Verzeichnis enthält die **Design-Tokens** (Quelle der Wahrheit) und Asset-Ordner.
+> Dieses Verzeichnis ist das **Brand Kit**: Design-Tokens (Quelle der Wahrheit), Assets und
+> Richtlinien.
 
-## Inhalt
+## Struktur
 
 ```
 branding/
-├── design-tokens/
-│   ├── tokens.json          # plattformneutral (Quelle der Wahrheit)
-│   ├── tokens.css           # CSS Custom Properties (--sc-*)
-│   └── tailwind.tokens.js   # Tailwind-Theme-Fragment
-├── logos/                   # Logos (noch Platzhalter)
-├── icons/                   # Icons (noch Platzhalter)
-└── README.md
+├── design-tokens/      Tokens (Quelle der Wahrheit) + README
+│   ├── tokens.json     plattformneutral (maßgeblich)
+│   ├── tokens.css      CSS Custom Properties (--sc-*)
+│   └── tailwind.tokens.js  Tailwind-Theme-Fragment
+├── logos/              Logo- & Mark-Varianten (SVG, dark/light) + README
+├── icons/              favicon.svg, app-icon.svg + README
+├── social/             github-social.svg, opengraph.svg + README
+├── ui/                 components · layout · status-system · accessibility
+└── guidelines/         brand-guidelines · logo-usage · colors · typography · voice-and-tone
 ```
 
 ## Stilrichtung
 
 **Enterprise Dark** · Infrastruktur-/Server-Ästhetik · modern, vertrauenswürdig, zeitlos.
-Referenzniveau: Proxmox, Grafana, TrueNAS.
+Referenzniveau: Proxmox, Grafana, TrueNAS. Kein Gaming-/Cyberpunk-Stil.
 
 ## Tokens verwenden
 
-- **CSS:** `tokens.css` importieren und Variablen wie `var(--sc-color-primary)` nutzen.
-- **Tailwind:** `tailwind.tokens.js` in die Theme-Extension einbinden (siehe Datei-Header).
-- **Andere Plattformen:** `tokens.json` als neutrale Quelle parsen.
+- **CSS:** `design-tokens/tokens.css` importieren, Variablen wie `var(--sc-color-primary)`.
+- **Tailwind:** `design-tokens/tailwind.tokens.js` in die Theme-Extension einbinden.
+- **Andere Plattformen:** `design-tokens/tokens.json` als neutrale Quelle parsen.
 
 ## Statusfarben = Ampelsystem
 
 `success` / `warning` / `error` entsprechen direkt dem Ampelsystem (🟢/🟡/🔴) des
-Preflight & Capacity Advisors. Visuelle und funktionale Semantik bleiben deckungsgleich.
+Preflight & Capacity Advisors. Visuelle und funktionale Semantik bleiben deckungsgleich
+(siehe [ui/status-system.md](ui/status-system.md)).
 
 ## Status
 
-Tokens sind **vorläufig** (`0.1.0-draft`). Finale Logos/Icons folgen in einem späteren
-NDF-Schritt. Wird ein BrandKit bereitgestellt, ist es hier zu analysieren und einzuarbeiten.
+- **Verbindlich:** Stilrichtung, Markenwerte, Design-Tokens (`v0.2.0-draft`), UI-/Accessibility-
+  Regeln, Logo-Idee (Hexagon/„S"/Knoten), Farbwelt.
+- **Platzhalter (hochwertig, nicht final):** konkrete Logo-/Icon-/Social-SVGs. Keine Binärdateien,
+  keine eingebetteten Fonts.

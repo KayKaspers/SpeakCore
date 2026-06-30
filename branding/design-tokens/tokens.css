@@ -1,20 +1,35 @@
 /*
  * SpeakCore Design Tokens – CSS Custom Properties
- * Status: draft (NDF Step 001). Quelle: tokens.json
+ * Status: draft v0.2.0 (NDF Step 005B). Quelle: tokens.json
  * Enterprise Dark. Prefix: --sc-*
  */
 
 :root {
-  /* Farben */
+  /* Farben – Flächen */
   --sc-color-background:      #0B1220;
   --sc-color-surface:         #111827;
-  --sc-color-primary:         #2563EB; /* Primary Blue */
-  --sc-color-accent:          #06B6D4; /* Accent Cyan  */
-  --sc-color-success:         #22C55E; /* Ampel gruen  */
-  --sc-color-warning:         #F59E0B; /* Ampel gelb   */
-  --sc-color-error:           #EF4444; /* Ampel rot    */
+  --sc-color-surface-raised:  #1A2233;
+  --sc-color-border:          #1F2937;
+  --sc-color-border-strong:   #334155;
+
+  /* Farben – Markenakzente */
+  --sc-color-primary:         #2563EB; /* Primary Blue   */
+  --sc-color-primary-hover:   #1D4ED8;
+  --sc-color-accent:          #06B6D4; /* Accent Cyan    */
+  --sc-color-info:            #38BDF8;
+
+  /* Farben – Status (= Preflight-Ampel) */
+  --sc-color-success:         #22C55E; /* Ampel gruen */
+  --sc-color-warning:         #F59E0B; /* Ampel gelb  */
+  --sc-color-error:           #EF4444; /* Ampel rot   */
+
+  /* Farben – Text */
   --sc-color-text-primary:    #F8FAFC;
   --sc-color-text-secondary:  #94A3B8;
+  --sc-color-text-muted:      #64748B;
+
+  /* Fokus */
+  --sc-color-ring:            #2563EB;
 
   /* Typografie */
   --sc-font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -28,9 +43,11 @@
   --sc-text-caption: 0.75rem;
 
   /* Radius */
-  --sc-radius-sm: 0.375rem;
-  --sc-radius-md: 0.5rem;
-  --sc-radius-lg: 0.75rem;
+  --sc-radius-sm:   0.375rem;
+  --sc-radius-md:   0.5rem;
+  --sc-radius-lg:   0.75rem;
+  --sc-radius-xl:   1rem;
+  --sc-radius-full: 9999px;
 
   /* Abstände */
   --sc-space-1: 0.25rem;
@@ -39,4 +56,24 @@
   --sc-space-4: 1rem;
   --sc-space-6: 1.5rem;
   --sc-space-8: 2rem;
+
+  /* Schatten */
+  --sc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --sc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --sc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
+
+  /* Z-Index */
+  --sc-z-base:     0;
+  --sc-z-dropdown: 1000;
+  --sc-z-sticky:   1100;
+  --sc-z-overlay:  1200;
+  --sc-z-modal:    1300;
+  --sc-z-toast:    1400;
+
+  /* Motion */
+  --sc-duration-fast: 120ms;
+  --sc-duration-base: 200ms;
+  --sc-duration-slow: 320ms;
+  --sc-easing-standard:   cubic-bezier(0.2, 0, 0, 1);
+  --sc-easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
 }

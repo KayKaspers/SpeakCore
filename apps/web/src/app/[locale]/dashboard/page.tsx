@@ -5,6 +5,7 @@ import { APP_VERSION, NAV_KEYS, NDF_STEP } from '@speakcore/shared';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/core/db';
 import { SETTING_SYSTEM_MODE, normalizeSystemMode } from '@/core/setup';
+import { BrandMark } from '@/components/BrandMark';
 import { logoutAction } from '../login/actions';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       {/* Sidebar */}
       <aside className="flex w-full flex-col border-b border-white/10 bg-sc-surface sm:w-64 sm:border-b-0 sm:border-r">
         <div className="flex items-center gap-2 px-6 py-5">
-          <span className="inline-block h-3 w-3 rounded-full bg-sc-accent" aria-hidden />
+          <BrandMark className="h-7 w-7" />
           <span className="text-sc-h2 font-semibold tracking-tight text-sc-text-primary">
             {tApp('name')}
           </span>

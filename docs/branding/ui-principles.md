@@ -1,6 +1,7 @@
 # Branding: UI-Prinzipien
 
-> Maßgeblich: [BRANDING.md](../../project-brain/BRANDING.md).
+> Maßgeblich: [BRANDING.md](../../project-brain/BRANDING.md). Konkrete Komponenten-/Layout-/
+> Accessibility-Regeln im Brand Kit: [`branding/ui/`](../../branding/ui/components.md).
 
 ## Grundhaltung
 

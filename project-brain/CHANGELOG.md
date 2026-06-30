@@ -5,6 +5,33 @@
 
 ## [Unreleased]
 
+### NDF Step 005B – Professional Branding Kit & Design System (2026-06-30)
+
+#### Added
+- **Brand Kit** unter `branding/`: Unterordner `social/`, `ui/`, `guidelines/` + READMEs je Ordner.
+- **Logos (SVG):** Voll-Logo + Mark, je dark/light (Hexagon + „S" + Netzwerk-Knoten; Wortmarke
+  zweifarbig). **Icons:** `favicon.svg`, `app-icon.svg`. **Social:** `github-social.svg`,
+  `opengraph.svg`. Keine Binärdateien, keine eingebetteten Fonts.
+- **Design-Tokens erweitert** (`v0.2.0-draft`, konsistent in json/css/tailwind): Border-Farben,
+  `surface-raised`, `primary-hover`, `info`, `text-muted`, `ring`; Radius `xl`/`full`; **Shadow**,
+  **Z-Index**, **Motion** (Dauer/Easing). In `tailwind.config.ts` verdrahtet.
+- **UI-Richtlinien** (`branding/ui/`): components, layout, status-system, accessibility.
+- **Guidelines** (`branding/guidelines/`): brand-guidelines, logo-usage, colors, typography,
+  voice-and-tone.
+- **Web-Integration (klein):** `BrandMark`-Komponente ersetzt die Platzhalter-Punkte in
+  Setup/Login/Dashboard/Systemcheck; `app/icon.svg` als Favicon.
+
+#### Changed
+- `project-brain/BRANDING.md`, `branding/README.md`, `docs/branding/*` auf das Brand Kit aktualisiert.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (32/32). Alle 10 SVGs
+  als wohlgeformtes XML geprüft.
+
+#### Notes
+- **Kein neues Produktfeature.** Logo-/Icon-/Social-SVGs sind hochwertige **Platzhalter**
+  (nicht final); verbindlich sind Stilrichtung, Tokens und Regeln.
+
 ### NDF Step 005 – Preflight & Capacity Advisor (Kernlogik) (2026-06-30)
 
 #### Added

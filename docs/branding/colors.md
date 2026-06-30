@@ -1,7 +1,9 @@
 # Branding: Farben
 
 > Maßgebliche Werte: [BRANDING.md](../../project-brain/BRANDING.md) und die Tokens in
-> [`branding/design-tokens/`](../../branding/design-tokens/). Diese Seite ist die lesbare Übersicht.
+> [`branding/design-tokens/`](../../branding/design-tokens/). Vollständige Farbreferenz (v0.2.0)
+> im Brand Kit: [`branding/guidelines/colors.md`](../../branding/guidelines/colors.md). Diese Seite
+> ist die lesbare Kurzübersicht.
 
 ## Palette (vorläufig)
 

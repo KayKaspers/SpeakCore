@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
+import { BrandMark } from '@/components/BrandMark';
 import { loginAction, type LoginActionState } from './actions';
 
 const inputClass =
@@ -16,7 +17,7 @@ export function LoginForm({ locale }: { locale: string }) {
     <div className="rounded-sc-lg border border-white/10 bg-sc-surface p-6 sm:p-8">
       <header className="mb-6">
         <div className="flex items-center gap-2">
-          <span className="inline-block h-3 w-3 rounded-full bg-sc-accent" aria-hidden />
+          <BrandMark className="h-7 w-7" />
           <h1 className="text-sc-h1 font-semibold text-sc-text-primary">{t('title')}</h1>
         </div>
         <p className="mt-1 text-sc-sm text-sc-text-secondary">{t('body')}</p>

@@ -52,17 +52,27 @@ visuelle Konsistenz mit der Kernlogik ([MVP.md](MVP.md) §3).
   (immer zusätzlich Text/Icon zur Ampel).
 - Vollständige Prinzipien: [docs/branding/ui-principles.md](../docs/branding/ui-principles.md).
 
-## 6. Assets
+## 6. Brand Kit (ab Step 005B)
 
-- Logos: [`branding/logos/`](../branding/logos/) (noch Platzhalter)
-- Icons: [`branding/icons/`](../branding/icons/) (noch Platzhalter)
-- Design-Tokens (Quelle der Wahrheit): [`branding/design-tokens/`](../branding/design-tokens/)
-  - `tokens.json` – plattformneutral
-  - `tokens.css` – CSS Custom Properties
-  - `tailwind.tokens.js` – Tailwind-Theme-Fragment
+`branding/` ist ein vollständiges **Brand Kit**:
+
+- **Design-Tokens** (Quelle der Wahrheit, `v0.2.0-draft`): [`branding/design-tokens/`](../branding/design-tokens/)
+  – `tokens.json` (maßgeblich) + `tokens.css` + `tailwind.tokens.js` (konsistent). Gruppen:
+  Farben, Status, Text, Border, Radius, Spacing, Shadow, Z-Index, Motion.
+- **Logos:** [`branding/logos/`](../branding/logos/) – Voll-Logo + Mark, je dark/light (SVG,
+  Hexagon + „S" + Netzwerk-Knoten). Wortmarke zweifarbig „**Speak**" + „**Core**".
+- **Icons:** [`branding/icons/`](../branding/icons/) – `favicon.svg`, `app-icon.svg`.
+- **Social:** [`branding/social/`](../branding/social/) – `github-social.svg`, `opengraph.svg`.
+- **UI-Richtlinien:** [`branding/ui/`](../branding/ui/) – components, layout, status-system, accessibility.
+- **Guidelines:** [`branding/guidelines/`](../branding/guidelines/) – brand-guidelines, logo-usage,
+  colors, typography, voice-and-tone.
+
+Die Mark ist in der WebUI als `BrandMark`-Komponente eingebunden (Setup/Login/Dashboard/Systemcheck)
+plus `app/icon.svg` als Favicon.
 
 ## 7. Status
 
-Es liegt noch **kein finales Asset-Set** vor. Diese Datei und die Tokens definieren die
-verbindliche Grundlage; finale Logos/Icons folgen in einem späteren NDF-Schritt. Falls ein
-BrandKit-Ordner bereitgestellt wird, ist dieser als Quelle zu analysieren und einzuarbeiten.
+- **Verbindlich:** Stilrichtung, Markenwerte, Design-Tokens, UI-/Accessibility-Regeln,
+  Logo-Idee (Hexagon/„S"/Knoten), Farbwelt.
+- **Platzhalter (hochwertig, nicht final):** konkrete Logo-/Icon-/Social-SVGs. Keine Binärdateien,
+  keine eingebetteten Fonts (System-Fallback `Inter`). Finale Verfeinerung kann später erfolgen.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SpeakCore">
+  <title>SpeakCore</title>
+  <defs>
+    <linearGradient id="sc-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <!-- vereinfachte Mark für kleine Größen (ohne Knoten) -->
+  <path d="M32 5 L55.4 18.5 L55.4 45.5 L32 59 L8.6 45.5 L8.6 18.5 Z"
+        fill="#0B1220" stroke="url(#sc-grad)" stroke-width="4" stroke-linejoin="round"/>
+  <text x="32" y="43" text-anchor="middle"
+        font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="32" font-weight="700"
+        fill="url(#sc-grad)">S</text>
+</svg>

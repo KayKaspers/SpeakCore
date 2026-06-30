@@ -1,7 +1,8 @@
 # Branding: Typografie
 
 > Maßgeblich: [BRANDING.md](../../project-brain/BRANDING.md) und
-> [`branding/design-tokens/`](../../branding/design-tokens/).
+> [`branding/design-tokens/`](../../branding/design-tokens/). Brand-Kit-Detail:
+> [`branding/guidelines/typography.md`](../../branding/guidelines/typography.md).
 
 ## Schriftfamilie
 
