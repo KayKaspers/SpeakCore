@@ -5,18 +5,32 @@
 
 ## [Unreleased]
 
-### NDF Step 002B – Toolchain-Verifikation (2026-06-30, in Arbeit)
+### NDF Step 002B – Toolchain-Verifikation (2026-06-30, abgeschlossen)
 
 #### Added
 - `.node-version` (Inhalt `20`), um die Node-Major-Version projektweit festzulegen
   (ergänzt das bestehende `engines`-Feld in der Root-`package.json`).
+- `pnpm-lock.yaml` erzeugt und committet → reproduzierbare Installation.
+
+#### Changed
+- `apps/web/next-env.d.ts`: von Next.js automatisch regeneriert (Referenz auf
+  `./.next/types/routes.d.ts` ergänzt) – geprüft und übernommen.
+
+#### Fixed
+- `apps/agent/src/index.ts`: überflüssige `eslint-disable-next-line no-console`-Zeile entfernt
+  (`no-console` ist in der Agent-ESLint-Konfiguration nicht aktiv).
+
+#### Verifiziert (Toolchain & Checks)
+- Toolchain: **Node v24.18.0**, **pnpm 11.9.0** (beide erfüllen `engines`: node ≥ 20, pnpm ≥ 9).
+- `pnpm install` ✅ · `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (3/3).
+- `prisma validate` ✅ (Schema gültig; SQLite). Next.js 15.5.19 baut `/de` + `/en` statisch,
+  Middleware gebündelt. Prisma Client 6.19.3 generiert. Agent via tsup gebündelt.
 
 #### Notes
-- **Verifikation noch nicht durchgeführt:** Node.js/pnpm/corepack sind auf der Arbeitsmaschine
-  nicht installiert. `pnpm install` (und damit `pnpm-lock.yaml`), `pnpm lint`, `pnpm typecheck`,
-  `pnpm build`, `pnpm test` sowie `prisma validate` **stehen weiterhin aus**.
-- Nächster Schritt: Node.js LTS (≥ 20) + pnpm (≥ 9 via corepack) installieren, dann Step 002B
-  erneut ausführen → Checks laufen lassen, Lockfile erzeugen und gemeinsam committen.
+- **Weiterhin keine Fachfeatures**: keine TS3-Anbindung, keine Docker-/Host-Steuerung,
+  kein Setup-Wizard, kein Admin-Login. Nur Fundament-Verifikation.
+- `next lint` ist in Next 16 deprecated (nur Hinweis, nicht blockierend) – Migration auf die
+  ESLint-CLI ist ein späterer, optionaler Schritt.
 
 ### NDF Step 002 – Tech-Grundgerüst (2026-06-30)
 
