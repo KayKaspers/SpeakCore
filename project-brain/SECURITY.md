@@ -43,8 +43,30 @@ Umgesetzt in Step 003 ([ADR-0012](DECISIONS.md), [ADR-0013](DECISIONS.md)):
   auditiert.
 - Formulare laufen über **Next.js Server Actions** (Same-Origin/CSRF-Mitigation); alle Prüfungen
   sind server-seitig autoritativ – Client-Validierung dient nur der UX.
-- **Offen:** Login-**Rate-Limiting**/Brute-Force-Schutz (siehe [RISKS.md](RISKS.md) R-08).
+- **Rate-Limiting** (Step 004): server-seitig, DB-gestützt (SQLite, [ADR-0014](DECISIONS.md)).
+  Login: max. 10 Fehlversuche / 15 min je **IP und** Identifier; Setup: max. 5 / 15 min je IP.
+  Erfolg setzt den Login-Zähler zurück; Sperren werden auditiert (`*.rate_limited`).
+  Grenze: Single-Node-Zähler; IP aus Proxy-Headern (nur hinter vertrauenswürdigem Proxy belastbar).
 - Kein externer IdP in 0.1 (Roadmap).
+
+## 4a. Security-Header & CSP (Step 004)
+
+Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/security-headers.ts`):
+
+- `Content-Security-Policy` (Baseline, s. u.)
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY` (+ CSP `frame-ancestors 'none'`)
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`
+- `Strict-Transport-Security` – **nur in Produktion**
+
+**Baseline-CSP:** `default-src 'self'`; `base-uri`/`form-action 'self'`; `frame-ancestors 'none'`;
+`object-src 'none'`; `img-src`/`font-src 'self' data:`; `style-src 'self' 'unsafe-inline'`;
+`script-src 'self' 'unsafe-inline'` (+ `'unsafe-eval'`/`ws:` nur im Dev für HMR).
+
+> **Limitierung:** `'unsafe-inline'` für Skripte ist nötig, weil Next.js Inline-Hydration-Skripte
+> ohne Nonce ausliefert. Das schwächt den XSS-Schutz der CSP. Upgrade auf eine **nonce-basierte
+> CSP** ist als Härtungsschritt vorgemerkt ([RISKS.md](RISKS.md) R-11).
 
 ## 5. Secret-Management
 

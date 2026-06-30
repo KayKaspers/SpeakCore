@@ -5,7 +5,10 @@ import { checkPasswordPair, isPlausibleEmail } from '@/core/password';
 import { getSetupState, normalizeSystemMode } from '@/core/setup';
 import { createOwner, OwnerAlreadyExistsError } from '@/core/users';
 import { createSession } from '@/core/session';
+import { logAudit } from '@/core/audit';
+import { SETUP_RATE_LIMIT, checkRateLimit, recordRateLimitHit } from '@/core/rate-limit';
 import { setSessionCookie } from '@/lib/auth';
+import { getClientIp } from '@/lib/request';
 
 export interface SetupActionState {
   errorKey?: string;
@@ -32,6 +35,14 @@ export async function createOwnerAction(
   const state = await getSetupState();
   if (state === 'completed') return { errorKey: 'ownerExists' };
   if (state === 'locked') return { errorKey: 'locked' };
+
+  // Einfaches Rate-Limiting gegen wiederholte Setup-Submits (je IP).
+  const setupKey = `setup:ip:${await getClientIp()}`;
+  if ((await checkRateLimit(setupKey, SETUP_RATE_LIMIT)).limited) {
+    await logAudit({ action: 'setup.rate_limited', actor: setupKey, result: 'failure' });
+    return { errorKey: 'rateLimited' };
+  }
+  await recordRateLimitHit(setupKey);
 
   if (!isPlausibleEmail(email)) return { errorKey: 'emailInvalid' };
 

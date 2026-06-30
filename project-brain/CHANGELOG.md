@@ -5,6 +5,42 @@
 
 ## [Unreleased]
 
+### NDF Step 004 – Auth-Härtung, Rate-Limiting & Security Headers (2026-06-30)
+
+#### Added
+- **Login-Rate-Limiting** (server-seitig, DB-gestützt/SQLite): Sliding-Window je IP **und**
+  Identifier; max. 10 Fehlversuche / 15 min. Erfolg setzt Zähler zurück; generische Fehler
+  bleiben erhalten (keine User-Enumeration). Audit-Eintrag `login.rate_limited`.
+- **Setup-Rate-Limiting**: max. 5 Versuche / 15 min je IP gegen wiederholte Setup-Submits
+  (Audit `setup.rate_limited`).
+- **Security-Header** zentral via Middleware: `Content-Security-Policy` (Baseline),
+  `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`,
+  `Permissions-Policy`, `Strict-Transport-Security` (nur Produktion).
+- **Baseline-CSP**: `default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`,
+  `base-uri`/`form-action 'self'`; `'unsafe-inline'` für Skripte/Styles (Next.js-Hydration),
+  `'unsafe-eval'`/`ws:` nur im Dev.
+- **Session-Härtung**: Gelegenheits-Cleanup abgelaufener Sessions beim Login
+  (`cleanupExpiredSessions`); Cookie-/Ablaufprüfungen aus Step 003 verifiziert.
+- Rate-Limit-Cleanup (`cleanupRateLimits`) als Wartungsfunktion.
+- Prisma: Modell `RateLimitHit` + SQLite-Migration `20260630054322_rate_limit_hits`.
+- Tests: Rate-Limit-Policy (Fenster/Sperre/RetryAfter) und Security-Header/CSP.
+- ADR-0014 (DB-Rate-Limiting), ADR-0015 (Security-Header/CSP via Middleware).
+
+#### Security
+- Brute-Force-Grundschutz für Login (RISKS R-08 dadurch mitigiert).
+- CSP-Limitierung dokumentiert (`'unsafe-inline'` ohne Nonces) als künftiger Härtungsschritt
+  (neue RISKS R-11).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (21/21) · `prisma validate` ✅.
+- Runtime-Smoke (prod): `/de/setup` → 200, alle Security-Header inkl. CSP & HSTS gesetzt,
+  Seite rendert unter CSP.
+
+#### Notes
+- **Keine** neuen Voice-Server-Funktionen, keine TS3-/Docker-/Host-Aktionen, kein Preflight,
+  kein Plugin-/Community-Modul. Reine Härtung.
+- Rate-Limiting ist Single-Node (SQLite); Distributed Rate-Limiting erst bei Mehr-Instanz-Betrieb nötig.
+
 ### NDF Step 003 – Setup-Wizard & Owner-Account (2026-06-30)
 
 #### Added

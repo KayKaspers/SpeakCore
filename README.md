@@ -97,6 +97,8 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 
 - **Vorhanden (Step 003):** Setup-Wizard, lokaler Owner-Account, Argon2id, Sessions/Login/Logout,
   geschütztes Dashboard, Audit-Log, generischer Adapter-**Typvertrag**.
+- **Härtung (Step 004):** DB-gestütztes Login-/Setup-Rate-Limiting, zentrale Security-Header +
+  Baseline-CSP, Session-Cleanup.
 - **Noch nicht:** TS3-Verbindung/-Installation, Docker-/Host-Steuerung, Plugin-/Community-Module.
 
 ## Mitwirken

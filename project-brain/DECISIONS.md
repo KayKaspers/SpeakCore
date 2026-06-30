@@ -136,6 +136,31 @@
 - **Konsequenzen:** `Algorithm` ist ein `const enum` → unter `isolatedModules` nur als Typ
   importieren (numerischer Literal-Wert mit Cast). Parameter konservativ (memoryCost 19456, t=2, p=1).
 
+## ADR-0014 – Rate-Limiting: DB-gestützt (SQLite), Sliding-Window, Single-Node
+
+- **Status:** accepted (Step 004)
+- **Kontext:** Login/Setup brauchen Brute-Force-Grundschutz im Self-Hosting-MVP ohne externe
+  Infrastruktur.
+- **Entscheidung:** **DB-gestütztes** Rate-Limiting über ein `RateLimitHit`-Modell (SQLite),
+  Sliding-Window je Schlüssel (`login:ip:*`, `login:id:*`, `setup:ip:*`). Reine Bewertungslogik
+  (`evaluateRateLimit`) getrennt und unit-testbar.
+- **Begründung:** Persistent über Neustarts, kein Redis nötig, passend für Single-Node.
+  In-Memory wäre nach Neustart wirkungslos.
+- **Konsequenzen:** Bei **mehreren Instanzen** ist der Zähler nicht global → Distributed
+  Rate-Limiting (z. B. Redis) wird erst dann nötig. Gelegenheits-Cleanup (`cleanupRateLimits`)
+  hält die Tabelle klein. IP stammt aus Proxy-Headern → nur hinter vertrauenswürdigem Reverse Proxy belastbar.
+
+## ADR-0015 – Security-Header & Baseline-CSP via Middleware
+
+- **Status:** accepted (Step 004)
+- **Entscheidung:** Zentrale Security-Header (inkl. Baseline-CSP) werden in der Next.js-Middleware
+  gesetzt; die Header-/CSP-Erzeugung liegt in einer reinen, Edge-sicheren Funktion
+  (`lib/security-headers.ts`).
+- **Begründung:** Eine Quelle der Wahrheit, testbar, gilt für alle Seiten-Routen.
+- **Konsequenzen:** CSP nutzt vorerst `'unsafe-inline'` (Next.js-Hydration/Streaming) ohne Nonces
+  – bewusst klein gehalten; Upgrade auf nonce-basierte CSP ist ein späterer Härtungsschritt
+  (RISKS R-11). HSTS nur in Produktion.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

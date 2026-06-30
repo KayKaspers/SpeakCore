@@ -56,10 +56,19 @@
   Umgebungserkennung im Preflight, ehrliche Ampelbewertung statt „läuft überall".
 
 ## R-08 – Sicherheit der exponierten WebUI
-- **E:** mittel · **A:** hoch · **Risiko:** hoch
+- **E:** mittel · **A:** hoch · **Risiko:** mittel *(durch Step 003/004 reduziert)*
 - **Beschreibung:** Als Admin-Oberfläche ist die WebUI ein attraktives Ziel (Auth-Bypass, CSRF, XSS).
-- **Gegenmaßnahmen:** Argon2id + sichere Sessions ([ADR-0006](DECISIONS.md)), CSRF-Schutz,
-  sichere Cookies, Security-Header, Rate-Limiting für Login, Audit-Log.
+- **Gegenmaßnahmen:** Argon2id + sichere Sessions ([ADR-0006](DECISIONS.md)/[ADR-0012](DECISIONS.md)),
+  CSRF via Server Actions, sichere Cookies, **Security-Header + Baseline-CSP** ([ADR-0015](DECISIONS.md)),
+  **DB-gestütztes Login-/Setup-Rate-Limiting** ([ADR-0014](DECISIONS.md)), Audit-Log.
+- **Rest:** nonce-basierte CSP noch offen (siehe R-11); Distributed Rate-Limiting erst bei Mehr-Instanz.
+
+## R-11 – CSP mit `'unsafe-inline'` (Skripte)
+- **E:** mittel · **A:** mittel · **Risiko:** mittel
+- **Beschreibung:** Die Baseline-CSP erlaubt `script-src 'unsafe-inline'` (Next.js-Hydration ohne
+  Nonce). Das schwächt den XSS-Schutz der CSP gegenüber einer nonce-/hash-basierten Variante.
+- **Gegenmaßnahmen:** Strikte Eingabevalidierung/Output-Encoding (React) als primärer XSS-Schutz;
+  übrige CSP-Direktiven restriktiv. **Geplant:** Umstieg auf nonce-basierte CSP ([ADR-0015](DECISIONS.md)).
 
 ## R-09 – Ein-Personen-/Bus-Faktor & Komplexität für 0.1
 - **E:** mittel · **A:** mittel · **Risiko:** mittel
@@ -84,8 +93,9 @@
 | R-03 | Scope-Creep | hoch |
 | R-05 | TS3-Lizenz | hoch |
 | R-06 | Datenverlust Backup/Restore | hoch |
-| R-08 | WebUI-Sicherheit | hoch |
 | R-04 | Preflight-Fehleinschätzung | mittel |
 | R-07 | Umgebungskomplexität | mittel |
+| R-08 | WebUI-Sicherheit | mittel *(reduziert)* |
 | R-09 | Komplexität/Bus-Faktor | mittel |
+| R-11 | CSP `'unsafe-inline'` | mittel |
 | R-10 | i18n-Drift | niedrig |

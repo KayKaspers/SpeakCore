@@ -56,6 +56,7 @@
       "emailInvalid": "Bitte eine gültige E-Mail-Adresse eingeben.",
       "passwordWeak": "Das Passwort erfüllt die Anforderungen nicht.",
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
       "generic": "Die Einrichtung ist fehlgeschlagen. Bitte erneut versuchen."
     },
     "passwordRules": {
@@ -72,6 +73,7 @@
     "password": "Passwort",
     "submit": "Anmelden",
     "error": "E-Mail oder Passwort ist falsch.",
+    "rateLimited": "Zu viele Anmeldeversuche. Bitte später erneut versuchen.",
     "generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
   },
   "dashboard": {

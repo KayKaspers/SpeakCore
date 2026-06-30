@@ -57,6 +57,16 @@ model AuditLog {
   @@index([createdAt])
 }
 
+/// Rate-Limiting-Treffer (z. B. Login-Fehlversuche). Sliding-Window über `createdAt`.
+/// SQLite-basiert (Single-Node-MVP); persistent über Neustarts. Siehe ADR-0014.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 /// Verwaltete Serverinstanz. 0.1: ausschließlich type = "teamspeak3".
 /// In Step 003 noch ungenutzt (keine TS3-Anbindung) – nur Schema-Vorbereitung.
 model ServerInstance {

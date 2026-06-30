@@ -56,6 +56,7 @@
       "emailInvalid": "Please enter a valid email address.",
       "passwordWeak": "The password does not meet the requirements.",
       "passwordMismatch": "The passwords do not match.",
+      "rateLimited": "Too many attempts. Please try again later.",
       "generic": "Setup failed. Please try again."
     },
     "passwordRules": {
@@ -72,6 +73,7 @@
     "password": "Password",
     "submit": "Sign in",
     "error": "Email or password is incorrect.",
+    "rateLimited": "Too many sign-in attempts. Please try again later.",
     "generic": "Sign-in failed. Please try again."
   },
   "dashboard": {

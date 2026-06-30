@@ -33,12 +33,21 @@ export function hashSessionToken(token: string): string {
 export async function createSession(
   userId: string,
 ): Promise<{ token: string; expiresAt: Date }> {
+  // Gelegenheits-Cleanup: abgelaufene Sessions beim Login entfernen (geringe Frequenz).
+  await cleanupExpiredSessions();
   const token = generateSessionToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await prisma.session.create({
     data: { userId, tokenHash: hashSessionToken(token), expiresAt },
   });
   return { token, expiresAt };
+}
+
+/** Entfernt abgelaufene Sessions (Wartung; kann auch periodisch laufen). */
+export async function cleanupExpiredSessions(now: number = Date.now()): Promise<void> {
+  await prisma.session
+    .deleteMany({ where: { expiresAt: { lt: new Date(now) } } })
+    .catch(() => undefined);
 }
 
 /** Validiert einen Roh-Token und liefert den zugehörigen Benutzer (oder null). */
