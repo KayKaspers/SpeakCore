@@ -82,13 +82,17 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - Eingabevalidierung aller Parameter (keine Shell-Injection in Docker-/Host-Aufrufe).
 - Roadmap-Härtung: mTLS / signierte Requests, Audit jeder privilegierten Operation.
 
-### Read-only-Snapshot (Step 006)
+### Read-only-Snapshot (Step 006/007)
 
 - Der Agent stellt bislang **ausschließlich lesende** Endpunkte bereit; `GET /system/snapshot`
-  liefert ungefährliche Systemdaten (CPU/RAM/Speicher/OS/Node-/Agent-Version, Docker-Verfügbarkeit).
-- **Kein Docker-Socket**, keine Container-Operationen, keine Portscans, keine Host-Änderungen.
-  Docker/Compose nur über `docker --version` / `docker compose version` – `execFile` ohne Shell,
+  liefert ungefährliche System-, **Umgebungs-** und **Netzwerk**-Daten (CPU/RAM/Speicher/OS/Node-/
+  Agent-Version, Docker-Verfügbarkeit, erkannte Umgebung, IPv4/IPv6/DNS-Status).
+- **Kein Docker-Socket**, keine Container-Operationen, keine Portscans, keine Host-Änderungen,
+  **keine externen Requests/IP-Checks**, keine Router-/NAT-/UPnP-Aktionen, keine aktive
+  Erreichbarkeitsprüfung. CLI (Docker/`systemd-detect-virt`) nur via `execFile` ohne Shell,
   **statische Argumente**, **Timeout**. Nicht ermittelbar ⇒ `unknown` (nie `absent`/falsch grün).
+- **Datenschutz:** Netzwerkdaten werden auf **Booleans/Anzahl** reduziert – **keine IP-Adressen
+  oder Interface-Namen** verlassen den Agent (Screenshot-sicher).
 - **Token-Gate:** ist `AGENT_BOOTSTRAP_TOKEN` gesetzt, erfordert `/system/snapshot` ein gültiges
   Bearer-Token (401 sonst). Ohne Token nur im **privaten Compose-Netz** vorsehen, **nie öffentlich**.
 - Die WebUI ruft den Agent **nur serverseitig** ab; kein Secret/keine Agent-URL gelangt in den Client.

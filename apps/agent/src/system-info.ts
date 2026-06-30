@@ -3,6 +3,8 @@ import { execFile } from 'node:child_process';
 import { statfs } from 'node:fs/promises';
 import { APP_VERSION } from '@speakcore/shared';
 import type { DockerProbe, SystemInfo } from '@speakcore/types';
+import { detectEnvironment } from './environment';
+import { gatherNetwork } from './network';
 
 /**
  * Read-only Systemerhebung (NDF Step 006).
@@ -67,11 +69,13 @@ export async function gatherSystemInfo(): Promise<SystemInfo> {
   const totalmem = os.totalmem();
   const freemem = os.freemem();
 
-  const [docker, dockerCompose, dataPathStorageGb] = await Promise.all([
+  const [docker, dockerCompose, dataPathStorageGb, environment] = await Promise.all([
     probeDocker(),
     probeDockerCompose(),
     probeDataPathStorageGb(),
+    detectEnvironment(),
   ]);
+  const network = gatherNetwork();
 
   return {
     agentVersion: APP_VERSION,
@@ -86,6 +90,8 @@ export async function gatherSystemInfo(): Promise<SystemInfo> {
     ...(dataPathStorageGb !== undefined ? { dataPathStorageGb } : {}),
     docker,
     dockerCompose,
+    environment,
+    network,
     collectedAt: new Date().toISOString(),
   };
 }

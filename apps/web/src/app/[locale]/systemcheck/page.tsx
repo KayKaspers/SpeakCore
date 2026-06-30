@@ -5,7 +5,11 @@ import type { PreflightInput, PreflightSeverity } from '@speakcore/types';
 import { runPreflight } from '@speakcore/shared';
 import { getCurrentUser } from '@/lib/auth';
 import { fetchAgentSnapshot } from '@/lib/agent-client';
-import { isSnapshotComplete, mapSystemInfoToResourceSnapshot } from '@/core/system-snapshot';
+import {
+  isSnapshotComplete,
+  mapDetectedEnvironment,
+  mapSystemInfoToResourceSnapshot,
+} from '@/core/system-snapshot';
 import { BrandMark } from '@/components/BrandMark';
 
 export const dynamic = 'force-dynamic';
@@ -65,8 +69,12 @@ export default async function SystemcheckPage({
 
   if (agent.status === 'connected') {
     const snapshot = mapSystemInfoToResourceSnapshot(agent.info);
-    // Umgebung wird in Step 006 nicht erhoben → konservativ „unknown".
-    input = { environment: 'unknown', profile: 'small', snapshot };
+    // Ab Step 007: Umgebung aus read-only Erkennung des Agents (sonst konservativ „unknown").
+    input = {
+      environment: mapDetectedEnvironment(agent.info.environment.kind),
+      profile: 'small',
+      snapshot,
+    };
     agentState = isSnapshotComplete(snapshot) ? 'connected' : 'incomplete';
   }
 
@@ -140,6 +148,56 @@ export default async function SystemcheckPage({
               <dd className="font-mono text-sc-text-primary">{info.nodeVersion}</dd>
             </div>
           </dl>
+        </section>
+      )}
+
+      {/* Umgebung & Netzwerk (nur bei verbundenem Agent) */}
+      {info && (
+        <section className="mb-6 rounded-sc-lg border border-sc-border bg-sc-surface p-6">
+          <h2 className="mb-3 text-sc-h2 font-medium text-sc-text-primary">
+            {t('env.title')} &amp; {t('network.title')}
+          </h2>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sc-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('env.detected')}</dt>
+              <dd className="text-sc-text-primary">
+                {t(`env.kind.${info.environment.kind}`)}
+                {info.environment.virtualization ? (
+                  <span className="text-sc-text-secondary"> ({info.environment.virtualization})</span>
+                ) : null}
+                {!info.environment.confident ? (
+                  <span className="text-sc-text-muted"> · {t('env.uncertain')}</span>
+                ) : null}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('network.ipv4')}</dt>
+              <dd className="text-sc-text-primary">
+                {info.network.hasIpv4 ? t('network.yes') : t('network.no')}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('network.ipv6')}</dt>
+              <dd className="text-sc-text-primary">
+                {info.network.hasIpv6 ? t('network.yes') : t('network.no')}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('network.externalInterface')}</dt>
+              <dd className="text-sc-text-primary">
+                {info.network.hasExternalInterface ? t('network.yes') : t('network.no')}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sc-caption text-sc-text-muted">{t('network.dns')}</dt>
+              <dd className="text-sc-text-primary">
+                {info.network.dns.configured === 'present'
+                  ? t('network.configured')
+                  : t('network.unknown')}
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-4 text-sc-caption text-sc-text-muted">{t('network.noExternalTest')}</p>
         </section>
       )}
 

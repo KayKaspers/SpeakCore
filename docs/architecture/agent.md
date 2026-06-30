@@ -30,17 +30,28 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/version` | Name/Version/NDF-Step (offen) |
 | GET | `/system/snapshot` | **read-only** Systemdaten für Preflight (Token-gated, wenn gesetzt) |
 
-## `/system/snapshot` – was gelesen wird (Step 006)
+## `/system/snapshot` – was gelesen wird (Step 006/007)
 
-**Gelesen (lesend, ungefährlich):** CPU-Kerne & Architektur, RAM gesamt/frei, freier Speicher am
-**Agent-Datenpfad**, OS/Plattform/Release, Node-/Agent-Version, Docker- & Compose-Verfügbarkeit
-(+ Version via `docker --version` / `docker compose version`).
+**Gelesen (lesend, ungefährlich):**
+- **System (Step 006):** CPU-Kerne & Architektur, RAM gesamt/frei, freier Speicher am
+  **Agent-Datenpfad**, OS/Plattform/Release, Node-/Agent-Version, Docker- & Compose-Verfügbarkeit
+  (+ Version via `docker --version` / `docker compose version`).
+- **Umgebung (Step 007):** `systemd-detect-virt` (Fallback `/proc/1/cgroup`) → VM / Container /
+  Bare Metal / Unknown. Bei Unsicherheit `unknown` + `confident:false` (kein Raten).
+- **Netzwerk (Step 007):** aus `os.networkInterfaces()` + `dns.getServers()` nur **Booleans/Anzahl**:
+  IPv4/IPv6 vorhanden, externe Schnittstelle vorhanden, Interface-Anzahl, DNS konfiguriert (+Anzahl).
+  **Keine IP-Adressen/Interface-Namen** – Screenshot-/Datenschutz-sicher.
 
 **Ausdrücklich NICHT:** keine Container-Operationen (`ps`/`inspect`/`run`/Start/Stop), **kein
-Docker-Socket** (`/var/run/docker.sock`), keine Portscans, keine Firewall-/Host-Änderungen, keine
-TS3-Verbindung. CLI-Aufrufe nur mit **statischen Argumenten** über `execFile` (keine Shell →
-keine Command-Injection) mit **Timeout**. Ist Docker nicht ermittelbar, lautet der Wert `unknown`
-(nie fälschlich `absent`) – die WebUI mappt das zu „gelb", nie zu falschem „grün".
+Docker-Socket** (`/var/run/docker.sock`), keine Portscans, keine Firewall-/Host-Änderungen, **keine
+externen Requests/IP-Checks**, keine Router-/NAT-/UPnP-Aktionen, keine aktive Erreichbarkeitsprüfung,
+keine TS3-Verbindung. CLI-Aufrufe nur mit **statischen Argumenten** über `execFile` (keine Shell →
+keine Command-Injection) mit **Timeout**. Ist Docker/Umgebung nicht ermittelbar, lautet der Wert
+`unknown` (nie fälschlich `absent`) – die WebUI mappt das zu „gelb", nie zu falschem „grün".
+
+> **Öffentliche Erreichbarkeit** (offene Ports, NAT, Firewall von außen) wird **nicht** geprüft –
+> das erfordert aktive/externe Tests und ist einem späteren, gesonderten Step mit eigenem
+> Sicherheitskonzept vorbehalten.
 
 > Warum kein Docker-Socket? Ein gemounteter Docker-Socket entspricht faktisch Root auf dem Host.
 > Für reine Systeminformationen ist er unnötig und würde die Angriffsfläche massiv erhöhen. Eine

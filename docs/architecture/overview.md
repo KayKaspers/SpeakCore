@@ -33,10 +33,11 @@ sinnvoll sind und welche Upgrades empfohlen werden. Die **reine Bewertungslogik*
 `packages/shared/preflight/` (Typen in `packages/types`) – ohne Host-/DB-/Agent-Abhängigkeit.
 
 - Richtwerte sind **konservative Empfehlungen, keine Garantie**; unbekannte Werte ergeben nie „grün".
-- **Ab Step 006:** `/systemcheck` ruft **serverseitig** den read-only Agent-Endpunkt
-  `GET /system/snapshot` ab und füttert echte Werte (CPU/RAM/Speicher/OS/Docker-Status) in
-  `runPreflight()`. Ist der Agent nicht erreichbar, greift ein Demo-/Unknown-Fallback (mit
-  Statusanzeige). Umgebung (Proxmox/LXC) wird **nicht** erkannt → bleibt `unknown`.
+- **Ab Step 006/007:** `/systemcheck` ruft **serverseitig** den read-only Agent-Endpunkt
+  `GET /system/snapshot` ab und füttert echte Werte (CPU/RAM/Speicher/OS/Docker-Status sowie
+  ab Step 007 **erkannte Umgebung** und **IPv4/IPv6/DNS-Status**) in `runPreflight()`. Ist der
+  Agent nicht erreichbar, greift ein Demo-/Unknown-Fallback (mit Statusanzeige). Umgebung wird
+  nur erkannt, wenn zuverlässig – sonst `unknown`. **Keine** externen Erreichbarkeitstests.
 - Der Browser spricht den Agent **nie direkt** an; `runPreflight()` bleibt reine Logik ohne
   Agent-Abhängigkeit. Details: [agent.md](agent.md).
 

@@ -5,6 +5,39 @@
 
 ## [Unreleased]
 
+### NDF Step 007 – Read-only Environment- & Netzwerk-Sonden (2026-06-30)
+
+#### Added
+- **Umgebungserkennung** (read-only) im Agent: `systemd-detect-virt` (execFile, statische Argumente,
+  Timeout) mit Fallback auf `/proc/1/cgroup`; klassifiziert in VM / Container / Bare Metal /
+  Unknown. Auf Nicht-Linux bzw. ohne klaren Hinweis ⇒ `unknown` (keine falsche Sicherheit).
+  Reine Klassifikatoren `classifyVirtualization` / `classifyCgroup`.
+- **Netzwerkdaten** (read-only) im Agent über `os.networkInterfaces()` + `dns.getServers()`:
+  IPv4/IPv6 vorhanden, externe Schnittstelle vorhanden, Interface-Anzahl, DNS konfiguriert +
+  Resolver-Anzahl. **Keine IP-Adressen/Interface-Namen** nach außen (nur Booleans/Anzahl).
+- `SystemInfo` um `environment` und `network` erweitert (Typvertrag).
+- Web: `mapDetectedEnvironment()` (rein) bildet Erkennung auf `InstallationEnvironment` ab; Mapping
+  setzt jetzt `ipv4`/`ipv6`/`dns` → schärfere Preflight-Bewertung (Environment/IP/DNS).
+- `/systemcheck`: neue Karte „Umgebung & Netzwerk" (erkannte Umgebung, IPv4/IPv6/DNS-Status) mit
+  Hinweis, dass **keine externen Erreichbarkeitstests** laufen.
+- Tests: Klassifikatoren, Interface-Zusammenfassung, DNS-unknown ⇒ nicht grün, Container ⇒ gelbe
+  Warnung, „keine externen Requests/verbotenen Kommandos"-Quell-Scan. 55/55 grün.
+
+#### Security / Datenschutz
+- **Keine externen Requests/IP-Checks**, keine Portscans, keine Firewall-/Router-/UPnP-Aktionen,
+  keine aktive Erreichbarkeitsprüfung. CLI nur `execFile` ohne Shell + Timeout.
+- **Privatsphäre:** WebUI erhält nur Booleans/Anzahl – keine IP-Adressen (Screenshot-sicher,
+  per Runtime-Smoke verifiziert: kein IPv4-Muster in der Antwort).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (55/55).
+- Runtime-Smoke (gebauter Agent): `/system/snapshot` liefert `environment`+`network` ohne IP-Leak.
+
+#### Notes
+- Umgebung wird nicht immer eindeutig erkannt (z. B. Proxmox vs. generische VM/LXC nicht sicher
+  unterscheidbar) → bei Unsicherheit `unknown`/`confident:false`. Öffentliche Erreichbarkeit
+  (Ports/NAT) bleibt einem späteren, gesonderten Step vorbehalten.
+
 ### NDF Step 006 – Read-only Agent-Sonden für Preflight (2026-06-30)
 
 #### Added

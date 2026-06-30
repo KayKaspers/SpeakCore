@@ -104,6 +104,31 @@
       "archLabel": "Architecture",
       "nodeLabel": "Node"
     },
+    "env": {
+      "title": "Environment",
+      "detected": "Detected",
+      "uncertain": "uncertain",
+      "kind": {
+        "proxmox-vm": "Proxmox VM",
+        "proxmox-lxc": "Proxmox LXC",
+        "vm": "Virtual machine",
+        "container": "Container/LXC",
+        "bare-metal": "Bare metal",
+        "unknown": "Unknown"
+      }
+    },
+    "network": {
+      "title": "Network",
+      "ipv4": "IPv4",
+      "ipv6": "IPv6",
+      "externalInterface": "External interface",
+      "dns": "DNS",
+      "yes": "present",
+      "no": "not present",
+      "configured": "configured",
+      "unknown": "unknown",
+      "noExternalTest": "No external reachability tests are performed. Public reachability (ports/NAT) will be checked separately later."
+    },
     "severity": {
       "green": "Suitable",
       "yellow": "Possible with limitations",

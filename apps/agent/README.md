@@ -32,6 +32,8 @@ pnpm --filter @speakcore/agent build    # tsup → dist/index.js (self-contained
 | GET     | `/system/snapshot`  | **read-only** Systemdaten (Step 006, Token-gated)  |
 
 `/system/snapshot` liest nur ungefährliche Daten (CPU/RAM/Speicher/OS/Node-/Agent-Version,
-Docker-Verfügbarkeit via `--version`). **Kein** Docker-Socket, keine Container-Operationen,
-keine Steuerung. Ist `AGENT_BOOTSTRAP_TOKEN` gesetzt, ist ein Bearer-Token erforderlich.
-Optional: `AGENT_DATA_PATH` legt den Pfad fest, dessen freier Speicher gemeldet wird (Default cwd).
+Docker-Verfügbarkeit via `--version`; ab Step 007 zusätzlich erkannte **Umgebung** via
+`systemd-detect-virt` und **Netzwerk**-Status – nur Booleans/Anzahl, **keine IP-Adressen**).
+**Kein** Docker-Socket, keine Container-Operationen, keine Steuerung, **keine externen Requests**.
+Ist `AGENT_BOOTSTRAP_TOKEN` gesetzt, ist ein Bearer-Token erforderlich. Optional: `AGENT_DATA_PATH`
+legt den Pfad fest, dessen freier Speicher gemeldet wird (Default cwd).

@@ -87,7 +87,8 @@
   OS, Docker-Version) ausgelesen werden – keine Secrets, keine Steuerung.
 - **Gegenmaßnahmen:** Agent nur im **privaten Compose-Netz**, nie öffentlich exponieren
   ([ADR-0004](DECISIONS.md)); Token-Gate aktivieren (`AGENT_BOOTSTRAP_TOKEN`); read-only Daten
-  bewusst minimal gehalten (kein Pfad-/ENV-Leak). Spätere Härtung: Token verpflichtend + mTLS.
+  bewusst minimal gehalten (kein Pfad-/ENV-Leak; **Netzwerk nur Booleans/Anzahl, keine IP-Adressen**
+  – Step 007). Spätere Härtung: Token verpflichtend + mTLS.
 
 ## R-10 – i18n-Drift (DE/EN)
 - **E:** mittel · **A:** niedrig · **Risiko:** niedrig
