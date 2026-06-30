@@ -1,0 +1,15 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+.git
+.gitignore
+**/.env
+**/.env.*
+!**/.env.example
+**/*.sqlite
+**/*.db
+**/coverage
+docs
+project-brain

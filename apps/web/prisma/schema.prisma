@@ -1,0 +1,50 @@
+// SpeakCore – Prisma Schema (NDF Step 002)
+// Bewusst nur STUB-Modelle. KEINE vollständige Geschäftslogik, KEINE Secrets hartkodiert.
+// SQLite ist der Standard für 0.1 (siehe project-brain/DECISIONS.md ADR-0002/0003).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Lokaler Admin-/Benutzer-Account. Passwort wird NUR als Hash gespeichert (Argon2id, ADR-0006).
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// Schlüssel-Wert-Einstellungen (z. B. Sprache, Setup-Status).
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Audit-Log wichtiger Aktionen (Stub – Befüllung folgt in späteren Steps).
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  actor     String
+  target    String?
+  result    String   @default("success")
+  createdAt DateTime @default(now())
+}
+
+/// Verwaltete Serverinstanz. 0.1: ausschließlich type = "teamspeak3".
+model ServerInstance {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("teamspeak3")
+  runState  String   @default("unknown")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

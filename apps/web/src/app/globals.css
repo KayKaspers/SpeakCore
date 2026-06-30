@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * SpeakCore Design Tokens als CSS-Variablen.
+ * Spiegel von branding/design-tokens/tokens.css (dort liegt die Quelle der Wahrheit).
+ */
+:root {
+  --sc-color-background: #0b1220;
+  --sc-color-surface: #111827;
+  --sc-color-primary: #2563eb;
+  --sc-color-accent: #06b6d4;
+  --sc-color-success: #22c55e;
+  --sc-color-warning: #f59e0b;
+  --sc-color-error: #ef4444;
+  --sc-color-text-primary: #f8fafc;
+  --sc-color-text-secondary: #94a3b8;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-sc-background font-sans text-sc-text-primary antialiased;
+  }
+}

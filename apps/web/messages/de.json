@@ -1,0 +1,21 @@
+{
+  "app": {
+    "name": "SpeakCore Suite",
+    "tagline": "Selbsthostbare Voice- & Community-Server-Verwaltung"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "setup": "Setup",
+    "systemcheck": "Systemcheck",
+    "servers": "Server",
+    "backups": "Backups",
+    "help": "Hilfe"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "statusLabel": "Status",
+    "statusPending": "Setup ausstehend",
+    "skeletonNote": "NDF Step 002 – technisches Grundgerüst",
+    "placeholderHint": "Dies ist ein Platzhalter-Dashboard. Es sind noch keine Funktionen aktiv."
+  }
+}

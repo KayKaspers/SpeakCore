@@ -1,0 +1,12 @@
+{
+  "name": "@speakcore/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Geteilte Tooling-Konfiguration (Base-tsconfig) für das SpeakCore-Monorepo.",
+  "files": [
+    "tsconfig.base.json"
+  ],
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json"
+  }
+}

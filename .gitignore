@@ -43,3 +43,10 @@ coverage/
 .nyc_output/
 playwright-report/
 test-results/
+
+# Monorepo / Tooling
+.pnpm-store/
+*.tsbuildinfo
+.turbo/
+# Prisma generierter Client
+**/generated/prisma/

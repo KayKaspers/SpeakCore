@@ -1,0 +1,59 @@
+# =========================================================================
+#  SpeakCore Suite – Docker Compose (SKELETON, NDF Step 002)
+#  Nur technisches Grundgerüst. KEINE TeamSpeak-Container.
+#  Der Agent erhält hier BEWUSST KEINE Docker-/Host-Rechte.
+# =========================================================================
+name: speakcore
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: speakcore-web:dev
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/data/speakcore.db
+      - AGENT_URL=http://agent:4000
+      - AGENT_BOOTSTRAP_TOKEN=${AGENT_BOOTSTRAP_TOKEN:?bitte in .env setzen}
+      - SESSION_SECRET=${SESSION_SECRET:?bitte in .env setzen}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - speakcore-data:/data
+    networks:
+      - speakcore
+    depends_on:
+      - agent
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: .
+      dockerfile: apps/agent/Dockerfile
+    image: speakcore-agent:dev
+    environment:
+      - NODE_ENV=production
+      - AGENT_PORT=4000
+      - AGENT_BOOTSTRAP_TOKEN=${AGENT_BOOTSTRAP_TOKEN:?bitte in .env setzen}
+    # Bewusst NICHT nach außen veröffentlicht – nur im internen Netz erreichbar.
+    expose:
+      - "4000"
+    networks:
+      - speakcore
+    restart: unless-stopped
+    # -----------------------------------------------------------------------
+    # WICHTIG (Step 002): Der Agent hat KEINE Docker-Socket-Anbindung.
+    # Eine spätere privilegierte Anbindung wird NUR dokumentiert, hier bewusst
+    # deaktiviert und erst nach Security-Review (siehe SECURITY.md) aktiviert:
+    #
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock   # NICHT aktivieren in 0.1-Skeleton
+    # -----------------------------------------------------------------------
+
+volumes:
+  speakcore-data:
+
+networks:
+  speakcore:
+    driver: bridge

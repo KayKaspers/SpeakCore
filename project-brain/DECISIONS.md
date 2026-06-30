@@ -81,6 +81,37 @@
 - **Begründung:** Vermeidet späteren Rewrite, ohne 0.1-Scope zu sprengen.
 - **Konsequenzen:** Interface muss bewusst generisch gehalten werden, ohne über TS3 hinaus zu spekulieren.
 
+## ADR-0009 – Monorepo mit pnpm Workspaces
+
+- **Status:** accepted (Step 002) · ersetzt OPEN-3
+- **Kontext:** Web (Next.js) und Agent (Node) teilen Typen/Konstanten und sollen gemeinsam
+  gebaut/getestet werden.
+- **Entscheidung:** Ein **Monorepo** mit **pnpm Workspaces**: `apps/web`, `apps/agent`,
+  `packages/{types,shared,config}`. Gemeinsame Root-Scripts laufen rekursiv (`pnpm -r`).
+- **Begründung:** Geteilte Verträge ohne Publishing, atomare Änderungen über App-Grenzen,
+  effiziente Installation/Caching durch pnpm.
+- **Konsequenzen:** pnpm als verbindlicher Paketmanager (`packageManager`-Feld); Build-Reihenfolge
+  topologisch. Workspace-Pakete werden als TS-Quelle konsumiert (web via `transpilePackages`,
+  agent via tsup-Bundling).
+
+## ADR-0010 – Agent-Runtime: eingebauter `node:http`, keine Frameworks
+
+- **Status:** accepted (Step 002)
+- **Kontext:** Der Agent ist die privilegierte, sicherheitskritische Komponente.
+- **Entscheidung:** Der Agent nutzt **`node:http`** ohne Runtime-Framework/-Dependencies.
+- **Begründung:** Kleinste Angriffsfläche und minimales Supply-Chain-Risiko (Risiko R-01).
+  Health/Version brauchen kein Framework. Build via tsup zu einem self-contained Bundle.
+- **Konsequenzen:** Routing manuell; bei wachsender API später Re-Evaluierung (z. B. schlankes
+  Framework) möglich – dann als neuer ADR.
+
+## ADR-0011 – next-intl mit `[locale]`-Routing
+
+- **Status:** accepted (Step 002) · konkretisiert ADR-0007
+- **Entscheidung:** App-Router-Struktur unter `app/[locale]/` mit next-intl-Middleware,
+  `defineRouting` (Standard `de`) und Messages in `apps/web/messages/{de,en}.json`.
+- **Begründung:** Saubere, URL-basierte Sprachtrennung; offizielle next-intl-Empfehlung.
+- **Konsequenzen:** Middleware leitet `/` → `/de` um; neue Seiten liegen unter `[locale]`.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)
@@ -89,5 +120,6 @@
 |----|-------|--------|-----------|
 | OPEN-1 | Open-Source-Lizenz (AGPL-3.0 vs. Apache-2.0 vs. MIT) | proposed | Empfehlung: AGPL-3.0 für Self-Hosting-Schutz; entscheidet Maintainer |
 | OPEN-2 | Setup-Script-Sprache (Bash vs. portabler) | proposed | Bash für Linux-Hosts naheliegend |
-| OPEN-3 | Monorepo-Struktur (pnpm workspaces) für Web + Agent | proposed | wahrscheinlich ja |
-| OPEN-4 | UI-Komponentenbasis (shadcn/ui vs. eigenes Set auf Tokens) | proposed | später, in NDF Step 002 |
+| OPEN-3 | Monorepo-Struktur (pnpm workspaces) für Web + Agent | **entschieden → ADR-0009** | umgesetzt in Step 002 |
+| OPEN-4 | UI-Komponentenbasis (shadcn/ui vs. eigenes Set auf Tokens) | proposed | später (Step 003+) |
+| OPEN-5 | Tailwind v3 vs. v4 | proposed | Step 002 nutzt Tailwind v3 (stabile Config-Datei); v4-Migration später prüfen |

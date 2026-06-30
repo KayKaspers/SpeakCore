@@ -111,6 +111,24 @@ Docker Compose mit getrennten Services:
 Vertrauensgrenze: Die WebUI/API ist exponiert; der Agent ist **nicht** öffentlich erreichbar
 und nur von der API über Token/privates Netz ansprechbar. Härtung: [docs/architecture/security.md](../docs/architecture/security.md).
 
+## 6a. Repository-Struktur (Monorepo, ab Step 002)
+
+pnpm Workspaces ([ADR-0009](DECISIONS.md)):
+
+```text
+apps/
+├── web/      SpeakCore WebUI + API (Next.js, TS, Tailwind, next-intl, Prisma)
+└── agent/    SpeakCore Agent (node:http, minimal, tsup-Build)
+packages/
+├── types/    geteilte Typen & spätere API-Verträge (@speakcore/types)
+├── shared/   Konstanten, App-Metadaten, Versionsinfo (@speakcore/shared)
+└── config/   geteilte Base-tsconfig (@speakcore/config)
+docker-compose.yml   Skeleton (web + agent), Agent ohne Host-/Docker-Rechte
+```
+
+Gemeinsame Scripts laufen rekursiv (`pnpm -r`). Workspace-Pakete werden als TS-Quelle
+konsumiert: `web` via `transpilePackages`, `agent` via tsup-Bundling ([ADR-0010](DECISIONS.md)).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

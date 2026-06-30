@@ -63,7 +63,33 @@ Die **WebUI kontrolliert niemals direkt Docker, Host oder TeamSpeak.** Alle priv
 Aktionen laufen ausschließlich über den **SpeakCore Agent**. Details:
 [ARCHITECTURE.md](project-brain/ARCHITECTURE.md).
 
+## Monorepo & Entwicklung
+
+Ab NDF Step 002 ist ein **Monorepo** (pnpm Workspaces) vorhanden – ein **technisches
+Grundgerüst ohne fachliche Features** (keine TS3-Verbindung/-Installation, keine echte
+Docker-Steuerung).
+
+```text
+apps/web      SpeakCore WebUI + API (Next.js, TS, Tailwind, next-intl, Prisma) – Skeleton
+apps/agent    SpeakCore Agent (node:http) – /health & /version
+packages/     types · shared · config (geteilte Typen/Konstanten/tsconfig)
+```
+
+Voraussetzungen: **Node.js ≥ 20** und **pnpm ≥ 9** (`corepack enable`).
+
+```bash
+pnpm install
+cp .env.example .env                       # plus apps/web/.env, apps/agent/.env nach Bedarf
+pnpm --filter @speakcore/web db:generate   # Prisma Client erzeugen
+pnpm dev                                    # web (:3000 → /de) + agent (:4000) parallel
+
+# Qualitäts-Checks
+pnpm lint && pnpm typecheck && pnpm build
+```
+
+Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Docker-Rechte).
+
 ## Mitwirken
 
-Siehe [WORKFLOW.md](project-brain/WORKFLOW.md). Aktuell befindet sich das Projekt in der
-Initialisierungsphase – es existiert noch **kein produktiver Anwendungscode**.
+Siehe [WORKFLOW.md](project-brain/WORKFLOW.md). Das Projekt befindet sich in einer frühen Phase:
+Das Grundgerüst steht (Step 002), **fachliche Funktionen folgen ab Step 003**.
