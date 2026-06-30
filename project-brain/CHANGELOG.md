@@ -5,6 +5,19 @@
 
 ## [Unreleased]
 
+### NDF Step 002B – Toolchain-Verifikation (2026-06-30, in Arbeit)
+
+#### Added
+- `.node-version` (Inhalt `20`), um die Node-Major-Version projektweit festzulegen
+  (ergänzt das bestehende `engines`-Feld in der Root-`package.json`).
+
+#### Notes
+- **Verifikation noch nicht durchgeführt:** Node.js/pnpm/corepack sind auf der Arbeitsmaschine
+  nicht installiert. `pnpm install` (und damit `pnpm-lock.yaml`), `pnpm lint`, `pnpm typecheck`,
+  `pnpm build`, `pnpm test` sowie `prisma validate` **stehen weiterhin aus**.
+- Nächster Schritt: Node.js LTS (≥ 20) + pnpm (≥ 9 via corepack) installieren, dann Step 002B
+  erneut ausführen → Checks laufen lassen, Lockfile erzeugen und gemeinsam committen.
+
 ### NDF Step 002 – Tech-Grundgerüst (2026-06-30)
 
 #### Added
