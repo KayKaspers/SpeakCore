@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { APP_VERSION, NAV_KEYS, NDF_STEP } from '@speakcore/shared';
@@ -35,19 +36,33 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           </span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
-          {NAV_KEYS.map((key, index) => (
-            <span
-              key={key}
-              className={
-                index === 0
-                  ? 'rounded-sc-md bg-sc-primary/10 px-3 py-2 text-sc-sm font-medium text-sc-primary'
-                  : 'cursor-default rounded-sc-md px-3 py-2 text-sc-sm text-sc-text-secondary'
-              }
-              aria-disabled={index !== 0}
-            >
-              {tNav(key)}
-            </span>
-          ))}
+          {NAV_KEYS.map((key, index) => {
+            // 'systemcheck' verlinkt auf die Demo-Seite; übrige bleiben Platzhalter.
+            if (key === 'systemcheck') {
+              return (
+                <Link
+                  key={key}
+                  href={`/${locale}/systemcheck`}
+                  className="rounded-sc-md px-3 py-2 text-sc-sm text-sc-text-secondary hover:text-sc-text-primary"
+                >
+                  {tNav(key)}
+                </Link>
+              );
+            }
+            return (
+              <span
+                key={key}
+                className={
+                  index === 0
+                    ? 'rounded-sc-md bg-sc-primary/10 px-3 py-2 text-sc-sm font-medium text-sc-primary'
+                    : 'cursor-default rounded-sc-md px-3 py-2 text-sc-sm text-sc-text-secondary'
+                }
+                aria-disabled={index !== 0}
+              >
+                {tNav(key)}
+              </span>
+            );
+          })}
         </nav>
         <div className="px-6 py-4 text-sc-caption text-sc-text-secondary">
           v{APP_VERSION} · {NDF_STEP}

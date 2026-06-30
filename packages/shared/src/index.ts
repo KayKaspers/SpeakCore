@@ -47,3 +47,6 @@ export function getVersionInfo(commit?: string): VersionInfo {
     ...(commit ? { commit } : {}),
   };
 }
+
+// Preflight & Capacity Advisor – reine Bewertungslogik (NDF Step 005).
+export * from './preflight';

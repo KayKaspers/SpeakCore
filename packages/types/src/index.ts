@@ -64,3 +64,6 @@ export interface AuditEntry {
 
 // Generischer Server-Adapter-Vertrag (Adapter-Prinzip, ADR-0008).
 export * from './adapter';
+
+// Preflight & Capacity Advisor – Typ-Verträge (NDF Step 005).
+export * from './preflight';

@@ -100,6 +100,14 @@ Ampelbewertung (🟢/🟡/🔴), die den Setup-Wizard steuert (siehe [MVP.md](MV
 Sonden, die Hostzugriff brauchen (z. B. Docker-Status, Ports, Firewall), laufen über den
 **Agent**, nicht in der WebUI.
 
+**Stand Step 005 ([ADR-0016](DECISIONS.md)):** Die **Kernlogik** ist umgesetzt – Typen in
+`packages/types` (`preflight.ts`) und **reine Bewertungsfunktionen** in
+`packages/shared/preflight/` (`runPreflight`, `evaluateCpu/Memory/Storage/…`), ohne Next.js-/DB-/
+Agent-/Host-Abhängigkeit und vollständig unit-getestet. Es werden **noch keine echten Hostdaten**
+erhoben; `ResourceSnapshot` ist Eingabe (in Step 005 Demo-/Dummy-Daten). Die echte Erhebung
+übernehmen spätere **Agent-Sonden**. Grundregel: **unbekannte Werte ⇒ nie grün**; Richtwerte sind
+konservative Empfehlungen, keine Garantie.
+
 ## 6. Deployment-Topologie (0.1)
 
 Docker Compose mit getrennten Services:

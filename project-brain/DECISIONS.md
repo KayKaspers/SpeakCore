@@ -161,6 +161,20 @@
   – bewusst klein gehalten; Upgrade auf nonce-basierte CSP ist ein späterer Härtungsschritt
   (RISKS R-11). HSTS nur in Produktion.
 
+## ADR-0016 – Preflight-Kernlogik: rein, in `packages/shared`, i18n über Keys
+
+- **Status:** accepted (Step 005)
+- **Kontext:** Der Preflight & Capacity Advisor ist ein Core-Modul; die Bewertung muss später
+  von WebUI **und** Agent nutzbar und gut testbar sein.
+- **Entscheidung:** Typen in `packages/types`, **reine Bewertungsfunktionen** in
+  `packages/shared/preflight/` – ohne Next.js-/DB-/Agent-/Host-Abhängigkeit. Findings tragen
+  **i18n-Schlüssel/Detail-Keys** (kein fest verdrahteter Text); die UI löst sie unter dem
+  `systemcheck`-Namespace auf.
+- **Begründung:** Wiederverwendbar (WebUI + Agent), framework-unabhängig testbar, sprachneutral.
+- **Konsequenzen:** MVP-Richtwerte (Profile/Schwellen) sind **konservative Empfehlungen, keine
+  Garantie**, und werden später kalibriert. Grundregel: **unbekannte Werte ⇒ nie grün**. Echte
+  Messwerte liefern spätere Agent-Sonden; die Logik bleibt davon unberührt.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

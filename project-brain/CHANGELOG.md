@@ -5,6 +5,37 @@
 
 ## [Unreleased]
 
+### NDF Step 005 – Preflight & Capacity Advisor (Kernlogik) (2026-06-30)
+
+#### Added
+- **Preflight-Typen** in `packages/types` (`preflight.ts`): `PreflightInput/Result/Finding`,
+  `ResourceSnapshot`, `InstallationEnvironment/Profile`, `PreflightSeverity`, `CapabilityStatus`,
+  `ServiceSuitability`, `UpgradeRecommendation`, `CapacityRecommendation`.
+- **Reine Bewertungslogik** in `packages/shared/preflight/` (keine Next.js-/DB-/Agent-/Host-
+  Abhängigkeit): `evaluateCpu/Memory/Storage/Network/BackupStorage/Capability/IpStack/
+  Environment`, `evaluateInstallProfile`, `evaluateServiceSuitability`, `combineFindings`,
+  `calculateOverallPreflightStatus`, `runPreflight`.
+- **Konservative MVP-Richtwerte** (`profiles.ts`): Profile Small/Medium/Large/Expert,
+  Netzwerk-/Backup-Schwellen, Dienst-Anforderungen.
+- **Ampellogik** GREEN/YELLOW/RED; unbekannte Werte führen nie zu „grün".
+- **Service Suitability** für TS3/TS6/Mumble/Matrix/Jitsi vorbereitet – nur **TeamSpeak 3**
+  ist in 0.1 produktiv (`available: true`), übrige als Roadmap markiert.
+- **Demo-UI** `/systemcheck` (geschützt, DE/EN): rendert eine Beispielbewertung über die echte
+  Logik (LXC, 4 GB RAM, unbekannter Upload → „Gelb"). KEINE echte Systemmessung.
+- i18n-Namespace `systemcheck` (DE/EN); Dashboard-Nav „Systemcheck" verlinkt.
+- Unit-Tests in `packages/shared` (CPU/RAM/Storage/Environment/IP/Gesamtstatus/TS3-Suitability/
+  LXC-Warnung/Unknown-not-green/runPreflight).
+- ADR-0016 (Preflight-Kernlogik, Richtwerte, i18n-Keys).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (32/32).
+- Runtime-Smoke: `/de/systemcheck` & `/en/systemcheck` laden und sind geschützt (Redirect Login).
+
+#### Notes
+- **Keine** echten Host-Messungen/Sonden, kein Docker-Socket, keine Portscans, keine TS3-/Docker-
+  Aktionen. Richtwerte sind **konservative Empfehlungen, keine Garantie**.
+- Echte Datenerhebung übernehmen spätere **Agent-Sonden** (zukünftiger Step).
+
 ### NDF Step 004 – Auth-Härtung, Rate-Limiting & Security Headers (2026-06-30)
 
 #### Added

@@ -34,6 +34,10 @@
   frustriert geeignete Nutzer.
 - **Gegenmaßnahmen:** Konservative Schwellwerte, transparente Begründung der Ampel, Expert-Override
   mit bewusster Warnbestätigung, iteratives Tuning anhand realer Hosts.
+- **Stand Step 005:** Bewertungslogik umgesetzt & unit-getestet ([ADR-0016](DECISIONS.md));
+  Grundregel **unbekannte Werte ⇒ nie grün** verhindert falsch-positive Grün-Bewertungen.
+  Richtwerte sind als konservative Empfehlungen dokumentiert (keine Garantie); Kalibrierung an
+  realen Hosts folgt mit den Agent-Sonden.
 
 ## R-05 – TS3-Lizenz-/Betriebsbedingungen
 - **E:** mittel · **A:** hoch · **Risiko:** hoch

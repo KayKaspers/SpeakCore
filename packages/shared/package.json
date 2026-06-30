@@ -11,12 +11,14 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"@speakcore/shared: kein separates Lint (typecheck deckt ab)\""
+    "lint": "echo \"@speakcore/shared: kein separates Lint (typecheck deckt ab)\"",
+    "test": "node --import tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
     "@speakcore/types": "workspace:*"
   },
   "devDependencies": {
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }
 }

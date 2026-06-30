@@ -26,6 +26,16 @@ SpeakCore ist strikt modular aufgebaut. Die zentrale Sicherheitsregel:
 später: WebUI → SpeakCore API → Adapter Layer → TS6 Adapter → TeamSpeak 6 WebQuery/API
 ```
 
+## Preflight & Capacity Advisor (Kernlogik, Step 005)
+
+Eigenes Core-Modul, das schätzt, was eine Umgebung leisten kann (Ampel 🟢/🟡/🔴), welche Dienste
+sinnvoll sind und welche Upgrades empfohlen werden. Die **reine Bewertungslogik** liegt in
+`packages/shared/preflight/` (Typen in `packages/types`) – ohne Host-/DB-/Agent-Abhängigkeit.
+
+- In Step 005 werden **keine echten Hostdaten** gemessen (Demo-/Dummy-Eingabe `ResourceSnapshot`).
+- Richtwerte sind **konservative Empfehlungen, keine Garantie**; unbekannte Werte ergeben nie „grün".
+- Echte Erhebung übernehmen spätere **Agent-Sonden**. Demo-UI: `/systemcheck`.
+
 ## Weiterführend
 
 - [Agent](agent.md) · [Adapter Layer](adapter-layer.md) · [Sicherheit](security.md)

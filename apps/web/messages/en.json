@@ -86,5 +86,70 @@
     "skeletonNote": "NDF Step 003 – setup & owner foundation",
     "placeholderHint": "Voice server management will follow in a later step.",
     "logout": "Sign out"
+  },
+  "systemcheck": {
+    "title": "System Check",
+    "subtitle": "Preflight & Capacity Advisor",
+    "intro": "This assessment estimates what your system can handle.",
+    "demoNotice": "Example data – no real system measurement is performed yet.",
+    "disclaimer": "Conservative recommendation, not a guarantee. Real measurements will follow via the SpeakCore Agent in a later step.",
+    "overall": "System assessment",
+    "backToDashboard": "Back to dashboard",
+    "severity": {
+      "green": "Suitable",
+      "yellow": "Possible with limitations",
+      "red": "Not recommended"
+    },
+    "sections": {
+      "limiting": "Limiting factors",
+      "services": "Services",
+      "upgrades": "Recommended upgrades"
+    },
+    "category": {
+      "cpu": "CPU",
+      "ram": "RAM",
+      "storage": "Storage",
+      "network": "Network/Upload",
+      "docker": "Docker",
+      "dockerCompose": "Docker Compose",
+      "os": "Operating system",
+      "ports": "Ports",
+      "firewall": "Firewall",
+      "ipStack": "IPv4/IPv6",
+      "dns": "DNS",
+      "backupStorage": "Backup storage",
+      "environment": "Environment"
+    },
+    "details": {
+      "unknown": "value unknown",
+      "absent": "not present",
+      "ipv6only": "IPv6 only – some clients/networks may not reach the server",
+      "noIp": "no public IP detected",
+      "proxmoxVm": "Proxmox VM – recommended for production installs",
+      "lxcExpert": "Proxmox LXC – Docker recommended in Expert Mode only",
+      "bareMetal": "Bare metal – good for large/dedicated setups",
+      "vps": "VPS/root server – mind network, firewall and backups",
+      "nasHome": "NAS/home server – for small communities, often limited",
+      "environmentUnknown": "Environment unknown – assessed conservatively"
+    },
+    "services": {
+      "teamspeak3": "TeamSpeak 3",
+      "teamspeak6": "TeamSpeak 6",
+      "mumble": "Mumble",
+      "matrix": "Matrix/Element",
+      "jitsi": "Jitsi",
+      "available": "available",
+      "future": "planned"
+    },
+    "upgrades": {
+      "cpu": "Increase CPU cores (≥ {recommended})",
+      "ram": "Increase RAM (≥ {recommended} GB)",
+      "storage": "Increase free storage (≥ {recommended} GB)",
+      "network": "Check/increase upload bandwidth",
+      "enableDocker": "Install Docker",
+      "enableCompose": "Install Docker Compose",
+      "backup": "Provide backup storage",
+      "useVm": "Use a VM instead of LXC for production installs"
+    }
   }
 }
