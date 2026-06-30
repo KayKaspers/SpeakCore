@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+.next/
+out/
+dist/
+build/
+
+# Environment & secrets — NIEMALS committen
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+*.key
+*.pem
+
+# Datenbank (SQLite MVP)
+*.sqlite
+*.sqlite3
+*.db
+prisma/dev.db*
+
+# SpeakCore runtime / Daten
+data/
+backups/
+logs/
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Test / Coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
