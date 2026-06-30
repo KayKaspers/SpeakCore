@@ -11,11 +11,78 @@
     "backups": "Backups",
     "help": "Help"
   },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "loading": "Please wait …",
+    "optional": "optional"
+  },
+  "setup": {
+    "title": "Set up SpeakCore",
+    "stepOf": "Step {current} of {total}",
+    "welcome": {
+      "title": "Welcome to SpeakCore",
+      "body": "In a few steps you'll set up your SpeakCore instance and create the owner account. No voice servers are installed yet.",
+      "cta": "Start setup"
+    },
+    "mode": {
+      "title": "Choose system mode",
+      "body": "You can change this mode later.",
+      "simple": "Simple Mode",
+      "simpleDesc": "Guided and focused on the essentials – recommended to get started.",
+      "expert": "Expert Mode",
+      "expertDesc": "More detail and overrides for experienced administrators."
+    },
+    "account": {
+      "title": "Create owner account",
+      "body": "This account has full control over SpeakCore.",
+      "email": "Email",
+      "displayName": "Display name",
+      "password": "Password",
+      "confirm": "Confirm password",
+      "passwordHint": "At least {min} characters, with upper- and lowercase letters and a digit."
+    },
+    "summary": {
+      "title": "Summary",
+      "body": "Please review your details.",
+      "modeLabel": "Mode",
+      "emailLabel": "Email",
+      "displayNameLabel": "Display name",
+      "create": "Create owner & finish"
+    },
+    "errors": {
+      "ownerExists": "An account already exists. Setup cannot be run again.",
+      "locked": "Setup is locked (SETUP_LOCK). No owner can be created.",
+      "emailInvalid": "Please enter a valid email address.",
+      "passwordWeak": "The password does not meet the requirements.",
+      "passwordMismatch": "The passwords do not match.",
+      "generic": "Setup failed. Please try again."
+    },
+    "passwordRules": {
+      "minLength": "At least {min} characters",
+      "lowercase": "A lowercase letter",
+      "uppercase": "An uppercase letter",
+      "digit": "A digit"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "body": "Sign in with your owner account.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "error": "Email or password is incorrect.",
+    "generic": "Sign-in failed. Please try again."
+  },
   "dashboard": {
     "title": "Dashboard",
+    "welcome": "Welcome, {name}",
     "statusLabel": "Status",
+    "statusReady": "Ready",
     "statusPending": "Setup pending",
-    "skeletonNote": "NDF Step 002 – technical skeleton",
-    "placeholderHint": "This is a placeholder dashboard. No features are active yet."
+    "modeLabel": "Mode",
+    "skeletonNote": "NDF Step 003 – setup & owner foundation",
+    "placeholderHint": "Voice server management will follow in a later step.",
+    "logout": "Sign out"
   }
 }

@@ -129,6 +129,34 @@ docker-compose.yml   Skeleton (web + agent), Agent ohne Host-/Docker-Rechte
 Gemeinsame Scripts laufen rekursiv (`pnpm -r`). Workspace-Pakete werden als TS-Quelle
 konsumiert: `web` via `transpilePackages`, `agent` via tsup-Bundling ([ADR-0010](DECISIONS.md)).
 
+## 6b. Auth-/Setup-Schichten (ab Step 003)
+
+Die Web-App trennt UI, App-Glue und framework-unabhängige Kernlogik ([ADR-0001](DECISIONS.md)):
+
+```text
+apps/web/src/
+├── app/[locale]/            UI & Server Actions (setup, login, dashboard)
+│   ├── page.tsx             Einstieg → Redirect je nach Setup-/Auth-Zustand
+│   ├── setup/               Wizard + createOwnerAction
+│   ├── login/               Login-/Logout-Actions
+│   └── dashboard/           geschützte Route
+├── lib/auth.ts              Next-Glue: Cookies setzen/lesen, getCurrentUser (server-only)
+└── core/                    framework-unabhängig (testbar):
+    ├── db, users, session, audit
+    ├── password / password-policy   (Argon2id + reine Policy)
+    └── setup / setup-state          (Zustandslogik + reine Helfer)
+```
+
+Auth-/Setup-Datenfluss:
+
+```
+Browser → Server Action (core/*) → Prisma (SQLite)
+Session: HttpOnly-Cookie (Roh-Token)  ↔  DB speichert HMAC(SESSION_SECRET, token)
+```
+
+Auth-Routen sind `force-dynamic` (pro Request ausgewertet). Details:
+[SECURITY.md](SECURITY.md) §4, [ADR-0012](DECISIONS.md)/[ADR-0013](DECISIONS.md).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

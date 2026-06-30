@@ -11,11 +11,78 @@
     "backups": "Backups",
     "help": "Hilfe"
   },
+  "common": {
+    "back": "Zurück",
+    "next": "Weiter",
+    "loading": "Bitte warten …",
+    "optional": "optional"
+  },
+  "setup": {
+    "title": "SpeakCore einrichten",
+    "stepOf": "Schritt {current} von {total}",
+    "welcome": {
+      "title": "Willkommen bei SpeakCore",
+      "body": "In wenigen Schritten richtest du deine SpeakCore-Instanz ein und legst den Owner-Account an. Es werden noch keine Voice-Server installiert.",
+      "cta": "Einrichtung starten"
+    },
+    "mode": {
+      "title": "Systemmodus wählen",
+      "body": "Du kannst diesen Modus später ändern.",
+      "simple": "Simple Mode",
+      "simpleDesc": "Geführt und auf das Wesentliche reduziert – empfohlen für den Einstieg.",
+      "expert": "Expert Mode",
+      "expertDesc": "Mehr Details und Overrides für erfahrene Administrator:innen."
+    },
+    "account": {
+      "title": "Owner-Account erstellen",
+      "body": "Dieser Account hat die volle Kontrolle über SpeakCore.",
+      "email": "E-Mail",
+      "displayName": "Anzeigename",
+      "password": "Passwort",
+      "confirm": "Passwort bestätigen",
+      "passwordHint": "Mindestens {min} Zeichen, mit Groß-, Kleinbuchstaben und Ziffer."
+    },
+    "summary": {
+      "title": "Zusammenfassung",
+      "body": "Bitte überprüfe deine Angaben.",
+      "modeLabel": "Modus",
+      "emailLabel": "E-Mail",
+      "displayNameLabel": "Anzeigename",
+      "create": "Owner anlegen & abschließen"
+    },
+    "errors": {
+      "ownerExists": "Es existiert bereits ein Account. Das Setup kann nicht erneut ausgeführt werden.",
+      "locked": "Das Setup ist gesperrt (SETUP_LOCK). Es kann kein Owner angelegt werden.",
+      "emailInvalid": "Bitte eine gültige E-Mail-Adresse eingeben.",
+      "passwordWeak": "Das Passwort erfüllt die Anforderungen nicht.",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "generic": "Die Einrichtung ist fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "passwordRules": {
+      "minLength": "Mindestens {min} Zeichen",
+      "lowercase": "Ein Kleinbuchstabe",
+      "uppercase": "Ein Großbuchstabe",
+      "digit": "Eine Ziffer"
+    }
+  },
+  "login": {
+    "title": "Anmelden",
+    "body": "Melde dich mit deinem Owner-Account an.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "error": "E-Mail oder Passwort ist falsch.",
+    "generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+  },
   "dashboard": {
     "title": "Dashboard",
+    "welcome": "Willkommen, {name}",
     "statusLabel": "Status",
+    "statusReady": "Bereit",
     "statusPending": "Setup ausstehend",
-    "skeletonNote": "NDF Step 002 – technisches Grundgerüst",
-    "placeholderHint": "Dies ist ein Platzhalter-Dashboard. Es sind noch keine Funktionen aktiv."
+    "modeLabel": "Modus",
+    "skeletonNote": "NDF Step 003 – Setup- & Owner-Grundlage",
+    "placeholderHint": "Die Voice-Server-Verwaltung folgt in einem späteren Schritt.",
+    "logout": "Abmelden"
   }
 }

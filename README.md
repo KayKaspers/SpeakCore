@@ -79,17 +79,26 @@ Voraussetzungen: **Node.js ≥ 20** und **pnpm ≥ 9** (`corepack enable`).
 
 ```bash
 pnpm install
-cp .env.example .env                       # plus apps/web/.env, apps/agent/.env nach Bedarf
-pnpm --filter @speakcore/web db:generate   # Prisma Client erzeugen
-pnpm dev                                    # web (:3000 → /de) + agent (:4000) parallel
+cp apps/web/.env.example apps/web/.env      # DATABASE_URL + SESSION_SECRET (zwingend!) setzen
+pnpm --filter @speakcore/web db:migrate     # SQLite-Migration anwenden + Prisma Client
+pnpm dev                                     # web (:3000 → /de) + agent (:4000) parallel
 
 # Qualitäts-Checks
-pnpm lint && pnpm typecheck && pnpm build
+pnpm lint && pnpm typecheck && pnpm build && pnpm test
 ```
+
+Beim ersten Aufruf öffnet sich der **Setup-Wizard**: Systemmodus wählen und den **Owner-Account**
+anlegen (Passwort Argon2id-gehasht). Danach Login/Dashboard. `SESSION_SECRET` ist Pflicht
+(z. B. `openssl rand -hex 32`); `SETUP_LOCK=true` sperrt die Owner-Erstellung dauerhaft.
 
 Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Docker-Rechte).
 
+## Funktionsstand
+
+- **Vorhanden (Step 003):** Setup-Wizard, lokaler Owner-Account, Argon2id, Sessions/Login/Logout,
+  geschütztes Dashboard, Audit-Log, generischer Adapter-**Typvertrag**.
+- **Noch nicht:** TS3-Verbindung/-Installation, Docker-/Host-Steuerung, Plugin-/Community-Module.
+
 ## Mitwirken
 
-Siehe [WORKFLOW.md](project-brain/WORKFLOW.md). Das Projekt befindet sich in einer frühen Phase:
-Das Grundgerüst steht (Step 002), **fachliche Funktionen folgen ab Step 003**.
+Siehe [WORKFLOW.md](project-brain/WORKFLOW.md). Voice-Server-Verwaltung folgt in späteren Steps.

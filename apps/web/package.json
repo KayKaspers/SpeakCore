@@ -9,11 +9,13 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"@speakcore/web: keine Tests im Skeleton\"",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
     "@prisma/client": "^6.1.0",
     "@speakcore/shared": "workspace:*",
     "@speakcore/types": "workspace:*",
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@speakcore/config": "workspace:*",
     "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",

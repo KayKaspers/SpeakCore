@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 003 – Setup-Wizard & Owner-Account (2026-06-30)
+
+#### Added
+- **Setup-Status-Erkennung**: Einstieg leitet je nach Zustand zu Setup, Login oder Dashboard.
+- **Setup-Wizard** (Client-Komponente, DE/EN): Willkommen → Systemmodus (Simple/Expert) →
+  Owner-Account → Zusammenfassung → Abschluss. Noch kein Preflight, keine TS3-Auswahl.
+- **Lokaler OWNER-Account**: E-Mail, optionaler Anzeigename, starke Passwortregeln,
+  Hashing mit **Argon2id** (`@node-rs/argon2`). Owner nur anlegbar, solange kein User existiert.
+- **Session-Grundlage**: opaker Zufallstoken im **HttpOnly**-Cookie; in der DB nur dessen
+  **HMAC-Hash** (Schlüssel = `SESSION_SECRET`). Login-, Logout- und geschützte Dashboard-Route.
+- **Framework-unabhängige Service-Schicht** unter `apps/web/src/core/` (ADR-0001): `db`,
+  `password`/`password-policy`, `session`, `setup`/`setup-state`, `users`, `audit`.
+- **Audit-Log** für `owner.created`, `setup.completed`, `login.success/failure`, `logout`.
+- **Generischer Adapter-Vertrag** in `packages/types` (`ServerAdapter` u. a.) – nur Typen,
+  keine Implementierung, keine Netzwerk-/ServerQuery-Logik.
+- Prisma erweitert (User.displayName, Session-Modell) + SQLite-Migration
+  `20260630052414_setup_owner_session`.
+- i18n-Messages für Setup/Login/Dashboard (DE/EN); `.env.example` um `SETUP_LOCK` und
+  `NEXT_PUBLIC_APP_URL` ergänzt, `DATABASE_URL`-Pfad korrigiert.
+- Unit-Tests: Passwort-Policy und Setup-Status-Logik (web, `node:test`).
+
+#### Security
+- Argon2id-Hashing, keine Default-Accounts/-Secrets, generische Fehlermeldungen (kein User-Enumeration-Leak).
+- Server Actions sind autoritativ (Server-seitige Validierung); CSRF über Same-Origin-Prüfung
+  der Next.js Server Actions + Cookie `SameSite=Lax`. Setup nicht wiederholbar; `SETUP_LOCK`-Guard.
+- Neue ADRs: ADR-0012 (Session-Auth), ADR-0013 (Argon2id via `@node-rs/argon2`). SECURITY.md/
+  ARCHITECTURE.md konkretisiert.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (13/13) · `prisma validate` ✅.
+- Runtime-Smoke (prod): `/de`→`/de/setup`, `/de/dashboard`→`/de/login`, `/de/setup`→200,
+  `/en/login`→`/en/setup`. Auth-Routen sind dynamisch (force-dynamic, kein statisches Caching).
+
+#### Notes
+- **Weiterhin keine** TS3-Verbindung/-Installation, keine Docker-/Host-Steuerung, kein
+  Plugin-/Community-Modul, kein Rollen-System über OWNER hinaus.
+- Login-**Rate-Limiting** noch nicht umgesetzt (siehe RISKS R-08).
+
 ### NDF Step 002B – Toolchain-Verifikation (2026-06-30, abgeschlossen)
 
 #### Added

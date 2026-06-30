@@ -34,8 +34,10 @@ Kontextbezogene Hilfetexte (in der App eingebettet), zweisprachig:
 
 ## Hinweis zum Stand
 
-SpeakCore befindet sich in einer frühen Phase. Mit NDF Step 002 existiert ein **technisches
-Grundgerüst** (Monorepo: `apps/web`, `apps/agent`, `packages/*`), aber noch **keine fachlichen
-Funktionen**. Diese Dokumente beschreiben den geplanten 0.1-Funktionsumfang
-([MVP.md](../project-brain/MVP.md)); die Installationswege sind noch nicht produktiv nutzbar.
-Entwickler-Einstieg: [README.md](../README.md) (Abschnitt „Monorepo & Entwicklung").
+SpeakCore befindet sich in einer frühen Phase. Stand NDF Step 003: Es gibt ein technisches
+Grundgerüst (Monorepo: `apps/web`, `apps/agent`, `packages/*`) sowie eine erste Fachfunktion –
+**Setup-Wizard, lokaler Owner-Account und Login** (Argon2id, server-seitige Sessions). **Noch keine**
+Voice-Server-Verwaltung (keine TS3-Anbindung/-Installation, keine Docker-/Host-Steuerung).
+Diese Dokumente beschreiben den geplanten 0.1-Funktionsumfang ([MVP.md](../project-brain/MVP.md));
+die Installationswege sind noch nicht produktiv nutzbar.
+Entwickler-Einstieg: [README.md](../README.md).

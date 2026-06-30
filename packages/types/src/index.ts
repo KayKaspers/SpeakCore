@@ -52,7 +52,7 @@ export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; message: string } };
 
-/** Audit-Log-Eintrag (Stub – bewusst minimal, keine Logik in Step 002). */
+/** Audit-Log-Eintrag (bewusst minimal). */
 export interface AuditEntry {
   id: string;
   action: string;
@@ -61,3 +61,6 @@ export interface AuditEntry {
   result: 'success' | 'failure';
   createdAt: string;
 }
+
+// Generischer Server-Adapter-Vertrag (Adapter-Prinzip, ADR-0008).
+export * from './adapter';

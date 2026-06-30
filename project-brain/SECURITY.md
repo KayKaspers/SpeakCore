@@ -30,9 +30,20 @@
 
 ## 4. Authentifizierung & Sitzungen
 
-- Passwort-Hashing: **Argon2id** ([ADR-0006](DECISIONS.md)).
-- Serverseitige Sessions, Cookies `HttpOnly`, `Secure`, `SameSite`.
-- Login mit Rate-Limiting / Brute-Force-Schutz.
+Umgesetzt in Step 003 ([ADR-0012](DECISIONS.md), [ADR-0013](DECISIONS.md)):
+
+- Passwort-Hashing: **Argon2id** via `@node-rs/argon2` (memoryCost 19456, t=2, p=1).
+- **OWNER-Account** wird nur erstellt, solange kein User existiert; Setup ist nicht
+  wiederholbar; zusätzlicher `SETUP_LOCK`-Guard.
+- Server-seitige Sessions: opaker 32-Byte-Zufallstoken im Cookie (`HttpOnly`, `SameSite=Lax`,
+  `Secure` in Produktion). In der DB nur der **HMAC-SHA256-Hash** des Tokens (Schlüssel =
+  `SESSION_SECRET`) → DB-Leak liefert ohne Secret keine nutzbaren Sitzungen. Logout entwertet
+  serverseitig.
+- Login liefert **generische** Fehlermeldungen (kein User-Enumeration-Leak); Fehlversuche werden
+  auditiert.
+- Formulare laufen über **Next.js Server Actions** (Same-Origin/CSRF-Mitigation); alle Prüfungen
+  sind server-seitig autoritativ – Client-Validierung dient nur der UX.
+- **Offen:** Login-**Rate-Limiting**/Brute-Force-Schutz (siehe [RISKS.md](RISKS.md) R-08).
 - Kein externer IdP in 0.1 (Roadmap).
 
 ## 5. Secret-Management

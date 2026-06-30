@@ -112,6 +112,30 @@
 - **Begründung:** Saubere, URL-basierte Sprachtrennung; offizielle next-intl-Empfehlung.
 - **Konsequenzen:** Middleware leitet `/` → `/de` um; neue Seiten liegen unter `[locale]`.
 
+## ADR-0012 – Session-Auth: opaker Token + HMAC-Hash, HttpOnly-Cookie, Server Actions
+
+- **Status:** accepted (Step 003) · konkretisiert ADR-0006
+- **Kontext:** Für den Owner-Login wird eine serverseitige Sitzung benötigt; Self-Hosting,
+  Single-Node, SQLite.
+- **Entscheidung:** Server-seitige Sessions mit **opakem Zufallstoken** (32 Byte). Im Cookie
+  liegt nur der Roh-Token (**HttpOnly**, `SameSite=Lax`, `Secure` in Produktion); in der DB nur
+  dessen **HMAC-SHA256-Hash** (Schlüssel = `SESSION_SECRET`). Formulare laufen über **Next.js
+  Server Actions**; die Geschäftslogik liegt in einer framework-unabhängigen `core/`-Schicht.
+- **Begründung:** Keine JWT-Schlüsselverwaltung nötig; serverseitige Invalidierung möglich;
+  DB-Leak gibt ohne `SESSION_SECRET` keine nutzbaren Tokens. Server Actions sind Same-Origin-
+  geschützt (CSRF-Mitigation) und halten Sicherheitslogik serverseitig.
+- **Konsequenzen:** `SESSION_SECRET` ist Pflicht (min. 16 Zeichen). Auth-Seiten sind
+  `force-dynamic`. Login-Rate-Limiting offen (RISKS R-08). Session-Rotation/„remember me" später.
+
+## ADR-0013 – Passwort-Hashing: Argon2id via `@node-rs/argon2`
+
+- **Status:** accepted (Step 003) · setzt ADR-0006 um
+- **Entscheidung:** **Argon2id** über **`@node-rs/argon2`** (napi-rs, vorgebaute Binaries).
+- **Begründung:** Argon2id ist OWASP-empfohlen; `@node-rs/argon2` liefert vorkompilierte
+  Binaries (kein `node-gyp`/Build-Toolchain nötig, reibungslos unter Windows).
+- **Konsequenzen:** `Algorithm` ist ein `const enum` → unter `isolatedModules` nur als Typ
+  importieren (numerischer Literal-Wert mit Cast). Parameter konservativ (memoryCost 19456, t=2, p=1).
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

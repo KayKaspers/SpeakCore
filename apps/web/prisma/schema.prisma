@@ -1,6 +1,6 @@
-// SpeakCore – Prisma Schema (NDF Step 002)
-// Bewusst nur STUB-Modelle. KEINE vollständige Geschäftslogik, KEINE Secrets hartkodiert.
-// SQLite ist der Standard für 0.1 (siehe project-brain/DECISIONS.md ADR-0002/0003).
+// SpeakCore – Prisma Schema (NDF Step 003)
+// Auth-/Setup-Grundlage. SQLite ist der Standard für 0.1 (ADR-0002/0003).
+// Bewusst KEINE komplexe Rechteverwaltung über OWNER hinaus.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,17 +11,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Lokaler Admin-/Benutzer-Account. Passwort wird NUR als Hash gespeichert (Argon2id, ADR-0006).
+/// Lokaler Account. In 0.1 existiert genau ein OWNER (im Setup-Wizard erstellt).
+/// Passwort wird NUR als Argon2id-Hash gespeichert (ADR-0006).
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
+  displayName  String?
   passwordHash String
-  role         String   @default("admin")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         String    @default("OWNER")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
 }
 
-/// Schlüssel-Wert-Einstellungen (z. B. Sprache, Setup-Status).
+/// Server-seitige Sitzung. Es wird NICHT der Roh-Token gespeichert, sondern dessen
+/// HMAC-Hash (Schlüssel = SESSION_SECRET). Der Roh-Token liegt nur im HttpOnly-Cookie.
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Schlüssel-Wert-Einstellungen (z. B. Setup-Status, Systemmodus simple/expert).
 model Setting {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -29,7 +45,7 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
-/// Audit-Log wichtiger Aktionen (Stub – Befüllung folgt in späteren Steps).
+/// Audit-Log wichtiger Aktionen (z. B. Owner-Erstellung, Setup-Abschluss, Login/Logout).
 model AuditLog {
   id        String   @id @default(cuid())
   action    String
@@ -37,9 +53,12 @@ model AuditLog {
   target    String?
   result    String   @default("success")
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// Verwaltete Serverinstanz. 0.1: ausschließlich type = "teamspeak3".
+/// In Step 003 noch ungenutzt (keine TS3-Anbindung) – nur Schema-Vorbereitung.
 model ServerInstance {
   id        String   @id @default(cuid())
   name      String
