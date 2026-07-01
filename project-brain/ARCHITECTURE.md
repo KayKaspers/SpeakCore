@@ -190,6 +190,13 @@ Ergebnis → normalisiert → UI  +  Audit-Events → AuditLog (DB, ohne Secrets
 
 Der Browser spricht den Agent **nie** direkt an; Agent-URL/Token bleiben serverseitig.
 
+**Managed ServerInstance (ab Step 014):** Vorbereitete Ressourcen werden persistent an eine
+`ServerInstance` mit `mode = "managed"` gebunden (`instanceId`, `provisioningStatus`, Network-/
+Volume-/Container-Name). Der DRAFT-Record entsteht **vor** dem Agent-Aufruf (auditierbar) und wird
+je nach Ergebnis auf `RESOURCES_PREPARED`/`_PARTIAL`/`_FAILED` bzw. DRAFT (writeDisabled/unavailable)
+gesetzt. **Keine Secrets** im Record; **noch kein Container/Start.** Abgrenzung external/managed:
+[docs/architecture/adapter-layer.md](../docs/architecture/adapter-layer.md).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

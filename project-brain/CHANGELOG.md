@@ -5,6 +5,43 @@
 
 ## [Unreleased]
 
+### NDF Step 014 – Managed ServerInstance & Provisioning-State (2026-07-01)
+
+> **Kein Container, kein TS3-Start.** Die in Step 013 vorbereiteten Ressourcen sind nun **persistent**
+> mit einer `ServerInstance` (`mode = "managed"`) verknüpft.
+
+#### Added
+- **Prisma:** `ServerInstance` um Managed-Provisioning-Felder erweitert (`instanceId` @unique,
+  `provisioningStatus`, `managedNetworkName/VolumeName/ContainerName`, `lastProvisioningStep`,
+  `lastProvisioningErrorKey`, `resourcesPreparedAt`) + additive SQLite-Migration
+  `20260701132908_managed_provisioning_state`. **External** Server (Step 008/009) bleiben unberührt.
+- **Provisioning-Flow:** `/servers/provision` legt **vor** dem Agent-Aufruf einen **managed DRAFT**-
+  Record an (jeder Versuch ist auditier-/nachvollziehbar), aktualisiert danach den `provisioningStatus`
+  (`RESOURCES_PREPARED` / `RESOURCE_PREPARE_PARTIAL` / `RESOURCE_PREPARE_FAILED`; bei `writeDisabled`/
+  `unavailable`/`unreachable` **bleibt DRAFT** – kein irreführender „fertiger" Server) und verlinkt den
+  neuen Server-Eintrag.
+- **Reine Mapper** (`resolveProvisioningStatus`, `provisioningErrorKey`) – unit-testbar.
+- **UI (DE/EN):** `/servers` zeigt **External** und **Managed** mit passenden Status-Badges;
+  `/servers/[id]` hat für `mode=managed` eine read-only Provisioning-Ansicht (Status, Network-/Volume-/
+  Container-Name, „Noch kein Container erstellt", „Noch kein TS3-Server gestartet") – **keine**
+  Start-/Stop-/Aktions-Buttons.
+- **Audit** mit ServerInstance verknüpft (`target = serverId`): `docker.prepare.requested`,
+  `docker.{network,volume}.{created,exists,conflict}`, `docker.prepare.completed`/`failed`.
+
+#### Security
+- OWNER-only; **`instanceId` und alle Docker-Namen/Labels werden server-seitig** aus dem validierten
+  Plan erzeugt (kein Nutzereinfluss). **Keine Secrets/Roh-Agent-/Docker-Daten** in `ServerInstance`
+  (per DB-Smoke bestätigt: keine secret-artigen Spalten).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (110/110) · `prisma validate` ✅.
+- DB-Smoke: managed Record persistiert (`instanceId`, Status), External + Credential weiter
+  funktionsfähig, keine Secret-Spalten.
+
+#### Notes
+- **Weiterhin kein Container/Start.** Container-Erstellung (`CONTAINER_PENDING`→`CONTAINER_CREATED`)
+  und Start folgen als eigene, geprüfte Steps.
+
 ### NDF Step 013 – Web-Integration & Audit für Managed Docker Prepare (2026-07-01)
 
 > **Kein Container, kein TS3-Start.** Die Web-App kann als **OWNER** kontrolliert die Network/Volume-

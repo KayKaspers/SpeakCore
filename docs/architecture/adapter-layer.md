@@ -47,6 +47,12 @@ Snapshot statt Live-Connect bei jedem Aufruf); Server können **entfernt** werde
 DB-Cascade mitgelöscht, ohne TS3-Aktion). Fehler werden **generisch** gespeichert/angezeigt (keine
 Secrets/Roh-Antworten). Weiterhin **keine** Steuerung/Installation.
 
+**External vs. Managed (ab Step 014):** `ServerInstance.mode` unterscheidet
+- **`external`** – ein bestehender, read-only verbundener TS3-Server (Query-Zugang verschlüsselt).
+- **`managed`** – von SpeakCore vorbereitete Ressourcen (Network/Volume) mit persistentem
+  `provisioningStatus` (DRAFT → RESOURCES_PREPARED/…); **noch kein Container, kein Start**. Managed
+  Records enthalten **keine** Secrets. Container-Erstellung/Start folgen in späteren Steps.
+
 ## Datenfluss
 
 ```

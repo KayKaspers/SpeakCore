@@ -17,6 +17,12 @@ function statusDotClass(lastStatus: string | null): string {
   if (lastStatus === 'unreachable') return 'bg-sc-error';
   return 'bg-sc-text-muted';
 }
+function managedBadgeClass(status: string | null): string {
+  if (status === 'RESOURCES_PREPARED') return 'bg-sc-success/15 text-sc-success';
+  if (status === 'RESOURCE_PREPARE_PARTIAL') return 'bg-sc-warning/15 text-sc-warning';
+  if (status === 'RESOURCE_PREPARE_FAILED') return 'bg-sc-error/15 text-sc-error';
+  return 'bg-sc-surface-raised text-sc-text-secondary';
+}
 
 export default async function ServersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -78,22 +84,38 @@ export default async function ServersPage({ params }: { params: Promise<{ locale
                   <span className="block truncate text-sc-body font-medium text-sc-text-primary">
                     {server.name}
                   </span>
-                  <span className="block font-mono text-sc-caption text-sc-text-secondary">
-                    {server.host}:{server.queryPort} · TeamSpeak 3
-                  </span>
-                  <span className="block text-sc-caption text-sc-text-muted">
-                    {t('status.lastCheck')}:{' '}
-                    {server.lastStatusCheckedAt
-                      ? new Date(server.lastStatusCheckedAt).toLocaleString(locale)
-                      : t('status.never')}
-                  </span>
+                  {server.mode === 'managed' ? (
+                    <span className="block font-mono text-sc-caption text-sc-text-secondary">
+                      {t('managed.label')} · {t('managed.containerNotCreated')}
+                    </span>
+                  ) : (
+                    <>
+                      <span className="block font-mono text-sc-caption text-sc-text-secondary">
+                        {server.host}:{server.queryPort} · TeamSpeak 3
+                      </span>
+                      <span className="block text-sc-caption text-sc-text-muted">
+                        {t('status.lastCheck')}:{' '}
+                        {server.lastStatusCheckedAt
+                          ? new Date(server.lastStatusCheckedAt).toLocaleString(locale)
+                          : t('status.never')}
+                      </span>
+                    </>
+                  )}
                 </span>
-                <span
-                  className={`inline-flex shrink-0 items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${statusBadgeClass(server.lastStatus)}`}
-                >
-                  <span className={`inline-block h-2 w-2 rounded-full ${statusDotClass(server.lastStatus)}`} aria-hidden />
-                  {statusLabel(server.lastStatus)}
-                </span>
+                {server.mode === 'managed' ? (
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${managedBadgeClass(server.provisioningStatus)}`}
+                  >
+                    {t(`managed.status.${server.provisioningStatus ?? 'DRAFT'}`)}
+                  </span>
+                ) : (
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${statusBadgeClass(server.lastStatus)}`}
+                  >
+                    <span className={`inline-block h-2 w-2 rounded-full ${statusDotClass(server.lastStatus)}`} aria-hidden />
+                    {statusLabel(server.lastStatus)}
+                  </span>
+                )}
               </Link>
             </li>
           ))}

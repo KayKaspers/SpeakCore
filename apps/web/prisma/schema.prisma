@@ -73,6 +73,8 @@ model ServerInstance {
   id              String            @id @default(cuid())
   name            String
   type            String            @default("teamspeak3")
+  // "external" = read-only verbundener Server (Step 008/009);
+  // "managed"  = von SpeakCore vorbereitete Ressourcen (Step 014; noch KEIN Container).
   mode            String            @default("external")
   host            String?
   queryPort       Int?
@@ -80,6 +82,15 @@ model ServerInstance {
   virtualServerId Int?
   runState        String            @default("unknown")
   lastConnectedAt DateTime?
+  // Managed-Provisioning-State (Step 014). KEINE Secrets, keine Roh-Agent-/Docker-Daten.
+  instanceId               String?   @unique
+  provisioningStatus       String? // DRAFT | RESOURCES_PREPARED | RESOURCE_PREPARE_PARTIAL | RESOURCE_PREPARE_FAILED | CONTAINER_PENDING | CONTAINER_CREATED | RUNNING | ERROR
+  managedNetworkName       String?
+  managedVolumeName        String?
+  managedContainerName     String?
+  lastProvisioningStep     String?
+  lastProvisioningErrorKey String?
+  resourcesPreparedAt      DateTime?
   // Persistierter read-only Status-Snapshot (Step 009). KEINE Secrets, keine Roh-Antworten.
   lastStatus          String?   // "reachable" | "unreachable"
   lastStatusCheckedAt DateTime?

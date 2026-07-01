@@ -162,7 +162,35 @@
       "rollbackHint": "In this step, created resources are not removed automatically.",
       "auditHint": "The action was recorded in the audit log (without secrets).",
       "rateLimited": "Too many attempts. Please try again later.",
+      "viewRecord": "View server record",
       "backToServers": "Back to servers"
+    },
+    "managed": {
+      "label": "Managed (prepared)",
+      "provisioningStatus": "Provisioning status",
+      "network": "Network",
+      "volume": "Volume",
+      "container": "Container",
+      "preparedAt": "Prepared at",
+      "containerNotCreated": "No container created yet",
+      "noServerStarted": "No TS3 server started yet",
+      "status": {
+        "DRAFT": "Draft",
+        "RESOURCES_PREPARED": "Resources prepared",
+        "RESOURCE_PREPARE_PARTIAL": "Partially prepared",
+        "RESOURCE_PREPARE_FAILED": "Preparation failed",
+        "CONTAINER_PENDING": "Container pending",
+        "CONTAINER_CREATED": "Container created",
+        "RUNNING": "Running",
+        "ERROR": "Error"
+      },
+      "error": {
+        "writeDisabled": "Docker write actions are disabled in the agent.",
+        "unavailable": "Docker/agent is unavailable.",
+        "unreachable": "Agent unreachable.",
+        "conflict": "Name conflict with an unmanaged resource.",
+        "invalid": "Invalid inputs."
+      }
     }
   },
   "dashboard": {

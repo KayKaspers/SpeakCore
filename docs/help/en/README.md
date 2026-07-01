@@ -18,9 +18,10 @@
   (name/version/clients/uptime). From Step 009: manually **refresh** status, see last check/last
   connection, and **remove** the server (credentials are deleted). Credentials are stored encrypted.
   Still no control/installation.*
-- Installing a new TeamSpeak 3 server — *later. As of Step 010–013: safety foundation, read-only
+- Installing a new TeamSpeak 3 server — *later. As of Step 010–014: safety foundation, read-only
   Docker inventory, and – as **OWNER** under `/servers/provision`, behind a feature flag + token – the
-  controlled creation of managed **network/volume** (server-side, with audit). Still **no** container
+  controlled creation of managed **network/volume**. The preparation is now stored as a **managed
+  server record** (status “Resources prepared”) and visible under `/servers`. Still **no** container
   is created and **no** TS3 server is started.*
 - Start/stop/restart a server
 - Reading logs

@@ -8,6 +8,8 @@ import {
   buildProvisionAuditEntries,
   buildProvisionInput,
   isOwner,
+  provisioningErrorKey,
+  resolveProvisioningStatus,
   type WebPrepareResult,
 } from '../src/core/provisioning-helpers';
 
@@ -41,43 +43,63 @@ function result(
   return { status, resources, instanceId: 'inst-123' };
 }
 
-test('audit entries: ok with created/exists', () => {
-  const entries = buildProvisionAuditEntries(
-    result('ok', [
+test('audit entries: ok yields requested + resource events + completed, linked to serverId', () => {
+  const r: WebPrepareResult = {
+    status: 'ok',
+    instanceId: 'inst-123',
+    serverId: 'srv-9',
+    resources: [
       { kind: 'network', name: 'speakcore-network-voice', outcome: 'created' },
       { kind: 'volume', name: 'speakcore-volume-ts3-x', outcome: 'exists' },
-    ]),
-    'owner@example.com',
-  );
+    ],
+  };
+  const entries = buildProvisionAuditEntries(r, 'owner@example.com');
   const actions = entries.map((e) => e.action);
   assert.ok(actions.includes('docker.prepare.requested'));
   assert.ok(actions.includes('docker.network.created'));
   assert.ok(actions.includes('docker.volume.exists'));
+  assert.ok(actions.includes('docker.prepare.completed'));
+  // Verknüpfung mit ServerInstance-ID.
   for (const e of entries) {
     assert.equal(e.actor, 'owner@example.com');
-    assert.equal(e.target, 'inst-123');
+    assert.equal(e.target, 'srv-9');
   }
 });
 
-test('audit entries map conflict/writeDisabled/unreachable', () => {
-  assert.ok(
-    buildProvisionAuditEntries(
-      result('conflict', [{ kind: 'network', name: 'x', outcome: 'conflict' }]),
-      'o@e.com',
-    )
-      .map((e) => e.action)
-      .includes('docker.prepare.conflict'),
-  );
-  assert.ok(
-    buildProvisionAuditEntries(result('writeDisabled'), 'o@e.com')
-      .map((e) => e.action)
-      .includes('docker.prepare.writeDisabled'),
-  );
-  assert.ok(
-    buildProvisionAuditEntries(result('unreachable'), 'o@e.com')
-      .map((e) => e.action)
-      .includes('docker.prepare.unavailable'),
-  );
+test('audit entries: failures yield docker.prepare.failed (+ resource conflict)', () => {
+  const conflict = buildProvisionAuditEntries(
+    result('conflict', [{ kind: 'network', name: 'x', outcome: 'conflict' }]),
+    'o@e.com',
+  ).map((e) => e.action);
+  assert.ok(conflict.includes('docker.network.conflict'));
+  assert.ok(conflict.includes('docker.prepare.failed'));
+
+  for (const status of ['writeDisabled', 'unavailable', 'unreachable', 'invalid'] as const) {
+    assert.ok(
+      buildProvisionAuditEntries(result(status), 'o@e.com')
+        .map((e) => e.action)
+        .includes('docker.prepare.failed'),
+      status,
+    );
+  }
+});
+
+test('resolveProvisioningStatus maps web status to persistent state', () => {
+  assert.equal(resolveProvisioningStatus('ok'), 'RESOURCES_PREPARED');
+  assert.equal(resolveProvisioningStatus('partial'), 'RESOURCE_PREPARE_PARTIAL');
+  assert.equal(resolveProvisioningStatus('conflict'), 'RESOURCE_PREPARE_FAILED');
+  assert.equal(resolveProvisioningStatus('invalid'), 'RESOURCE_PREPARE_FAILED');
+  // Umgebungszustände: kein irreführender „prepared"-Status.
+  assert.equal(resolveProvisioningStatus('writeDisabled'), 'DRAFT');
+  assert.equal(resolveProvisioningStatus('unavailable'), 'DRAFT');
+  assert.equal(resolveProvisioningStatus('unreachable'), 'DRAFT');
+});
+
+test('provisioningErrorKey returns generic keys (no detail) or null', () => {
+  assert.equal(provisioningErrorKey('writeDisabled'), 'writeDisabled');
+  assert.equal(provisioningErrorKey('unreachable'), 'unreachable');
+  assert.equal(provisioningErrorKey('conflict'), 'conflict');
+  assert.equal(provisioningErrorKey('ok'), null);
 });
 
 test('audit entries never contain secrets', () => {

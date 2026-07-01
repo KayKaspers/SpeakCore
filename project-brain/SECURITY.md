@@ -126,6 +126,12 @@ direkter Browser→Agent-Aufruf; keine freien Docker-Parameter (Input server-sei
 gebaut + re-validiert). Normalisierte **Audit-Events** werden in der DB persistiert – **ohne Secrets/
 Roh-Agent-Details**. Rate-limitiert. Bei deaktiviertem Flag: klarer `writeDisabled`-Hinweis, keine
 automatische Aktivierung.
+
+**Managed ServerInstance (Step 014):** Vorbereitete Ressourcen werden persistent gebunden
+(`mode = "managed"`, `instanceId`, `provisioningStatus`). **`instanceId`, Docker-Namen und Labels
+werden ausschließlich server-seitig** aus dem validierten Plan erzeugt – **kein** Nutzereinfluss.
+Der Record enthält **keine Secrets/Roh-Agent-/Docker-Daten**. `writeDisabled`/`unavailable`/
+`unreachable` führen **nicht** zu einem irreführenden „prepared"-Status (bleibt DRAFT).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
   (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.

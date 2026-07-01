@@ -36,8 +36,77 @@ export default async function ServerDetailPage({
   }
 
   const t = await getTranslations('servers');
-  const reachable = server.lastStatus === 'reachable';
   const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleString(locale) : t('status.never'));
+
+  // Managed-Ansicht: vorbereitete Ressourcen, KEIN Container/Start, keine Aktionen.
+  if (server.mode === 'managed') {
+    const provStatus = server.provisioningStatus ?? 'DRAFT';
+    const badge =
+      provStatus === 'RESOURCES_PREPARED'
+        ? 'bg-sc-success/15 text-sc-success'
+        : provStatus === 'RESOURCE_PREPARE_PARTIAL'
+          ? 'bg-sc-warning/15 text-sc-warning'
+          : provStatus === 'RESOURCE_PREPARE_FAILED'
+            ? 'bg-sc-error/15 text-sc-error'
+            : 'bg-sc-surface-raised text-sc-text-secondary';
+    const rows: { label: string; value: string }[] = [
+      { label: t('managed.network'), value: server.managedNetworkName ?? t('status.notAvailable') },
+      { label: t('managed.volume'), value: server.managedVolumeName ?? t('status.notAvailable') },
+      { label: t('managed.container'), value: server.managedContainerName ?? t('status.notAvailable') },
+      { label: t('managed.preparedAt'), value: fmtDate(server.resourcesPreparedAt) },
+    ];
+    return (
+      <main className="mx-auto w-full max-w-2xl px-4 py-8">
+        <header className="mb-6 flex items-center gap-2">
+          <BrandMark className="h-7 w-7" />
+          <div>
+            <h1 className="text-sc-h1 font-semibold text-sc-text-primary">{server.name}</h1>
+            <p className="font-mono text-sc-caption text-sc-text-secondary">{t('managed.label')}</p>
+          </div>
+        </header>
+
+        <section className="rounded-sc-lg border border-sc-border bg-sc-surface p-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2 className="text-sc-h2 font-medium text-sc-text-primary">{t('managed.provisioningStatus')}</h2>
+            <span className={`rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${badge}`}>
+              {t(`managed.status.${provStatus}`)}
+            </span>
+          </div>
+
+          {server.lastProvisioningErrorKey && (
+            <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
+              {t(`managed.error.${server.lastProvisioningErrorKey}`)}
+            </p>
+          )}
+
+          <dl className="space-y-2 text-sc-sm">
+            {rows.map((row) => (
+              <div key={row.label} className="flex justify-between gap-4">
+                <dt className="text-sc-text-secondary">{row.label}</dt>
+                <dd className="font-mono text-sc-text-primary">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-4 space-y-1 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
+            <p>• {t('managed.containerNotCreated')}</p>
+            <p>• {t('managed.noServerStarted')}</p>
+          </div>
+        </section>
+
+        <footer className="mt-6">
+          <Link
+            href={`/${locale}/servers`}
+            className="rounded-sc-md border border-sc-border-strong px-3 py-2 text-sc-sm text-sc-text-secondary"
+          >
+            {t('backToList')}
+          </Link>
+        </footer>
+      </main>
+    );
+  }
+
+  const reachable = server.lastStatus === 'reachable';
 
   const rows: { label: string; value: string }[] = [
     { label: t('status.name'), value: server.statusName ?? t('status.notAvailable') },

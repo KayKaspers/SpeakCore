@@ -116,6 +116,9 @@
 - **Rest/geplant:** automatisches Rollback-`rm` und Container-Erstellung als eigene, geprüfte Steps.
 - **Stand Step 013:** Web-Auslösung nur **OWNER**, serverseitig (Agent-URL/Token nie im Client),
   rate-limitiert, normalisiertes Audit ohne Secrets.
+- **Stand Step 014:** vorbereitete Ressourcen sind an eine managed `ServerInstance` gebunden
+  (server-seitig erzeugte `instanceId`/Namen, keine Secrets). **Offen:** verwaiste Docker-Ressourcen,
+  falls ein managed Record später entfernt wird (automatisches Remove ist ein eigener, geprüfter Step).
 
 ## R-13 – SSRF über TS3-Host-Eingabe (read-only)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel

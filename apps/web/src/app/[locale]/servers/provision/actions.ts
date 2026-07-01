@@ -15,6 +15,7 @@ import {
 export interface ProvisionActionState {
   status?: WebPrepareStatus;
   resources?: ManagedResourceResult[];
+  serverId?: string;
   errorKey?: string;
 }
 
@@ -52,5 +53,5 @@ export async function prepareResourcesAction(
   });
 
   const result = await prepareManagedTs3Resources(input, user!.email);
-  return { status: result.status, resources: result.resources };
+  return { status: result.status, resources: result.resources, serverId: result.serverId };
 }

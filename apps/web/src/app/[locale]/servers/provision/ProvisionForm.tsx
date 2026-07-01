@@ -138,6 +138,15 @@ export function ProvisionForm({ locale }: { locale: string }) {
           )}
 
           <p className="mt-2 text-sc-caption text-sc-text-muted">{t('auditHint')}</p>
+
+          {state.serverId && (
+            <Link
+              href={`/${locale}/servers/${state.serverId}`}
+              className="mt-3 inline-block rounded-sc-md bg-sc-primary px-3 py-2 text-sc-sm font-medium text-white"
+            >
+              {t('viewRecord')}
+            </Link>
+          )}
         </section>
       )}
 

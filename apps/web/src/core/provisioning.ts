@@ -1,36 +1,83 @@
-import { validateTs3ProvisionInput } from '@speakcore/shared';
+import { createTs3ProvisioningPlan, validateTs3ProvisionInput } from '@speakcore/shared';
 import type { Ts3ProvisionInput } from '@speakcore/types';
+import { prisma } from './db';
 import { logAudit } from './audit';
 import { prepareManagedResources } from '@/lib/agent-client';
 import {
   buildProvisionAuditEntries,
+  provisioningErrorKey,
+  resolveProvisioningStatus,
   type WebPrepareResult,
 } from './provisioning-helpers';
 
 export * from './provisioning-helpers';
 
 /**
- * Web-Service: löst die Vorbereitung managed Ressourcen beim Agent aus, persistiert normalisierte
- * Audit-Events und liefert ein UI-taugliches Ergebnis. **Kein Container, kein TS3-Start.**
- * Enthält keine Secrets/Roh-Agent-Details. Der Aufrufer (Server Action) erzwingt OWNER-only.
+ * Web-Service (NDF Step 014): persistiert einen **managed** ServerInstance-Record und löst die
+ * Ressourcen-Vorbereitung (Network/Volume) beim Agent aus.
+ *
+ * Ablauf: DRAFT-Record vor dem Agent-Aufruf anlegen (jeder Versuch ist auditierbar) → Agent prepare
+ * → Provisioning-State aktualisieren → Audit persistieren. **Kein Container, kein TS3-Start.**
+ * Ergebnis/DB enthalten keine Secrets/Roh-Agent-Details. OWNER-only erzwingt die Server Action.
  */
 export async function prepareManagedTs3Resources(
   input: Ts3ProvisionInput,
   actor: string,
 ): Promise<WebPrepareResult> {
-  let result: WebPrepareResult;
-
+  // Ungültige Eingabe: kein Record anlegen (kein Junk), nur auditieren.
   if (!validateTs3ProvisionInput(input).ok) {
-    result = { status: 'invalid', resources: [], instanceId: input.instanceId };
-  } else {
-    const agent = await prepareManagedResources(input);
-    result = agent
-      ? { status: agent.status, resources: agent.resources, instanceId: input.instanceId }
-      : { status: 'unreachable', resources: [], instanceId: input.instanceId };
+    const result: WebPrepareResult = {
+      status: 'invalid',
+      resources: [],
+      instanceId: input.instanceId,
+    };
+    for (const entry of buildProvisionAuditEntries(result, actor)) await logAudit(entry);
+    return result;
   }
 
-  for (const entry of buildProvisionAuditEntries(result, actor)) {
-    await logAudit(entry);
-  }
+  const plan = createTs3ProvisioningPlan(input);
+
+  // 1) DRAFT-Record (managed) VOR dem Agent-Aufruf.
+  const server = await prisma.serverInstance.create({
+    data: {
+      name: input.displayName.trim() || 'Managed TS3',
+      type: 'teamspeak3',
+      mode: 'managed',
+      instanceId: input.instanceId,
+      voicePort: input.voicePort,
+      queryPort: input.queryPort,
+      runState: 'unknown',
+      provisioningStatus: 'DRAFT',
+      lastProvisioningStep: 'PREPARE_RESOURCES',
+      managedNetworkName: plan.networks[0].name,
+      managedVolumeName: plan.volumes[0].name,
+      managedContainerName: plan.container.name,
+    },
+  });
+
+  // 2) Agent prepare (Network/Volume).
+  const agent = await prepareManagedResources(input);
+  const status: WebPrepareResult['status'] = agent ? agent.status : 'unreachable';
+  const resources = agent?.resources ?? [];
+
+  // 3) Provisioning-State aktualisieren (kein irreführender „fertiger" Server bei writeDisabled/unavailable).
+  const provisioningStatus = resolveProvisioningStatus(status);
+  const prepared = status === 'ok' || status === 'partial';
+  await prisma.serverInstance.update({
+    where: { id: server.id },
+    data: {
+      provisioningStatus,
+      lastProvisioningErrorKey: provisioningErrorKey(status),
+      ...(prepared ? { resourcesPreparedAt: new Date() } : {}),
+    },
+  });
+
+  const result: WebPrepareResult = {
+    status,
+    resources,
+    instanceId: input.instanceId,
+    serverId: server.id,
+  };
+  for (const entry of buildProvisionAuditEntries(result, actor)) await logAudit(entry);
   return result;
 }

@@ -162,7 +162,35 @@
       "rollbackHint": "In diesem Schritt werden erstellte Ressourcen nicht automatisch entfernt.",
       "auditHint": "Die Aktion wurde im Audit-Log protokolliert (ohne Secrets).",
       "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
+      "viewRecord": "Zum Server-Eintrag",
       "backToServers": "Zurück zu den Servern"
+    },
+    "managed": {
+      "label": "Managed (vorbereitet)",
+      "provisioningStatus": "Provisioning-Status",
+      "network": "Netzwerk",
+      "volume": "Volume",
+      "container": "Container",
+      "preparedAt": "Vorbereitet am",
+      "containerNotCreated": "Noch kein Container erstellt",
+      "noServerStarted": "Noch kein TS3-Server gestartet",
+      "status": {
+        "DRAFT": "Entwurf",
+        "RESOURCES_PREPARED": "Ressourcen vorbereitet",
+        "RESOURCE_PREPARE_PARTIAL": "Teilweise vorbereitet",
+        "RESOURCE_PREPARE_FAILED": "Vorbereitung fehlgeschlagen",
+        "CONTAINER_PENDING": "Container ausstehend",
+        "CONTAINER_CREATED": "Container erstellt",
+        "RUNNING": "Läuft",
+        "ERROR": "Fehler"
+      },
+      "error": {
+        "writeDisabled": "Docker-Schreibaktionen sind im Agent deaktiviert.",
+        "unavailable": "Docker/Agent ist nicht verfügbar.",
+        "unreachable": "Agent nicht erreichbar.",
+        "conflict": "Namenskonflikt mit einer nicht verwalteten Ressource.",
+        "invalid": "Ungültige Eingaben."
+      }
     }
   },
   "dashboard": {
