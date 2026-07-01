@@ -29,7 +29,8 @@ pnpm --filter @speakcore/agent build    # tsup → dist/index.js (self-contained
 |---------|---------------------|----------------------------------------------------|
 | GET     | `/health`           | Status & Uptime (offen)                            |
 | GET     | `/version`          | Name/Version/NDF-Step (offen)                      |
-| GET     | `/system/snapshot`  | **read-only** Systemdaten (Step 006, Token-gated)  |
+| GET     | `/system/snapshot`  | **read-only** Systemdaten (Step 006/007, Token-gated) |
+| GET     | `/docker/inventory` | **read-only** Managed-Only Docker-Inventar (Step 011, Token-gated) |
 
 `/system/snapshot` liest nur ungefährliche Daten (CPU/RAM/Speicher/OS/Node-/Agent-Version,
 Docker-Verfügbarkeit via `--version`; ab Step 007 zusätzlich erkannte **Umgebung** via

@@ -73,3 +73,6 @@ export * from './system';
 
 // Agent Docker Safety Foundation & TS3 Provisioning Blueprint (NDF Step 010).
 export * from './provisioning';
+
+// Read-only Docker-Inventar (managed-only, NDF Step 011).
+export * from './docker';

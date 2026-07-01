@@ -29,6 +29,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/health` | Status & Uptime (offen, Liveness) |
 | GET | `/version` | Name/Version/NDF-Step (offen) |
 | GET | `/system/snapshot` | **read-only** Systemdaten für Preflight (Token-gated, wenn gesetzt) |
+| GET | `/docker/inventory` | **read-only** Inventar der SpeakCore-managed Docker-Ressourcen (Token-gated) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
 
@@ -76,6 +77,24 @@ Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für die spätere TS3
 - **Rollback & Audit** als deklarative Planstruktur; Secrets werden nie geloggt (RISKS R-14).
 
 > **Step 010 installiert nichts.** Echte Docker-Aktionen kommen erst nach diesem Sicherheitsfundament.
+
+## `/docker/inventory` – read-only Managed-Only-Inventar (Step 011)
+
+Erste echte Docker-Nähe, **ausschließlich lesend**. Der Agent listet **nur** SpeakCore-managed
+Ressourcen (Filter `label=speakcore.managed=true`):
+
+- Abfragen via `execFile` (statische Argumente, Timeout, keine Shell): `ps` / `volume ls` /
+  `network ls` mit statischem `--format`. Ein reiner Parser trennt die Ausgabe und wendet einen
+  **Managed-Only-Guard** an (nicht-verwaltete Ressourcen werden verworfen).
+- Das DTO enthält je Ressource nur `id`/`name`, `kind`, `managed`, optional `instanceId`/`service`/
+  `state` und die **gefilterten SpeakCore-Labels** – **keine** Rohobjekte, **keine** Details fremder
+  Ressourcen. Fremde Ressourcen werden **nicht** enumeriert.
+- **Verboten/nicht enthalten:** Erstellen/Starten/Stoppen/Entfernen, Container-Inspektion,
+  Kommando-Ausführung im Container, Datei-Kopie, Compose, **Docker-Socket**. Nicht verfügbar ⇒
+  `status: "unavailable"` (kein Crash).
+
+> Schreibende Aktionen (Netzwerk/Volume/Container anlegen) folgen erst in einem späteren Step gegen
+> den validierten Provisioning-Plan (Step 010), mit Rollback/Audit.
 
 ## Sicherheitsprinzipien
 

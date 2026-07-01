@@ -161,6 +161,15 @@
       "archLabel": "Architecture",
       "nodeLabel": "Node"
     },
+    "docker": {
+      "title": "Docker inventory (SpeakCore-managed only)",
+      "available": "available",
+      "unavailable": "unavailable",
+      "containers": "Containers",
+      "volumes": "Volumes",
+      "networks": "Networks",
+      "managedOnlyNote": "Read-only. Only resources created by SpeakCore are detected; foreign Docker resources are not managed."
+    },
     "env": {
       "title": "Environment",
       "detected": "Detected",

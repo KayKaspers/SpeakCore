@@ -161,6 +161,15 @@
       "archLabel": "Architektur",
       "nodeLabel": "Node"
     },
+    "docker": {
+      "title": "Docker-Inventar (nur SpeakCore-verwaltet)",
+      "available": "verfügbar",
+      "unavailable": "nicht verfügbar",
+      "containers": "Container",
+      "volumes": "Volumes",
+      "networks": "Netzwerke",
+      "managedOnlyNote": "Nur lesend. Es werden ausschließlich von SpeakCore erzeugte Ressourcen erkannt; fremde Docker-Ressourcen werden nicht verwaltet."
+    },
     "env": {
       "title": "Umgebung",
       "detected": "Erkannt",

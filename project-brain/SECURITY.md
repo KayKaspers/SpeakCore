@@ -116,11 +116,15 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
   nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
   (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.
 
-### Read-only-Snapshot (Step 006/007)
+### Read-only-Snapshot & Docker-Inventar (Step 006/007/011)
 
 - Der Agent stellt bislang **ausschließlich lesende** Endpunkte bereit; `GET /system/snapshot`
   liefert ungefährliche System-, **Umgebungs-** und **Netzwerk**-Daten (CPU/RAM/Speicher/OS/Node-/
   Agent-Version, Docker-Verfügbarkeit, erkannte Umgebung, IPv4/IPv6/DNS-Status).
+- `GET /docker/inventory` (Step 011, **token-gated**, read-only) listet **nur SpeakCore-managed**
+  Docker-Ressourcen (Filter `speakcore.managed=true`) mit gefilterten SpeakCore-Labels –
+  **keine** Rohobjekte, **keine** fremden Ressourcendetails, kein Enumerieren fremder Ressourcen.
+  Keine schreibenden/inspizierenden Kommandos, kein Socket. Nicht verfügbar ⇒ `unavailable`.
 - **Kein Docker-Socket**, keine Container-Operationen, keine Portscans, keine Host-Änderungen,
   **keine externen Requests/IP-Checks**, keine Router-/NAT-/UPnP-Aktionen, keine aktive
   Erreichbarkeitsprüfung. CLI (Docker/`systemd-detect-virt`) nur via `execFile` ohne Shell,

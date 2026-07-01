@@ -61,9 +61,10 @@ privilegierten Operationen (Container anlegen/starten/stoppen, TS3 installieren,
 auf Dateisystemebene, Systemcheck-Sonden). Authentifiziert via Bootstrap-Token, exponiert
 eine minimale, klar definierte HTTP-API.
 
-**Stand Step 006/010:** umgesetzt sind ausschließlich **read-only** Endpunkte – `GET /health`,
-`GET /version` und `GET /system/snapshot` (lesende Systemdaten für den Preflight; Docker nur via
-`--version`, **kein** Docker-Socket, keine Steuerung). Für spätere Container-Aktionen ist ein
+**Stand Step 006/010/011:** umgesetzt sind ausschließlich **read-only** Endpunkte – `GET /health`,
+`GET /version`, `GET /system/snapshot` sowie `GET /docker/inventory` (nur SpeakCore-managed
+Ressourcen; Docker nur lesend via `ps`/`volume ls`/`network ls` mit Managed-Filter, **kein**
+Docker-Socket, keine Steuerung). Für spätere Container-Aktionen ist ein
 **Sicherheitsfundament** definiert (Managed-Only, Aktions-Allowlist, Provisioning-Blueprint/
 Validierung – [ADR-0019](DECISIONS.md)/[ADR-0020](DECISIONS.md)), aber **noch nichts ausgeführt**.
 Details: [docs/architecture/agent.md](../docs/architecture/agent.md).

@@ -5,6 +5,45 @@
 
 ## [Unreleased]
 
+### NDF Step 011 – Managed-Only Docker Inventory (read-only) (2026-07-01)
+
+> Erste echte Docker-Nähe im Agent – **ausschließlich lesend**. Kein Erstellen/Starten/Stoppen/
+> Entfernen, **kein Docker-Socket**, keine Host-Manipulation, keine TS3-Installation.
+
+#### Added
+- **Agent-Endpunkt `GET /docker/inventory`** (read-only, **token-gated** wie `/system/snapshot`):
+  liefert nur **SpeakCore-managed** Ressourcen (Container/Volumes/Netzwerke) mit gefilterten
+  SpeakCore-Labels. `/health`, `/version`, `/system/snapshot` unverändert.
+- **Read-only Docker-Abfragen** via `execFile` (statische Argumente, Timeout, keine Shell):
+  `ps`/`volume ls`/`network ls` jeweils mit `--filter label=speakcore.managed=true` und statischem
+  `--format`. Docker nicht verfügbar ⇒ `status: "unavailable"` (kein Crash).
+- **Reiner Parser** (`docker-inventory-parser.ts`): trennt CLI-Ausgabe, **Managed-Only-Guard**
+  (nicht-verwaltete Ressourcen werden verworfen), übernimmt **nur** SpeakCore-Labels. Keine
+  Rohobjekte, keine fremden Container-/Ressourcendetails.
+- **Typen** in `packages/types` (`DockerInventory`, `DockerManaged{Container,Volume,Network}`,
+  `DockerInventoryStatus`, `DockerResourceKind`, `ManagedResourceLabelSet`).
+- **Web (klein):** `/systemcheck` zeigt eine Karte „Docker-Inventar (nur SpeakCore-verwaltet)"
+  mit Verfügbarkeit + Anzahl managed Container/Volumes/Netzwerke + Hinweis, dass fremde Ressourcen
+  **nicht** verwaltet werden. Serverseitiger Abruf über `fetchDockerInventory()`.
+- Tests: Parser (managed/unmanaged/Labels-Filter), Managed-Only-Guard, Docker-unavailable ohne
+  Crash, Endpunkt token-gated, **Source-Scan** gegen schreibende/inspizierende Docker-Kommandos
+  und Socket, kein fremdes Feld im DTO. 94/94 grün.
+
+#### Security
+- **Kein Docker-Socket**, kein Shell-Aufruf, **keine** schreibenden/steuernden Kommandos, kein
+  `inspect`/`exec`/`cp`, keine freien Nutzerparameter. Nur managed Ressourcen werden detailliert;
+  fremde Ressourcen werden **nicht enumeriert** und **nicht** in Details geleakt.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (94/94).
+- Runtime-Smoke (gebauter Agent, echtes Docker): `/docker/inventory` → `available`, 0 managed
+  Ressourcen (Filter greift, kein fremdes Datum in der Antwort).
+
+#### Notes
+- Fremde/unmanaged Ressourcen werden bewusst **nicht** gezählt/aufgelistet (Vermeidung von
+  Datenabfluss). Erste **schreibende** Aktion (`CREATE_MANAGED_NETWORK`/`CREATE_MANAGED_VOLUME`)
+  folgt als eigener, sorgfältiger Step gegen den validierten Plan (Step 010).
+
 ### NDF Step 010 – Agent Docker Safety Foundation & TS3 Provisioning Blueprint (2026-07-01)
 
 > **Es wird NICHTS installiert/ausgeführt.** Reine Planungs-/Validierungslogik + Sicherheitskonzept

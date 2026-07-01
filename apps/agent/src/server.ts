@@ -4,6 +4,7 @@ import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
 import { extractBearerToken, isValidToken } from './auth';
 import { gatherSystemInfo } from './system-info';
+import { gatherDockerInventory } from './docker-inventory';
 
 const startedAt = Date.now();
 
@@ -48,6 +49,17 @@ async function handle(
     }
     const info = await gatherSystemInfo();
     sendJson(res, 200, info);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/docker/inventory') {
+    // Read-only Inventar der SpeakCore-managed Docker-Ressourcen (Token-gated wie /system/snapshot).
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    const inventory = await gatherDockerInventory();
+    sendJson(res, 200, inventory);
     return;
   }
 

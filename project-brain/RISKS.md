@@ -17,6 +17,8 @@
   exponiert, generierte Bootstrap-Tokens, minimale Agent-API, Audit-Log, später mTLS ([ADR-0005](DECISIONS.md)).
   **Managed-Only + Aktions-Allowlist** ([ADR-0019](DECISIONS.md)/[ADR-0020](DECISIONS.md)): der Agent
   ist kein allgemeines Docker-Admin-Interface; kein Docker-Socket in WebUI/Web-Container.
+  Stand Step 011: Docker-Nähe ist bislang **rein lesend** (`/docker/inventory`, nur managed
+  Ressourcen, kein Socket/Schreiben); schreibende Aktionen kommen erst als eigener, geprüfter Step.
 
 ## R-14 – Secrets in Docker-Logs bei TS3-Provisionierung (spätere Umsetzung)
 - **E:** mittel · **A:** mittel · **Risiko:** mittel

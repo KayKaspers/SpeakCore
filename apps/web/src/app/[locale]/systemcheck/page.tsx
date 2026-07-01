@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import type { PreflightInput, PreflightSeverity } from '@speakcore/types';
 import { runPreflight } from '@speakcore/shared';
 import { getCurrentUser } from '@/lib/auth';
-import { fetchAgentSnapshot } from '@/lib/agent-client';
+import { fetchAgentSnapshot, fetchDockerInventory } from '@/lib/agent-client';
 import {
   isSnapshotComplete,
   mapDetectedEnvironment,
@@ -63,6 +63,7 @@ export default async function SystemcheckPage({
 
   // Read-only Agent-Snapshot serverseitig abrufen; bei Nichterreichbarkeit Demo-Fallback.
   const agent = await fetchAgentSnapshot();
+  const dockerInventory = await fetchDockerInventory();
   let input: PreflightInput = DEMO_INPUT;
   let agentState: AgentState = 'unreachable';
   const info = agent.status === 'connected' ? agent.info : null;
@@ -198,6 +199,43 @@ export default async function SystemcheckPage({
             </div>
           </dl>
           <p className="mt-4 text-sc-caption text-sc-text-muted">{t('network.noExternalTest')}</p>
+        </section>
+      )}
+
+      {/* Docker-Inventar (read-only, nur SpeakCore-managed) */}
+      {dockerInventory && (
+        <section className="mb-6 rounded-sc-lg border border-sc-border bg-sc-surface p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sc-h2 font-medium text-sc-text-primary">{t('docker.title')}</h2>
+            <span
+              className={`inline-flex items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${
+                dockerInventory.status === 'available'
+                  ? 'bg-sc-success/15 text-sc-success'
+                  : 'bg-sc-warning/15 text-sc-warning'
+              }`}
+            >
+              {dockerInventory.status === 'available'
+                ? t('docker.available')
+                : t('docker.unavailable')}
+            </span>
+          </div>
+          {dockerInventory.status === 'available' && (
+            <dl className="grid grid-cols-3 gap-x-6 gap-y-2 text-sc-sm">
+              <div>
+                <dt className="text-sc-caption text-sc-text-muted">{t('docker.containers')}</dt>
+                <dd className="text-sc-text-primary">{dockerInventory.containers.length}</dd>
+              </div>
+              <div>
+                <dt className="text-sc-caption text-sc-text-muted">{t('docker.volumes')}</dt>
+                <dd className="text-sc-text-primary">{dockerInventory.volumes.length}</dd>
+              </div>
+              <div>
+                <dt className="text-sc-caption text-sc-text-muted">{t('docker.networks')}</dt>
+                <dd className="text-sc-text-primary">{dockerInventory.networks.length}</dd>
+              </div>
+            </dl>
+          )}
+          <p className="mt-4 text-sc-caption text-sc-text-muted">{t('docker.managedOnlyNote')}</p>
         </section>
       )}
 
