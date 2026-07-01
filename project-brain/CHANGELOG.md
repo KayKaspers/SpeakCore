@@ -5,6 +5,48 @@
 
 ## [Unreleased]
 
+### NDF Step 010 – Agent Docker Safety Foundation & TS3 Provisioning Blueprint (2026-07-01)
+
+> **Es wird NICHTS installiert/ausgeführt.** Reine Planungs-/Validierungslogik + Sicherheitskonzept
+> für spätere Agent-Docker-Aktionen. Kein `docker run/compose up/start/stop`, kein Container/Volume/
+> Netzwerk, **kein Docker-Socket**, keine Host-Manipulation.
+
+#### Added
+- **Managed-Only-Prinzip:** SpeakCore verwaltet später nur Ressourcen, die es selbst erzeugt hat –
+  eindeutige Labels (`speakcore.managed=true`, `speakcore.project`, `speakcore.instanceId`,
+  `speakcore.service`) und Namenspräfixe (`speakcore-ts3-<id>`, `speakcore-volume-ts3-<id>`,
+  `speakcore-network-voice`).
+- **Agent-Aktionsmodell** (`AgentActionType` + `ALLOWED_AGENT_ACTIONS`): der Agent ist **kein**
+  allgemeines Docker-Admin-Interface, nur eng definierte Aktionen. In Step 010 sind ausschließlich
+  Planung/Validierung implementiert.
+- **Provisioning-Blueprint** (`createTs3ProvisioningPlan`, rein): plant Container/Volumes/Netzwerke/
+  Ports/Labels, Secret-**Anforderungen** (keine Werte), Warnungen, Rollback- und Audit-Schritte –
+  **ohne Ausführung**.
+- **Validierung** (`validateTs3ProvisionInput`): Ports gültig/keine Duplikate/keine reservierten
+  Ports im Simple Mode; Image-Allowlist; Restart-Policy-Allowlist; kein Pfad-/Host-Mount als
+  Volume; **immer abgelehnt:** privileged, Docker-Socket-Mount, Host-Mounts, freie Docker-Args.
+- **Rollback- & Audit-Planstruktur** (Secrets werden nie protokolliert).
+- Typen in `packages/types` (`provisioning.ts`), reine Logik in `packages/shared/provisioning/`.
+- ADR-0019 (Docker-Zugriffsstrategie: CLI über Agent, Allowlist, statische Argumente),
+  ADR-0020 (Managed-Only-Provisioning-Safety).
+- Tests: Plan-Namen/Labels/Ports, ungültige/doppelte/reservierte Ports, Image-Allowlist,
+  Host-Mount/Socket/privileged-Ablehnung, keine Secrets in Rollback/Audit. 87/87 grün.
+
+#### Security
+- **Docker-Socket in WebUI/Web-Container ist verboten.** Falls später im Agent nötig, nur mit
+  separater Begründung + Härtung (ADR-0019). Keine freien Nutzerparameter; alle Docker-Argumente
+  werden später **intern/statisch** aus dem validierten Plan erzeugt.
+- Secret-Konzept: generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md)); nie in Logs/
+  Audit/Client. **Risiko dokumentiert** (offizielles TS3-Image gibt Initial-Credentials in Logs aus,
+  RISKS R-14).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (87/87).
+
+#### Notes
+- **Warum noch keine Installation?** Echte Docker-Aktionen brauchen eine abgesicherte Docker-Anbindung
+  im Agent; diese wird erst nach diesem Sicherheitsfundament in einem eigenen Step umgesetzt.
+
 ### NDF Step 009 – TS3 read-only Feinschliff (2026-07-01)
 
 #### Added

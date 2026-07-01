@@ -18,6 +18,14 @@ Nur die WebUI/API ist exponiert. Der Agent ist nicht öffentlich erreichbar.
 - TS3-Query-Zugänge werden verschlüsselt gespeichert, nie im Klartext, nie im Log.
 - Warnungen bei riskanter Konfiguration (offene Ports, schwache Umgebung via Preflight).
 
+## Agent & Docker (Ausblick)
+
+Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für spätere Installationen gilt das
+**Managed-Only-Prinzip** (nur selbst erzeugte, gelabelte Ressourcen), eine Aktions-Allowlist und
+Docker-Argumente aus einem validierten Plan – **kein Docker-Socket im Web-Container**. Stand
+Step 010: nur Planung/Validierung, **keine** echte Docker-Aktion. Details:
+[project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
+
 ## Auth-Härtung (Step 004)
 
 - **Rate-Limiting** für Login (10 Fehlversuche / 15 min je IP und Identifier) und Setup

@@ -61,10 +61,12 @@ privilegierten Operationen (Container anlegen/starten/stoppen, TS3 installieren,
 auf Dateisystemebene, Systemcheck-Sonden). Authentifiziert via Bootstrap-Token, exponiert
 eine minimale, klar definierte HTTP-API.
 
-**Stand Step 006:** umgesetzt sind ausschließlich **read-only** Endpunkte – `GET /health`,
+**Stand Step 006/010:** umgesetzt sind ausschließlich **read-only** Endpunkte – `GET /health`,
 `GET /version` und `GET /system/snapshot` (lesende Systemdaten für den Preflight; Docker nur via
-`--version`, **kein** Docker-Socket, keine Steuerung). Privilegierte Aktionen (Container/TS3)
-folgen in späteren Steps. Details: [docs/architecture/agent.md](../docs/architecture/agent.md).
+`--version`, **kein** Docker-Socket, keine Steuerung). Für spätere Container-Aktionen ist ein
+**Sicherheitsfundament** definiert (Managed-Only, Aktions-Allowlist, Provisioning-Blueprint/
+Validierung – [ADR-0019](DECISIONS.md)/[ADR-0020](DECISIONS.md)), aber **noch nichts ausgeführt**.
+Details: [docs/architecture/agent.md](../docs/architecture/agent.md).
 
 ### 3.4 Adapter Layer
 Generische Abstraktion „Server-Typ". Definiert ein einheitliches Interface (provision, start,

@@ -50,3 +50,6 @@ export function getVersionInfo(commit?: string): VersionInfo {
 
 // Preflight & Capacity Advisor – reine Bewertungslogik (NDF Step 005).
 export * from './preflight';
+
+// Agent Docker Safety Foundation & TS3 Provisioning Blueprint (NDF Step 010, reine Planung).
+export * from './provisioning';

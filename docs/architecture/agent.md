@@ -57,6 +57,26 @@ keine Command-Injection) mit **Timeout**. Ist Docker/Umgebung nicht ermittelbar,
 > Für reine Systeminformationen ist er unnötig und würde die Angriffsfläche massiv erhöhen. Eine
 > sichere Docker-**Verwaltung** (Steuerung) folgt erst in späteren Steps mit eigenem Sicherheitskonzept.
 
+## Docker Safety Foundation (Step 010 – Konzept, keine Ausführung)
+
+Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für die spätere TS3-Installation gilt
+([ADR-0019](../../project-brain/DECISIONS.md)/[ADR-0020](../../project-brain/DECISIONS.md)):
+
+- **Managed-Only:** nur selbst erzeugte Ressourcen (Labels `speakcore.managed=true`,
+  `speakcore.project`, `speakcore.instanceId`, `speakcore.service`; Namenspräfixe
+  `speakcore-ts3-<id>`, `speakcore-volume-ts3-<id>`, `speakcore-network-voice`).
+- **Aktions-Allowlist** (`AgentActionType`): PLAN/VALIDATE, CREATE/START/STOP/REMOVE (managed),
+  ROLLBACK – nichts darüber hinaus.
+- **Docker-CLI mit intern erzeugten, statischen Argumenten** aus einem **validierten Plan**;
+  **keine freien Nutzerparameter**. **Kein Docker-Socket in WebUI/Web-Container.**
+- **Immer verboten:** privileged, Docker-Socket-Mount, Host-Mounts/Pfade, freie Docker-Args,
+  Images außerhalb der Allowlist, reservierte Ports im Simple Mode.
+- **Blueprint/Validierung:** `createTs3ProvisioningPlan` / `validateTs3ProvisionInput`
+  (`@speakcore/shared/provisioning`) – rein, getestet, **ohne** jede Docker-Aktion.
+- **Rollback & Audit** als deklarative Planstruktur; Secrets werden nie geloggt (RISKS R-14).
+
+> **Step 010 installiert nichts.** Echte Docker-Aktionen kommen erst nach diesem Sicherheitsfundament.
+
 ## Sicherheitsprinzipien
 
 - **Nicht öffentlich exponiert** (privates Compose-Netz / Loopback).

@@ -70,3 +70,6 @@ export * from './preflight';
 
 // Agent-Systeminformationen (read-only, NDF Step 006).
 export * from './system';
+
+// Agent Docker Safety Foundation & TS3 Provisioning Blueprint (NDF Step 010).
+export * from './provisioning';

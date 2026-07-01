@@ -200,6 +200,39 @@
   Verlust des Schlüssels ⇒ gespeicherte Secrets unlesbar (dokumentiert). Schlüssel gehört in einen
   sicheren Store, nie ins Repo.
 
+## ADR-0019 – Docker-Zugriffsstrategie: CLI über Agent mit Allowlist & statischen Argumenten
+
+- **Status:** accepted (Step 010, für spätere Umsetzung)
+- **Kontext:** Für die spätere TS3-Installation muss der Agent Docker-Ressourcen erzeugen. Die Art
+  der Docker-Anbindung bestimmt maßgeblich die Angriffsfläche.
+- **Optionen & Bewertung:**
+  1. **Docker-CLI über Agent, nur mit intern erzeugten statischen Argumenten, Allowlist, Labels,
+     Managed-Only** – **gewählt.** Kleine, klar prüfbare Oberfläche; keine freien Nutzerparameter.
+  2. Docker-API direkt über Socket – **verworfen:** entspricht faktisch Root auf dem Host, große
+     Angriffsfläche.
+  3. Docker-API über **eingeschränkten Socket-Proxy** (z. B. tecnativa/docker-socket-proxy) – als
+     spätere Härtung möglich/empfohlen, aber MVP-Overhead.
+  4. Externer Container-Manager – **verworfen:** Overkill für 0.1.
+- **Entscheidung:** Option 1 für MVP. **Docker-Socket direkt in WebUI/Web-Container ist verboten.**
+  Wenn ein Socket später im **Agent** nötig wird, ist das separat zu begründen und abzusichern
+  (Proxy/Allowlist/mTLS).
+- **Konsequenzen:** Alle Docker-Argumente werden aus dem **validierten Plan** intern gebaut (nie aus
+  Nutzereingaben). Re-Evaluierung Richtung Socket-Proxy bei wachsendem Funktionsumfang.
+
+## ADR-0020 – Managed-Only-Provisioning-Safety (Labels, Allowlists, Validierung, Rollback)
+
+- **Status:** accepted (Step 010)
+- **Entscheidung:** **SpeakCore verwaltet nur Ressourcen, die es selbst erzeugt hat.** Alle späteren
+  Container/Volumes/Netzwerke tragen `speakcore.managed=true` + Projekt-/Instanz-/Service-Labels und
+  feste Namenspräfixe. Es gibt ein **Aktions-Allowlist** (`AgentActionType`); Eingaben werden streng
+  **validiert** (Image-/Restart-Allowlist, Port-Regeln, keine Host-Mounts/Pfade, kein privileged/
+  Socket, keine freien Docker-Args). Planung, Rollback und Audit sind als deklarative Struktur
+  vorbereitet (`createTs3ProvisioningPlan`).
+- **Begründung:** Verhindert, dass der Agent ein allgemeines Docker-Admin-Interface wird; minimiert
+  Fehl-/Missbrauch (Managed-Only-Guard über Labels).
+- **Konsequenzen:** Löschen/Steuern später nur für Ressourcen mit gültigen Managed-Labels. Secrets
+  werden generiert + verschlüsselt gespeichert ([ADR-0018](DECISIONS.md)), nie geloggt (RISKS R-14).
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

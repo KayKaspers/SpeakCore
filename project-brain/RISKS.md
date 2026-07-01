@@ -15,6 +15,18 @@
   WebUI/API oder ein schwacher Agent-Token könnte zu Host-Übernahme führen.
 - **Gegenmaßnahmen:** Strikte Privileg-Trennung ([ADR-0004](DECISIONS.md)), Agent nicht öffentlich
   exponiert, generierte Bootstrap-Tokens, minimale Agent-API, Audit-Log, später mTLS ([ADR-0005](DECISIONS.md)).
+  **Managed-Only + Aktions-Allowlist** ([ADR-0019](DECISIONS.md)/[ADR-0020](DECISIONS.md)): der Agent
+  ist kein allgemeines Docker-Admin-Interface; kein Docker-Socket in WebUI/Web-Container.
+
+## R-14 – Secrets in Docker-Logs bei TS3-Provisionierung (spätere Umsetzung)
+- **E:** mittel · **A:** mittel · **Risiko:** mittel
+- **Beschreibung:** Das offizielle TeamSpeak-3-Image gibt beim ersten Start Initial-Credentials
+  (ServerAdmin-Token/Query-Passwort) in die Container-Logs aus. Ein ungefiltertes Log-Handling
+  könnte diese Secrets exponieren.
+- **Gegenmaßnahmen (geplant, Step 010 dokumentiert):** Secrets von SpeakCore **selbst generieren**
+  und verschlüsselt speichern ([ADR-0018](DECISIONS.md)); Query-Passwort möglichst per ENV/Secret
+  vorgeben statt aus Logs auslesen; Container-Logs nie ungefiltert an Client/Audit weitergeben;
+  Managed-Only-Prinzip ([ADR-0020](DECISIONS.md)). Konkrete Umsetzung im echten Installations-Step.
 
 ## R-02 – Unsichere Speicherung von TS3-Query-Zugängen / Secrets
 - **E:** mittel · **A:** hoch · **Risiko:** hoch
@@ -123,6 +135,7 @@
 | R-08 | WebUI-Sicherheit | mittel *(reduziert)* |
 | R-09 | Komplexität/Bus-Faktor | mittel |
 | R-11 | CSP `'unsafe-inline'` | mittel |
+| R-14 | Secrets in Docker-Logs (Provisionierung) | mittel |
 | R-13 | SSRF über TS3-Host-Eingabe | niedrig-mittel |
 | R-10 | i18n-Drift | niedrig |
 | R-12 | Agent-Snapshot ohne Token | niedrig |

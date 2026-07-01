@@ -18,7 +18,9 @@
   Ab Step 009: Status manuell **aktualisieren**, letzten Check/letzte Verbindung sehen und den
   Server wieder **entfernen** (Zugangsdaten werden dabei gelöscht). Zugangsdaten sind verschlüsselt
   gespeichert. Weiterhin keine Steuerung/Installation.*
-- Neuen TeamSpeak-3-Server installieren — *später*
+- Neuen TeamSpeak-3-Server installieren — *später. Stand Step 010: nur das Sicherheitsfundament
+  (Managed-Only, Validierung, Provisioning-Blueprint) ist vorbereitet – es wird noch nichts
+  installiert und keine Docker-Aktion ausgeführt.*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore

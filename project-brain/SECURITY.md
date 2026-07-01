@@ -100,6 +100,22 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - Eingabevalidierung aller Parameter (keine Shell-Injection in Docker-/Host-Aufrufe).
 - Roadmap-Härtung: mTLS / signierte Requests, Audit jeder privilegierten Operation.
 
+### Agent Docker Safety Foundation (Step 010 – Konzept, noch keine Ausführung)
+
+- **Der Agent ist KEIN allgemeines Docker-Admin-Interface** ([ADR-0019](DECISIONS.md),
+  [ADR-0020](DECISIONS.md)). Vorgesehen ist ausschließlich eine **eng definierte Aktions-Allowlist**
+  (`AgentActionType`), keine freien Nutzerparameter.
+- **Managed-Only:** SpeakCore verwaltet später nur selbst erzeugte Ressourcen (Labels
+  `speakcore.managed=true` + Namenspräfixe). Löschen/Steuern nur bei gültigen Managed-Labels.
+- **Docker-Zugriff:** Docker-CLI über den Agent, Argumente **intern/statisch** aus einem validierten
+  Plan. **Docker-Socket in WebUI/Web-Container ist verboten**; ein Socket im Agent bedürfte
+  separater Begründung + Härtung.
+- **Verboten (immer abgelehnt):** privileged, Docker-Socket-Mount, Host-Mounts/Pfade, freie
+  Docker-Args, Images außerhalb der Allowlist, reservierte Ports im Simple Mode.
+- **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
+  nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
+  (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.
+
 ### Read-only-Snapshot (Step 006/007)
 
 - Der Agent stellt bislang **ausschließlich lesende** Endpunkte bereit; `GET /system/snapshot`

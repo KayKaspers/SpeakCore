@@ -18,7 +18,9 @@
   (name/version/clients/uptime). From Step 009: manually **refresh** status, see last check/last
   connection, and **remove** the server (credentials are deleted). Credentials are stored encrypted.
   Still no control/installation.*
-- Installing a new TeamSpeak 3 server — *later*
+- Installing a new TeamSpeak 3 server — *later. As of Step 010 only the safety foundation
+  (managed-only, validation, provisioning blueprint) is prepared – nothing is installed yet and no
+  Docker action is performed.*
 - Start/stop/restart a server
 - Reading logs
 - Backup & Restore
