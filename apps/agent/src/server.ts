@@ -5,6 +5,7 @@ import type { AgentConfig } from './config';
 import type {
   Ts3ContainerCreateRequest,
   Ts3ContainerStartRequest,
+  Ts3ContainerStatusRequest,
   Ts3ProvisionInput,
 } from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
@@ -13,6 +14,7 @@ import { gatherDockerInventory } from './docker-inventory';
 import { prepareProvision } from './docker-write';
 import { createTs3Container } from './docker-container';
 import { startTs3Container } from './docker-start';
+import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -160,6 +162,27 @@ async function handle(
     }
     const result = await startTs3Container(body as Ts3ContainerStartRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/container-status') {
+    // Read-only Laufzeit-Status eines managed Containers. Nur Token-Gate (kein Write-Flag nötig).
+    // Nur `container ls` mit Label-Filtern; kein inspect/logs/exec, keine Secrets, keine Roh-Ausgabe.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await getManagedContainerStatus(body as Ts3ContainerStatusRequest, {
       exec: dockerExec,
     });
     sendJson(res, 200, result);

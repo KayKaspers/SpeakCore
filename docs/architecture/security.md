@@ -42,7 +42,10 @@ managed **Network/Volume** (`/docker/provision/prepare`), **Container erstellen*
 **Container-Vorbereitung** (`CONTAINER_PENDING`) rein web-seitig das Query-Admin-Secret und speichert es
 **verschlüsselt**; in **Step 017** wird der Container erstellt (`CONTAINER_CREATED`) und das Secret dem
 Agent **serverseitig** übergeben, der es als **ENV** setzt; in **Step 018** wird der Container nach
-**expliziter Lizenzzustimmung** gestartet (`RUNNING`). **Kein Log-Lesen**, kein Secret in Logs. Details:
+**expliziter Lizenzzustimmung** gestartet (`RUNNING`); in **Step 019** liefert ein **read-only
+Healthcheck** (`/docker/provision/container-status`, nur Token, kein Write-Flag) via `docker container ls`
+den Ist-Zustand (Container läuft? optional TS3 erreichbar?) – **ohne** Lifecycle-Status zu überschreiben.
+**Kein Log-Lesen**, kein Inspect, keine Portscans, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

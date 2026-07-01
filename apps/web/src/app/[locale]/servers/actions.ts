@@ -16,6 +16,7 @@ import {
 import { prepareManagedContainer } from '@/core/container-prepare';
 import { createManagedContainerForServer } from '@/core/container-create';
 import { startManagedContainerForServer } from '@/core/container-start';
+import { runManagedHealthcheck } from '@/core/managed-health';
 
 export interface AddServerState {
   errorKey?: string;
@@ -226,5 +227,35 @@ export async function startContainerAction(formData: FormData): Promise<void> {
   }
   // licenseRequired | invalidState | invalidPlan | writeDisabled
   //   | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Löst einen **read-only** Healthcheck für einen managed Server aus (Container-Laufzeit + optional TS3).
+ * OWNER-only, rate-limitiert. **Keine** Logs/Inspect/Reparatur; `provisioningStatus` bleibt unverändert.
+ */
+export async function healthcheckAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:health:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await runManagedHealthcheck(id, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'ok') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // notManaged | invalidState
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }

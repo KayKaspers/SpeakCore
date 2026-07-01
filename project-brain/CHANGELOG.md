@@ -5,6 +5,47 @@
 
 ## [Unreleased]
 
+### NDF Step 019 – Managed Server Read-only Healthcheck (2026-07-01)
+
+> **Read-only.** Unterscheidet ehrlich zwischen **Lifecycle-Status** (`provisioningStatus`, unverändert)
+> und **Ist-Zustand** (Container läuft? TS3 erreichbar?). **Keine** Logs/Inspect/Portscans/Reparatur.
+
+#### Added
+- **Agent read-only Endpunkt** **`POST /docker/provision/container-status`** (`docker-status.ts`):
+  **nur Token-Gate** (kein Write-Flag – read-only). Ermittelt via **`docker container ls`** mit
+  **Label-Filtern** (`managed=true` + `instanceId`) den Laufzeitstatus; Containername intern aus
+  `instanceId` abgeleitet. `execFile`, statische Argumente, keine Shell, **kein** `inspect`/`logs`/
+  `exec`/`socket`. Status `running | created | exited | notFound | conflict | unavailable | error`;
+  normalisiert, **keine** fremden Containerdetails/Roh-Ausgaben.
+- **Web-Service** `runManagedHealthcheck` (`src/core/managed-health.ts`) + reine Helfer
+  (`managed-health-helpers.ts`) + **OWNER-only Server Action** `healthcheckAction` (rate-limitiert):
+  ruft den Container-Status ab und – **nur wenn der Container läuft** – optional den **read-only
+  TS3-ServerQuery-Basisstatus** (`login/use/serverinfo`, bestehender Client aus Step 008/009).
+- **Optionaler TS3-Check ehrlich begrenzt:** Da managed Server aktuell **keine** eindeutig erreichbare
+  Query-Adresse haben (kein `host`), wird **nicht geraten** → `ts3ReachabilityStatus = notConfigured`
+  (kein Portscan). Sobald ein Host/Query-Port vorliegt, greift der read-only Check.
+- **Prisma** (Migration `20260701160000_add_managed_healthcheck`): `lastHealthCheckedAt`,
+  `containerRuntimeStatus`, `ts3ReachabilityStatus`, `lastHealthErrorKey`, `lastSuccessfulHealthCheckAt`.
+  **`provisioningStatus` bleibt** der letzte Lifecycle-Status; Healthcheck-Felder = Ist-Zustand.
+- **UI (DE/EN):** managed Detailseite bei `RUNNING` mit Button **„Status prüfen"**, Anzeige von
+  Container-Laufzeitstatus, TS3-Erreichbarkeit (ja/nein/unbekannt/nicht konfiguriert), letztem/letztem
+  erfolgreichen Healthcheck und – falls TS3 erreichbar – Name/Version/Uptime/Clients. Hinweise:
+  read-only, keine Logs, keine Reparatur. **Keine** Stop-/Remove-/Restart-Buttons.
+- **Audit:** `healthcheck.managed.requested/completed/failed`, `healthcheck.container.running/notRunning`,
+  `healthcheck.ts3.reachable/unreachable` (Target = ServerInstance-ID, **keine Secrets/Roh-Ausgaben**).
+- Tests: Agent (Label-Filter, State-Normalisierung, notFound/conflict/unavailable/error, invalid,
+  Token-Gate/read-only ohne Write-Flag, Quell-Scan) und Web (Guard/Audit/Fehlerschlüssel/runState,
+  kein Secret im Audit, Quell-Scan). **191 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Read-only:** kein Write-Flag,
+  **kein** `run/create/start/stop/rm/inspect/exec/cp/logs`, kein compose, kein Socket, keine Portscans,
+  **keine automatische Reparatur**. TS3-Client nur read-only (`login/use/serverinfo/version`). Keine
+  Secrets/Roh-Docker-/TS3-Ausgaben in DB/Audit/Client.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (191) · `prisma validate` ✅.
+
 ### NDF Step 018 – START_MANAGED_CONTAINER mit TS3-Lizenzzustimmung (2026-07-01)
 
 > **Erster Start** eines bereits erstellten managed Containers. Übergang `CONTAINER_CREATED → RUNNING`.

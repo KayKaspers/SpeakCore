@@ -188,6 +188,32 @@
       "licenseHint": "SpeakCore stellt nur die Verwaltung bereit. Für die Einhaltung der TeamSpeak-Lizenz bist du selbst verantwortlich. Der Start setzt die für das TS3-Image benötigte Lizenzbestätigung.",
       "containerStartedHint": "Container wurde gestartet.",
       "nextStepHealthcheck": "TS3-Statusprüfung erfolgt in einem späteren Schritt.",
+      "health": {
+        "title": "Healthcheck (read-only)",
+        "checkButton": "Status prüfen",
+        "containerRuntime": "Container-Laufzeitstatus",
+        "ts3Reachability": "TS3 erreichbar",
+        "lastCheck": "Letzter Healthcheck",
+        "lastSuccess": "Letzter erfolgreicher Healthcheck",
+        "readonly": "Healthcheck ist read-only.",
+        "noLogs": "Es werden keine Logs gelesen.",
+        "noRepair": "Es werden keine Reparaturaktionen ausgeführt.",
+        "runtime": {
+          "running": "Läuft",
+          "created": "Erstellt (nicht gestartet)",
+          "exited": "Beendet",
+          "notFound": "Nicht gefunden",
+          "conflict": "Namenskonflikt",
+          "unavailable": "Docker nicht verfügbar",
+          "error": "Unbekannt"
+        },
+        "ts3": {
+          "reachable": "Ja",
+          "unreachable": "Nein",
+          "unknown": "Unbekannt",
+          "notConfigured": "Nicht konfiguriert"
+        }
+      },
       "notice": {
         "encryptionMissing": "SECRET_ENCRYPTION_KEY ist nicht gesetzt – Aktion abgebrochen.",
         "invalidState": "In diesem Status nicht möglich.",
@@ -201,7 +227,8 @@
         "error": "Container konnte nicht erstellt werden.",
         "licenseRequired": "Bitte bestätige zuerst die TeamSpeak-3-Lizenzbedingungen.",
         "startFailed": "Container konnte nicht gestartet werden.",
-        "notFound": "Container nicht gefunden."
+        "notFound": "Container nicht gefunden.",
+        "notManaged": "Healthcheck ist nur für managed Server verfügbar."
       },
       "status": {
         "DRAFT": "Entwurf",

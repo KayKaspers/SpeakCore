@@ -31,7 +31,10 @@
   stellt nur die Verwaltung bereit – für die Lizenz-Einhaltung bist du selbst verantwortlich. Es werden
   weiterhin **keine** Docker-Logs gelesen und **keine** Secrets angezeigt. Eine TS3-Statusprüfung folgt
   in einem späteren Schritt.*
-- Server starten/stoppen/neustarten
+- Server starten/stoppen/neustarten — *ab Step 018: managed Container **starten** (nach
+  Lizenzzustimmung). Ab Step 019: **read-only Healthcheck** („Status prüfen") – zeigt ehrlich, ob der
+  Docker-Container läuft und (falls konfiguriert) ob der TS3-Dienst erreichbar ist. **Kein** Log-Lesen,
+  **kein** Inspect, **keine** Reparatur, keine Stop-/Remove-Aktion. Stop folgt als eigener Schritt.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

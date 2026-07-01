@@ -6,6 +6,7 @@ import { getServer } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
 import {
   createContainerAction,
+  healthcheckAction,
   prepareContainerAction,
   refreshServerAction,
   startContainerAction,
@@ -99,6 +100,7 @@ export default async function ServerDetailPage({
               'conflict',
               'error',
               'licenseRequired',
+              'notManaged',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -182,6 +184,85 @@ export default async function ServerDetailPage({
                 {t('managed.startButton')}
               </button>
             </form>
+          )}
+
+          {provStatus === 'RUNNING' && (
+            <div className="mt-6 border-t border-sc-border pt-4">
+              <div className="mb-3 flex items-center justify-between gap-4">
+                <h3 className="text-sc-sm font-medium text-sc-text-primary">
+                  {t('managed.health.title')}
+                </h3>
+                <form action={healthcheckAction}>
+                  <input type="hidden" name="locale" value={locale} />
+                  <input type="hidden" name="id" value={server.id} />
+                  <button
+                    type="submit"
+                    className="rounded-sc-md bg-sc-primary px-3 py-1.5 text-sc-sm font-medium text-white"
+                  >
+                    {t('managed.health.checkButton')}
+                  </button>
+                </form>
+              </div>
+              <dl className="space-y-2 text-sc-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-sc-text-secondary">{t('managed.health.containerRuntime')}</dt>
+                  <dd className="font-mono text-sc-text-primary">
+                    {server.containerRuntimeStatus
+                      ? t(`managed.health.runtime.${server.containerRuntimeStatus}`)
+                      : t('status.notAvailable')}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-sc-text-secondary">{t('managed.health.ts3Reachability')}</dt>
+                  <dd className="font-mono text-sc-text-primary">
+                    {server.ts3ReachabilityStatus
+                      ? t(`managed.health.ts3.${server.ts3ReachabilityStatus}`)
+                      : t('status.notAvailable')}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-sc-text-secondary">{t('managed.health.lastCheck')}</dt>
+                  <dd className="text-sc-text-primary">{fmtDate(server.lastHealthCheckedAt)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-sc-text-secondary">{t('managed.health.lastSuccess')}</dt>
+                  <dd className="text-sc-text-primary">{fmtDate(server.lastSuccessfulHealthCheckAt)}</dd>
+                </div>
+                {server.ts3ReachabilityStatus === 'reachable' && (
+                  <>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sc-text-secondary">{t('status.name')}</dt>
+                      <dd className="text-sc-text-primary">
+                        {server.statusName ?? t('status.notAvailable')}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sc-text-secondary">{t('status.version')}</dt>
+                      <dd className="text-sc-text-primary">
+                        {server.statusVersion ?? t('status.notAvailable')}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sc-text-secondary">{t('status.clients')}</dt>
+                      <dd className="text-sc-text-primary">
+                        {server.statusClientsOnline !== null && server.statusMaxClients !== null
+                          ? `${server.statusClientsOnline} / ${server.statusMaxClients}`
+                          : t('status.notAvailable')}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sc-text-secondary">{t('status.uptime')}</dt>
+                      <dd className="text-sc-text-primary">{formatUptime(server.statusUptimeSeconds)}</dd>
+                    </div>
+                  </>
+                )}
+              </dl>
+              <div className="mt-3 space-y-1 text-sc-caption text-sc-text-muted">
+                <p>• {t('managed.health.readonly')}</p>
+                <p>• {t('managed.health.noLogs')}</p>
+                <p>• {t('managed.health.noRepair')}</p>
+              </div>
+            </div>
           )}
         </section>
 

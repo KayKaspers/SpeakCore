@@ -137,6 +137,10 @@
   Container, Idempotenz (`running`)/`conflict`/`notFound`, **kein** `run/create/stop/rm`, **kein**
   Log-Lesen; explizite Lizenzzustimmung nötig. Ergebnis/Audit ohne Secrets. Verwaiste/hängende
   Container (Stop/Remove) bleiben eigene, spätere Steps.
+- **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
+  Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
+  Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur
+  read-only; für managed Server aktuell meist `notConfigured` (keine eindeutige Query-Adresse – offen).
 
 ## R-16 – Fehlerhafte/unvollständige Secret-Key-Rotation (Step 016)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel

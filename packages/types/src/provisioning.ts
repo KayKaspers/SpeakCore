@@ -246,3 +246,28 @@ export interface ContainerStartResult {
   errors?: ValidationError[];
   audit: PlannedAuditAction[];
 }
+
+// --- Managed Container Read-only Status (NDF Step 019: nur `container ls`) ------
+
+export type ContainerRuntimeStatus =
+  | 'running'
+  | 'created'
+  | 'exited'
+  | 'notFound'
+  | 'conflict'
+  | 'unavailable'
+  | 'error';
+
+/** Read-only Statusabfrage eines managed Containers. Nur `instanceId` (Name wird intern abgeleitet). */
+export interface Ts3ContainerStatusRequest {
+  instanceId: string;
+}
+
+/**
+ * Ergebnis der read-only Laufzeit-Statusabfrage. Enthält **keine** fremden Containerdetails,
+ * keine Roh-Docker-Ausgabe und keine Secrets – nur der normalisierte Zustand.
+ */
+export interface ContainerStatusResult {
+  status: ContainerRuntimeStatus;
+  containerName?: string;
+}

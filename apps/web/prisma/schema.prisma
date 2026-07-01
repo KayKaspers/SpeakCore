@@ -102,6 +102,13 @@ model ServerInstance {
   statusClientsOnline Int?
   statusMaxClients    Int?
   statusUptimeSeconds Int?
+  // Read-only Healthcheck-Ist-Zustand (Step 019). Getrennt vom Lifecycle-Status (provisioningStatus).
+  // KEINE Roh-Docker-/TS3-Ausgaben, keine Secrets.
+  lastHealthCheckedAt         DateTime?
+  containerRuntimeStatus      String? // running | created | exited | notFound | conflict | unavailable | error
+  ts3ReachabilityStatus       String? // reachable | unreachable | unknown | notConfigured
+  lastHealthErrorKey          String?
+  lastSuccessfulHealthCheckAt DateTime?
   credential          ServerCredential? @relation
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt

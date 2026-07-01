@@ -109,8 +109,10 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`), Container-Vorbereitung
   (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret, **echte Container-Erstellung**
   (`CONTAINER_CREATED`, `docker create`) mit Secret-Übergabe per ENV (kein Log-Lesen) und **Container-
-  Start** (`RUNNING`, `docker start`) nach **expliziter TS3-Lizenzzustimmung**.
-- **Noch kein** TS3-Statuscheck/ServerQuery-Connect zum managed Server, kein Stop/Remove.
+  Start** (`RUNNING`, `docker start`) nach **expliziter TS3-Lizenzzustimmung**; **read-only Healthcheck**
+  (`docker container ls`) zeigt den Ist-Zustand (Container läuft? optional TS3 erreichbar?) getrennt vom
+  Lifecycle-Status — **kein** Log-Lesen/Inspect/Portscan, keine Reparatur.
+- **Noch kein** ServerQuery-Connect mit erreichbarer Query-Adresse zum managed Server, kein Stop/Remove.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.

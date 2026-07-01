@@ -30,7 +30,10 @@
   SpeakCore only provides the management layer – you are responsible for license compliance. Docker logs
   are still **never** read and secrets are **never** displayed. A TS3 status check will follow in a later
   step.*
-- Start/stop/restart a server
+- Start/stop/restart a server — *from Step 018: **start** a managed container (after license
+  confirmation). From Step 019: a **read-only health check** ("Check status") honestly shows whether the
+  Docker container is running and (if configured) whether the TS3 service is reachable. **No** log
+  reading, **no** inspect, **no** repair, no stop/remove action. Stop follows in its own step.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

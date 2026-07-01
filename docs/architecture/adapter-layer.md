@@ -67,7 +67,14 @@ und dem Agent als Container-**ENV** (`TS3SERVERQUERY_ADMIN_PASSWORD`) übergeben
 delegiert der Adapter an den Agent, der **`docker start`** (nur bereits vorhandener managed Container)
 ausführt. `TS3SERVER_LICENSE=accept` wurde beim Create gesetzt (ENV lässt sich beim Start nicht ergänzen);
 der Serverlauf wird durch die Zustimmung freigegeben ([ADR-0024](../../project-brain/DECISIONS.md)). Kein
-Log-Lesen. **Healthcheck/ServerQuery-Connect** und **Stop** folgen als eigene Steps.
+Log-Lesen.
+
+**Read-only Healthcheck (Step 019):** Unterscheidet **Lifecycle-Status** (`provisioningStatus`, bleibt
+`RUNNING`) vom **Ist-Zustand**. Der Adapter fragt den Agent read-only nach dem Container-Laufzeitstatus
+(`docker container ls`, kein Inspect/Logs) und – wenn der Container läuft und eine Query-Adresse
+konfiguriert ist – optional read-only `serverinfo` (Step-008/009-Client). Ergebnis in separaten
+Healthcheck-Feldern; **keine** Reparatur, **keine** Stop-/Remove-Aktion. **ServerQuery-Connect mit
+erreichbarer Adresse** und **Stop** folgen als eigene Steps.
 
 ## Datenfluss
 

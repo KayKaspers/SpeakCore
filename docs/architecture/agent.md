@@ -33,6 +33,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/prepare` | **write** (Flag-gated): managed **Network + Volume** anlegen (kein Container) |
 | POST | `/docker/provision/create-container` | **write** (Flag-gated): managed **Container erstellen** (`docker create`, **kein Start**) |
 | POST | `/docker/provision/start-container` | **write** (Flag-gated): managed **Container starten** (`docker start`, Lizenzzustimmung nötig) |
+| POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
 
@@ -161,8 +162,27 @@ Erster **Start** eines bereits erstellten managed Containers ([ADR-0024](../../p
 „Container starten"); Status `CONTAINER_CREATED → RUNNING`. Ohne Zustimmung `licenseRequired` (kein Start).
 Bei Fehler bleibt der Status `CONTAINER_CREATED` mit generischem Fehlerschlüssel.
 
-> Read-only **Healthcheck**, **TS3-ServerQuery-Connect** zum managed Server und **Stop** folgen als
-> eigene, geprüfte Steps.
+## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
+
+**Read-only** Healthcheck-Baustein (nur Token-Gate, **kein** Write-Flag):
+
+- Ermittelt via **`docker container ls`** mit **Label-Filtern** (`speakcore.managed=true` +
+  `speakcore.instanceId=<id>`, plus `--all` für gestoppte) bzw. dem intern abgeleiteten Namen den
+  normalisierten Zustand: `running | created | exited | notFound | conflict | unavailable | error`.
+- **Kein** `inspect`/`logs`/`exec`/`start`/`stop`/`rm`/`run`/`create`, kein compose, kein Socket,
+  **kein Log-Lesen**, keine Portscans. `execFile`, statische Argumente, keine Shell. **Keine** fremden
+  Containerdetails/Roh-Ausgaben – nur der normalisierte Status.
+- **Lifecycle vs. Ist-Zustand:** Der Web-Healthcheck (`core/managed-health`) speichert den Ist-Zustand
+  in separaten Feldern (`containerRuntimeStatus`, `ts3ReachabilityStatus`, `lastHealthCheckedAt`,
+  `lastSuccessfulHealthCheckAt`, `lastHealthErrorKey`); **`provisioningStatus` bleibt** `RUNNING`.
+- **Optionaler TS3-Check** (read-only `login/use/serverinfo`) nur bei laufendem Container **und**
+  konfigurierter Query-Adresse; sonst `ts3ReachabilityStatus = notConfigured` (kein Raten/Portscan).
+
+**Web-Auslösung (Step 019):** OWNER-only Server Action (`/servers/[id]`, Button „Status prüfen") für
+managed Server mit Status `RUNNING`. **Keine** automatische Reparatur, **keine** Stop-/Remove-Aktion.
+
+> **TS3-ServerQuery-Connect** mit erreichbarer Query-Adresse für managed Server und **Stop** folgen
+> als eigene, geprüfte Steps.
 
 ## Sicherheitsprinzipien
 

@@ -217,6 +217,14 @@ Zustimmung fest (`docker.containerStart.licenseConfirmed`). Idempotent (`running
 (`conflict`)/`notFound`; **kein** `run/create/stop/rm`, **kein Log-Lesen**. `TS3SERVER_LICENSE=accept`
 wird beim Create gesetzt (ENV am Start nicht ergänzbar). Details: [ADR-0024](DECISIONS.md).
 
+**Read-only Healthcheck (Step 019):** `core/managed-health` → `lib/agent-client` → Agent
+`POST /docker/provision/container-status` (**read-only**, nur Token, kein Write-Flag) via
+`docker container ls` mit Label-Filtern. Trennt **Lifecycle-Status** (`provisioningStatus`, bleibt
+`RUNNING`) vom **Ist-Zustand** (neue Felder `containerRuntimeStatus`, `ts3ReachabilityStatus`,
+`lastHealthCheckedAt`, `lastSuccessfulHealthCheckAt`, `lastHealthErrorKey`). Optional read-only
+TS3-`serverinfo` (Step-008/009-Client), wenn der Container läuft **und** eine Query-Adresse konfiguriert
+ist – sonst `notConfigured` (kein Portscan). **Keine** Logs/Inspect/Reparatur.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

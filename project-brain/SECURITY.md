@@ -168,6 +168,16 @@ wird durch die Zustimmung freigegeben. OWNER-only, Idempotenz (`running`) + Konf
 **kein Log-Lesen**, keine Portprüfung/Healthchecks/ServerQuery. Kein Browser→Agent; keine Secrets im
 Request/Ergebnis/Audit. **SpeakCore stellt nur die Verwaltung bereit; Lizenz-Einhaltung liegt beim Nutzer**
 (RISKS R-05).
+
+**Read-only Healthcheck (Step 019):** Der Agent-Endpunkt `/docker/provision/container-status` ist
+**read-only** (nur Token-Gate, **kein** Write-Flag): `docker container ls` mit Label-Filtern
+(`managed=true` + `instanceId`), Name intern abgeleitet. **Kein** `inspect/logs/exec/start/stop/rm/run/
+create`, kein compose, kein Socket, **kein Log-Lesen**, keine Portscans, **keine Reparatur**. Der
+**Lifecycle-Status** (`provisioningStatus`) wird **nicht** überschrieben; separate Healthcheck-Felder
+zeigen den Ist-Zustand (Container läuft/beendet/…; TS3 erreichbar/unbekannt/nicht konfiguriert). Der
+optionale **TS3-Check** nutzt nur read-only ServerQuery-Kommandos (`login/use/serverinfo/version`) und
+läuft nur bei laufendem Container mit konfigurierter Query-Adresse (sonst `notConfigured` – kein Raten).
+Es werden **keine** Roh-Docker-/TS3-Ausgaben und **keine** Secrets gespeichert/ausgegeben.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).
