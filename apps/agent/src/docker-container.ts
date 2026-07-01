@@ -10,6 +10,8 @@
  * Logs → R-14). Es wird **nie** geloggt, geplant oder im Ergebnis zurückgegeben.
  */
 import {
+  TS3_LICENSE_ACCEPT,
+  TS3_LICENSE_ENV,
   TS3_QUERY_ADMIN_PASSWORD_ENV,
   createTs3ProvisioningPlan,
   validateTs3ProvisionInput,
@@ -51,6 +53,10 @@ function envArgs(env: Record<string, string>): string[] {
  * Baut die **statische** `docker create`-Argumentliste aus dem validierten Plan. Das Secret wird als
  * ENV mitgegeben (letzter ENV-Eintrag), das Image steht – wie von `docker create` verlangt – am Ende.
  * Named Volume (kein Host-Pfad), festes Netzwerk, Restart-Policy aus Allowlist, Managed-Labels.
+ *
+ * Die (nicht-geheime) Lizenz-ENV `TS3SERVER_LICENSE=accept` muss hier gesetzt werden, weil das Image
+ * sie beim Prozessstart erwartet und der spätere Startbefehl keine ENV ergänzen kann. Sie ist beim
+ * Create **inert** – der Server läuft erst nach expliziter Lizenzzustimmung beim Start (Step 018, ADR-0024).
  */
 export function buildCreateArgs(plan: Ts3ProvisioningPlan, secretEnv: Record<string, string>): string[] {
   const c = plan.container;
@@ -67,7 +73,7 @@ export function buildCreateArgs(plan: Ts3ProvisioningPlan, secretEnv: Record<str
     ...portArgs(c.ports),
     '-v',
     `${volume.volume}:${volume.mountPath}`,
-    ...envArgs({ ...c.environment, ...secretEnv }),
+    ...envArgs({ [TS3_LICENSE_ENV]: TS3_LICENSE_ACCEPT, ...c.environment, ...secretEnv }),
     c.image,
   ];
 }

@@ -4,7 +4,12 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
-import { createContainerAction, prepareContainerAction, refreshServerAction } from '../actions';
+import {
+  createContainerAction,
+  prepareContainerAction,
+  refreshServerAction,
+  startContainerAction,
+} from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +47,9 @@ export default async function ServerDetailPage({
   if (server.mode === 'managed') {
     const provStatus = server.provisioningStatus ?? 'DRAFT';
     const badge =
-      provStatus === 'RESOURCES_PREPARED' || provStatus === 'CONTAINER_CREATED'
+      provStatus === 'RESOURCES_PREPARED' ||
+      provStatus === 'CONTAINER_CREATED' ||
+      provStatus === 'RUNNING'
         ? 'bg-sc-success/15 text-sc-success'
         : provStatus === 'RESOURCE_PREPARE_PARTIAL'
           ? 'bg-sc-warning/15 text-sc-warning'
@@ -91,6 +98,7 @@ export default async function ServerDetailPage({
               'unreachable',
               'conflict',
               'error',
+              'licenseRequired',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -107,21 +115,29 @@ export default async function ServerDetailPage({
           </dl>
 
           <div className="mt-4 space-y-1 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
-            {provStatus === 'CONTAINER_CREATED' ? (
-              <p>• {t('managed.containerCreatedHint')}</p>
-            ) : (
-              <p>• {t('managed.containerNotCreated')}</p>
-            )}
-            <p>• {t('managed.noServerStarted')}</p>
-            {provStatus === 'RESOURCES_PREPARED' && <p>• {t('managed.prepareHintSecret')}</p>}
-            {provStatus === 'CONTAINER_PENDING' && (
+            {provStatus === 'RUNNING' ? (
               <>
-                <p>• {t('managed.createHintNotStarted')}</p>
-                <p>• {t('managed.createHintNoServer')}</p>
-                <p>• {t('managed.createHintNoSecret')}</p>
+                <p>• {t('managed.containerStartedHint')}</p>
+                <p>• {t('managed.nextStepHealthcheck')}</p>
+              </>
+            ) : (
+              <>
+                {provStatus === 'CONTAINER_CREATED' ? (
+                  <p>• {t('managed.containerCreatedHint')}</p>
+                ) : (
+                  <p>• {t('managed.containerNotCreated')}</p>
+                )}
+                <p>• {t('managed.noServerStarted')}</p>
+                {provStatus === 'RESOURCES_PREPARED' && <p>• {t('managed.prepareHintSecret')}</p>}
+                {provStatus === 'CONTAINER_PENDING' && (
+                  <>
+                    <p>• {t('managed.createHintNotStarted')}</p>
+                    <p>• {t('managed.createHintNoServer')}</p>
+                    <p>• {t('managed.createHintNoSecret')}</p>
+                  </>
+                )}
               </>
             )}
-            {provStatus === 'CONTAINER_CREATED' && <p>• {t('managed.nextStepStart')}</p>}
           </div>
 
           {provStatus === 'RESOURCES_PREPARED' && (
@@ -146,6 +162,24 @@ export default async function ServerDetailPage({
                 className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
               >
                 {t('managed.createButton')}
+              </button>
+            </form>
+          )}
+
+          {provStatus === 'CONTAINER_CREATED' && (
+            <form action={startContainerAction} className="mt-6 space-y-3">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="id" value={server.id} />
+              <p className="text-sc-caption text-sc-text-muted">{t('managed.licenseHint')}</p>
+              <label className="flex items-start gap-2 text-sc-sm text-sc-text-secondary">
+                <input type="checkbox" name="licenseAccepted" className="mt-1" />
+                <span>{t('managed.licenseLabel')}</span>
+              </label>
+              <button
+                type="submit"
+                className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
+              >
+                {t('managed.startButton')}
               </button>
             </form>
           )}

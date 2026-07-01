@@ -183,6 +183,11 @@
       "createHintNoSecret": "Secrets are not displayed.",
       "containerCreatedHint": "Container created, but not started yet.",
       "nextStepStart": "Next step (later): start the container.",
+      "startButton": "Start container",
+      "licenseLabel": "I confirm that I comply with / accept the TeamSpeak 3 license terms.",
+      "licenseHint": "SpeakCore only provides the management layer. You are responsible for complying with the TeamSpeak license. Starting sets the license confirmation required by the TS3 image.",
+      "containerStartedHint": "Container has been started.",
+      "nextStepHealthcheck": "A TS3 status check will follow in a later step.",
       "notice": {
         "encryptionMissing": "SECRET_ENCRYPTION_KEY is not set – action aborted.",
         "invalidState": "Not possible in this state.",
@@ -193,7 +198,10 @@
         "unavailable": "Docker/agent is unavailable.",
         "unreachable": "Agent unreachable.",
         "conflict": "Name conflict with an unmanaged resource.",
-        "error": "The container could not be created."
+        "error": "The container could not be created.",
+        "licenseRequired": "Please confirm the TeamSpeak 3 license terms first.",
+        "startFailed": "The container could not be started.",
+        "notFound": "Container not found."
       },
       "status": {
         "DRAFT": "Draft",
@@ -212,7 +220,9 @@
         "conflict": "Name conflict with an unmanaged resource.",
         "invalid": "Invalid inputs.",
         "createFailed": "The container could not be created.",
-        "invalidPlan": "The provisioning plan is invalid."
+        "invalidPlan": "The provisioning plan is invalid.",
+        "startFailed": "The container could not be started.",
+        "notFound": "Container not found."
       }
     }
   },

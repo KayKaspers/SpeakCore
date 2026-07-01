@@ -155,6 +155,19 @@ wird **serverseitig entschlüsselt**, dem Agent übergeben und als Container-**E
 geschlossen). OWNER-only, Idempotenz (`exists`) + Konfliktschutz (`conflict`). Kein Browser→Agent; Secret
 nie im Client/Audit/Agent-Response. **Kein** `stop/rm/inspect/exec/cp/logs`, **kein** compose, **kein**
 Socket/privileged.
+
+**Container-Start mit Lizenzzustimmung (Step 018, [ADR-0024](DECISIONS.md)):** Übergang
+`CONTAINER_CREATED → RUNNING`. Der Agent führt **nur `docker start`** aus (nie `run`/`create`), hinter
+**Token + `AGENT_DOCKER_WRITE_ENABLED`**, **nur** für einen bereits vorhandenen, per Label geprüften
+**managed** Container (Name aus `instanceId`). **Explizite TS3-Lizenzzustimmung** ist Pflicht
+(Web-Checkbox ohne Vorab-Default **und** `licenseAccepted === true` im Agent-Request); ohne Zustimmung
+kein Start. Die Zustimmung wird auditiert (`docker.containerStart.licenseConfirmed`). `TS3SERVER_LICENSE=accept`
+ist eine nicht-geheime ENV, die beim **Create** gesetzt wird (am Start nicht ergänzbar); der Serverlauf
+wird durch die Zustimmung freigegeben. OWNER-only, Idempotenz (`running`) + Konfliktschutz (`conflict`) +
+`notFound` (kein falscher RUNNING). **Kein** `run/create/stop/rm/inspect/exec/cp/logs`, **kein** compose,
+**kein Log-Lesen**, keine Portprüfung/Healthchecks/ServerQuery. Kein Browser→Agent; keine Secrets im
+Request/Ergebnis/Audit. **SpeakCore stellt nur die Verwaltung bereit; Lizenz-Einhaltung liegt beim Nutzer**
+(RISKS R-05).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

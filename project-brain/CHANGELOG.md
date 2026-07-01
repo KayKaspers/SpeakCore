@@ -5,6 +5,48 @@
 
 ## [Unreleased]
 
+### NDF Step 018 – START_MANAGED_CONTAINER mit TS3-Lizenzzustimmung (2026-07-01)
+
+> **Erster Start** eines bereits erstellten managed Containers. Übergang `CONTAINER_CREATED → RUNNING`.
+> Nur `docker start`, **keine** weitere Docker-Aktion, **kein** Log-Lesen, **explizite** Lizenzzustimmung.
+
+#### Added
+- **Agent-Aktion `startTs3Container`** (`apps/agent/src/docker-start.ts`) + Endpunkt
+  **`POST /docker/provision/start-container`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): startet via
+  **`docker start`** (nie `run`/`create`) **nur** einen bereits vorhandenen, SpeakCore-**managed** Container
+  (Name aus `instanceId` abgeleitet + Managed-Label geprüft). `execFile` ohne Shell, statische Argumente.
+  Status `started | running | notFound | conflict | error | writeDisabled | invalid | unavailable`;
+  **Idempotenz** (läuft bereits ⇒ `running`, kein Start), **Konfliktschutz** (fremder Name ⇒ `conflict`),
+  fehlt ⇒ `notFound`. **Lizenzzustimmung** (`licenseAccepted === true`) ist Pflicht (Defense-in-Depth).
+- **Web-Service** `startManagedContainerForServer` (`src/core/container-start.ts`) + reine Helfer
+  (`container-start-helpers.ts`) + **OWNER-only Server Action** `startContainerAction` (rate-limitiert).
+  Guard: nur `CONTAINER_CREATED`/`RUNNING`; sonst `invalidState`. Ohne Lizenzzustimmung `licenseRequired`
+  (Status unverändert). Erfolg ⇒ `RUNNING` + `runState = running`. Fehler ⇒ Status bleibt `CONTAINER_CREATED`
+  mit generischem Fehlerschlüssel.
+- **UI (DE/EN):** managed Detailseite mit **Lizenz-Checkbox** (kein Vorab-Default) + Hinweis
+  („SpeakCore stellt nur die Verwaltung bereit; du bist für die TS3-Lizenz verantwortlich; der Start
+  setzt die Lizenzbestätigung") + Button „Container starten" (bei `CONTAINER_CREATED`); bei `RUNNING`
+  „Container wurde gestartet" + „TS3-Statusprüfung folgt später".
+- **Audit:** `docker.containerStart.requested/licenseConfirmed/completed/failed/conflict`,
+  `docker.container.started/alreadyRunning` (Target = ServerInstance-ID, **keine Secrets/ENV/Roh-Ausgabe**).
+- **Lizenz-Befund (ADR-0024):** Das TS3-Image erwartet `TS3SERVER_LICENSE=accept` als **ENV beim
+  `docker create`** (ein Startbefehl kann keine ENV ergänzen). Daher wird die (nicht-geheime, inerte)
+  Lizenz-ENV in **Step 017** beim Create gesetzt; der **tatsächliche Serverlauf** wird durch die
+  **explizite Lizenzzustimmung beim Start** freigegeben und auditiert. Kein Trick, kein Log-Lesen.
+- Tests: Agent (start-not-run/create, `docker start <name>`, idempotent/`running`, conflict, notFound,
+  unavailable, error, fehlende Lizenz ⇒ kein Start, Token/Flag-Gate, Quell-Scan) und Web (Guard/Audit
+  inkl. `licenseConfirmed`, kein Secret im Audit, Fehlerschlüssel, Quell-Scan). **172 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein** `run/create/stop/rm/
+  inspect/exec/cp/logs`, **kein** compose, **kein** Socket/Host-Mount/privileged, **keine** freien
+  Docker-Parameter, **keine** fremde Ressource verändern. Kein Secret im Client/Audit/Agent-Response.
+  Quell-Scan-Tests erzwingen dies. **[ADR-0024](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (172) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 017 – Managed CREATE_TS3_CONTAINER ohne Start (2026-07-01)
 
 > **Container wird erstellt, aber NICHT gestartet.** Übergang `CONTAINER_PENDING → CONTAINER_CREATED`.

@@ -292,6 +292,29 @@
   ist ein **eigener, späterer Step/ADR**. Automatisches Rollback-`rm` bleibt deklarativ (kein `rm` in
   diesem Step). Ergebnis/Audit enthalten nie Secrets/ENV-Werte/Roh-Docker-Ausgabe.
 
+## ADR-0024 – Container-Start mit expliziter Lizenzzustimmung; Lizenz-ENV beim Create
+
+- **Status:** accepted (Step 018)
+- **Kontext:** Der erste **Start** eines managed TS3-Containers (`CONTAINER_CREATED → RUNNING`) soll nur
+  nach expliziter TS3-Lizenzzustimmung erfolgen. **Befund:** Das offizielle `teamspeak`-Image erwartet
+  `TS3SERVER_LICENSE=accept` als **ENV, die beim `docker create` vorhanden sein muss** – ein späterer
+  Startbefehl kann keine ENV ergänzen (auch keine Logs/Exec, das ist verboten).
+- **Entscheidung:** Neue Agent-Aktion **`START_MANAGED_CONTAINER`** (`POST /docker/provision/start-container`)
+  führt **ausschließlich `docker start <managed-name>`** aus (nie `run`/`create`), hinter **Token +
+  `AGENT_DOCKER_WRITE_ENABLED`**, nur für einen bereits vorhandenen, per Label geprüften **managed**
+  Container. Idempotenz (`running`)/Konfliktschutz (`conflict`)/`notFound`. Die (nicht-geheime) Lizenz-ENV
+  `TS3SERVER_LICENSE=accept` wird bereits in **Step 017** beim `docker create` gesetzt – dort **inert**
+  (create startet nichts). Der **tatsächliche Serverlauf** wird durch eine **explizite Lizenz-Checkbox
+  beim Start** freigegeben (`licenseAccepted === true`, sonst kein Start) und als Audit-Event
+  `docker.containerStart.licenseConfirmed` festgehalten. Kein Vorab-Default, keine automatische Zustimmung.
+- **Begründung:** So bleibt jede Docker-Aktion klein/prüfbar, es wird nicht getrickst (die technisch
+  nötige ENV ist dokumentiert am Create), und die rechtlich relevante **Zustimmung** ist eine bewusste
+  Nutzerhandlung vor dem tatsächlichen Lauf. SpeakCore stellt nur die Verwaltung bereit; die Einhaltung
+  der TeamSpeak-Lizenz liegt beim Nutzer (RISKS R-05). **Kein Log-Lesen** (R-14 bleibt geschlossen).
+- **Konsequenzen:** **Stop/Remove** sind eigene, spätere Steps (kein `stop`/`rm` hier). Read-only
+  **Healthcheck** und **TS3-ServerQuery-Connect** zum managed Server folgen als eigene Steps (in 018
+  bewusst nicht). Perspektivisch sinnvoll: Lizenzzustimmung bereits **vor** dem Create einholen.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

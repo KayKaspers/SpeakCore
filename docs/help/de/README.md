@@ -26,7 +26,11 @@
   „Container-Erstellung vorbereitet"): SpeakCore erzeugt ein Secret und speichert es verschlüsselt.
   Ab Step 017 kann der **Container erstellt** werden (Status „Container erstellt"): via `docker create`,
   das Secret wird dem Container als ENV vorgegeben (kein Log-Lesen). Der Container wird **erstellt, aber
-  nicht gestartet** – der TS3-Server läuft danach **noch nicht**; Secrets werden nie angezeigt.*
+  nicht gestartet**. Ab Step 018 kann der **Container gestartet** werden (Status „Läuft"): via
+  `docker start`, **nach expliziter Bestätigung der TeamSpeak-3-Lizenzbedingungen** (Checkbox). SpeakCore
+  stellt nur die Verwaltung bereit – für die Lizenz-Einhaltung bist du selbst verantwortlich. Es werden
+  weiterhin **keine** Docker-Logs gelesen und **keine** Secrets angezeigt. Eine TS3-Statusprüfung folgt
+  in einem späteren Schritt.*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore

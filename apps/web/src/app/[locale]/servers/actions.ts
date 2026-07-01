@@ -15,6 +15,7 @@ import {
 } from '@/core/servers';
 import { prepareManagedContainer } from '@/core/container-prepare';
 import { createManagedContainerForServer } from '@/core/container-create';
+import { startManagedContainerForServer } from '@/core/container-start';
 
 export interface AddServerState {
   errorKey?: string;
@@ -193,5 +194,37 @@ export async function createContainerAction(formData: FormData): Promise<void> {
   }
   // invalidState | encryptionMissing | credentialMissing | invalidPlan
   //   | writeDisabled | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Startet den managed TS3-Container (CONTAINER_CREATED → RUNNING). OWNER-only, rate-limitiert.
+ * Erfordert **explizite** TS3-Lizenzzustimmung (Checkbox). **Kein Log-Lesen, kein Secret im Client.**
+ */
+export async function startContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const licenseAccepted = formData.get('licenseAccepted') === 'on';
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:start:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await startManagedContainerForServer(id, user.email, licenseAccepted);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'started' || result.status === 'running') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // licenseRequired | invalidState | invalidPlan | writeDisabled
+  //   | unavailable | unreachable | conflict | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }

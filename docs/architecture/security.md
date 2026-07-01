@@ -34,14 +34,15 @@ werden dabei nie ausgegeben. Details: [SECURITY.md §5](../../project-brain/SECU
 Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für spätere Installationen gilt das
 **Managed-Only-Prinzip** (nur selbst erzeugte, gelabelte Ressourcen), eine Aktions-Allowlist und
 Docker-Argumente aus einem validierten Plan – **kein Docker-Socket im Web-Container**. Stand
-Step 012–017: read-only (Planung/Validierung, Inventar) **plus** eng begrenzte **Write-Aktionen** –
-managed **Network/Volume** (`/docker/provision/prepare`) und **Container erstellen**
-(`/docker/provision/create-container`, **`docker create`, kein Start**), beide hinter **Token +
-Feature-Flag** (`AGENT_DOCKER_WRITE_ENABLED`, Default `false`), idempotent, Managed-Only. In Step 015
-erzeugt die **Container-Vorbereitung** (`CONTAINER_PENDING`) rein web-seitig das Query-Admin-Secret und
-speichert es **verschlüsselt**; in **Step 017** wird der Container erstellt (`CONTAINER_CREATED`) und das
-Secret dem Agent **serverseitig** übergeben, der es als **ENV** setzt – **kein Log-Lesen**, kein
-Secret in Logs, **kein Start**. Details:
+Step 012–018: read-only (Planung/Validierung, Inventar) **plus** eng begrenzte **Write-Aktionen** –
+managed **Network/Volume** (`/docker/provision/prepare`), **Container erstellen**
+(`/docker/provision/create-container`, `docker create`) und **Container starten**
+(`/docker/provision/start-container`, `docker start`), alle hinter **Token + Feature-Flag**
+(`AGENT_DOCKER_WRITE_ENABLED`, Default `false`), idempotent, Managed-Only. In Step 015 erzeugt die
+**Container-Vorbereitung** (`CONTAINER_PENDING`) rein web-seitig das Query-Admin-Secret und speichert es
+**verschlüsselt**; in **Step 017** wird der Container erstellt (`CONTAINER_CREATED`) und das Secret dem
+Agent **serverseitig** übergeben, der es als **ENV** setzt; in **Step 018** wird der Container nach
+**expliziter Lizenzzustimmung** gestartet (`RUNNING`). **Kein Log-Lesen**, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

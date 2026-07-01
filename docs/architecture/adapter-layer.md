@@ -50,8 +50,8 @@ Secrets/Roh-Antworten). Weiterhin **keine** Steuerung/Installation.
 **External vs. Managed (ab Step 014):** `ServerInstance.mode` unterscheidet
 - **`external`** – ein bestehender, read-only verbundener TS3-Server (Query-Zugang verschlüsselt).
 - **`managed`** – von SpeakCore vorbereitete Ressourcen (Network/Volume) mit persistentem
-  `provisioningStatus` (DRAFT → RESOURCES_PREPARED → **CONTAINER_PENDING** → **CONTAINER_CREATED** → …);
-  bis Step 017 **kein Start**. Managed Records enthalten **keine** Secrets im `ServerInstance`.
+  `provisioningStatus` (DRAFT → RESOURCES_PREPARED → **CONTAINER_PENDING** → **CONTAINER_CREATED** →
+  **RUNNING**). Managed Records enthalten **keine** Secrets im `ServerInstance`.
 
 **Container-Vorbereitung (Step 015):** `RESOURCES_PREPARED → CONTAINER_PENDING` erzeugt ein
 **verschlüsseltes** ServerQuery-Admin-Secret (in `ServerCredential`) und finalisiert die Plan-Namen –
@@ -61,7 +61,13 @@ aus Docker-Logs gelesen.
 **Container-Erstellung (Step 017):** `CONTAINER_PENDING → CONTAINER_CREATED` – der Adapter delegiert an
 den Agent, der **`docker create` (kein Start)** ausführt. Das Secret wird **serverseitig** entschlüsselt
 und dem Agent als Container-**ENV** (`TS3SERVERQUERY_ADMIN_PASSWORD`) übergeben – kein Log-Lesen
-([ADR-0023](../../project-brain/DECISIONS.md)). Container-**Start** folgt als eigener Step.
+([ADR-0023](../../project-brain/DECISIONS.md)).
+
+**Container-Start (Step 018):** `CONTAINER_CREATED → RUNNING` – nach **expliziter Lizenzzustimmung**
+delegiert der Adapter an den Agent, der **`docker start`** (nur bereits vorhandener managed Container)
+ausführt. `TS3SERVER_LICENSE=accept` wurde beim Create gesetzt (ENV lässt sich beim Start nicht ergänzen);
+der Serverlauf wird durch die Zustimmung freigegeben ([ADR-0024](../../project-brain/DECISIONS.md)). Kein
+Log-Lesen. **Healthcheck/ServerQuery-Connect** und **Stop** folgen als eigene Steps.
 
 ## Datenfluss
 

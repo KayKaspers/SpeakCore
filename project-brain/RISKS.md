@@ -62,6 +62,12 @@
   Server-Lizenz). SpeakCore darf diese nicht unterlaufen.
 - **Gegenmaßnahmen:** Klare Hinweise im Wizard, keine Umgehung von Limits, rechtliche Prüfung
   vor Verteilung von TS3-Binaries/Images (offener Punkt, siehe [DECISIONS.md](DECISIONS.md)).
+- **Stand Step 018 ([ADR-0024](DECISIONS.md)):** Der Container-**Start** erfordert eine **explizite
+  Nutzer-Lizenzzustimmung** (Checkbox, kein Vorab-Default) und wird auditiert
+  (`docker.containerStart.licenseConfirmed`). SpeakCore setzt die für das TS3-Image nötige Lizenz-ENV
+  (`TS3SERVER_LICENSE=accept`) technisch beim Create, der tatsächliche Serverlauf wird aber erst nach
+  der Zustimmung freigegeben. **SpeakCore stellt nur die Verwaltung bereit; die Lizenz-Einhaltung liegt
+  beim Nutzer.** Offen: Zustimmung künftig bereits vor dem Create einholen; rechtliche Gesamtprüfung.
 
 ## R-06 – Datenverlust bei Backup/Restore
 - **E:** mittel · **A:** hoch · **Risiko:** hoch
@@ -126,6 +132,11 @@
   [ADR-0023](DECISIONS.md)) – gleiche Guards (Flag + Token, Managed-Only, `execFile`/keine Shell,
   Idempotenz/`conflict`, kein `rm`); Secret nur als ENV, nie im Ergebnis/Audit/Log. Verwaiste
   Container bei späterem Entfernen bleiben offen (Remove = eigener Step).
+- **Stand Step 018:** erster **Container-Start** (`docker start`, [ADR-0024](DECISIONS.md)) – gleiche
+  Guards (Flag + Token, Managed-Only, `execFile`/keine Shell), **nur bereits vorhandene** managed
+  Container, Idempotenz (`running`)/`conflict`/`notFound`, **kein** `run/create/stop/rm`, **kein**
+  Log-Lesen; explizite Lizenzzustimmung nötig. Ergebnis/Audit ohne Secrets. Verwaiste/hängende
+  Container (Stop/Remove) bleiben eigene, spätere Steps.
 
 ## R-16 – Fehlerhafte/unvollständige Secret-Key-Rotation (Step 016)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel

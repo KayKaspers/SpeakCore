@@ -25,8 +25,11 @@
   **container creation can be prepared** (status “Container creation prepared”): SpeakCore generates a
   secret and stores it encrypted. From Step 017 the **container can be created** (status “Container
   created”): via `docker create`, with the secret passed to the container as an ENV (no log reading).
-  The container is **created but not started** – the TS3 server is **not** running yet; secrets are
-  never displayed.*
+  The container is **created but not started**. From Step 018 the **container can be started** (status
+  “Running”): via `docker start`, **after explicitly confirming the TeamSpeak 3 license terms** (checkbox).
+  SpeakCore only provides the management layer – you are responsible for license compliance. Docker logs
+  are still **never** read and secrets are **never** displayed. A TS3 status check will follow in a later
+  step.*
 - Start/stop/restart a server
 - Reading logs
 - Backup & Restore

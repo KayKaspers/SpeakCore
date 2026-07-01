@@ -183,6 +183,11 @@
       "createHintNoSecret": "Secrets werden nicht angezeigt.",
       "containerCreatedHint": "Container erstellt, aber noch nicht gestartet.",
       "nextStepStart": "Nächster Schritt (später): Container starten.",
+      "startButton": "Container starten",
+      "licenseLabel": "Ich bestätige, dass ich die TeamSpeak-3-Lizenzbedingungen einhalte/akzeptiere.",
+      "licenseHint": "SpeakCore stellt nur die Verwaltung bereit. Für die Einhaltung der TeamSpeak-Lizenz bist du selbst verantwortlich. Der Start setzt die für das TS3-Image benötigte Lizenzbestätigung.",
+      "containerStartedHint": "Container wurde gestartet.",
+      "nextStepHealthcheck": "TS3-Statusprüfung erfolgt in einem späteren Schritt.",
       "notice": {
         "encryptionMissing": "SECRET_ENCRYPTION_KEY ist nicht gesetzt – Aktion abgebrochen.",
         "invalidState": "In diesem Status nicht möglich.",
@@ -193,7 +198,10 @@
         "unavailable": "Docker/Agent ist nicht verfügbar.",
         "unreachable": "Agent nicht erreichbar.",
         "conflict": "Namenskonflikt mit einer nicht verwalteten Ressource.",
-        "error": "Container konnte nicht erstellt werden."
+        "error": "Container konnte nicht erstellt werden.",
+        "licenseRequired": "Bitte bestätige zuerst die TeamSpeak-3-Lizenzbedingungen.",
+        "startFailed": "Container konnte nicht gestartet werden.",
+        "notFound": "Container nicht gefunden."
       },
       "status": {
         "DRAFT": "Entwurf",
@@ -212,7 +220,9 @@
         "conflict": "Namenskonflikt mit einer nicht verwalteten Ressource.",
         "invalid": "Ungültige Eingaben.",
         "createFailed": "Container konnte nicht erstellt werden.",
-        "invalidPlan": "Der Provisioning-Plan ist ungültig."
+        "invalidPlan": "Der Provisioning-Plan ist ungültig.",
+        "startFailed": "Container konnte nicht gestartet werden.",
+        "notFound": "Container nicht gefunden."
       }
     }
   },

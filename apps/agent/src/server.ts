@@ -2,12 +2,17 @@ import http from 'node:http';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
-import type { Ts3ContainerCreateRequest, Ts3ProvisionInput } from '@speakcore/types';
+import type {
+  Ts3ContainerCreateRequest,
+  Ts3ContainerStartRequest,
+  Ts3ProvisionInput,
+} from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
 import { gatherSystemInfo } from './system-info';
 import { gatherDockerInventory } from './docker-inventory';
 import { prepareProvision } from './docker-write';
 import { createTs3Container } from './docker-container';
+import { startTs3Container } from './docker-start';
 import { dockerExec } from './docker-cli';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -132,6 +137,28 @@ async function handle(
       return;
     }
     const result = await createTs3Container(body as Ts3ContainerCreateRequest, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/start-container') {
+    // Managed Container STARTEN (nur `docker start`). Token-Pflicht + Write-Feature-Flag.
+    // Lizenzzustimmung muss im Body explizit true sein. Kein Log-Lesen, keine Secrets im Ergebnis.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await startTs3Container(body as Ts3ContainerStartRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
     });

@@ -215,3 +215,34 @@ export interface ContainerCreateResult {
   errors?: ValidationError[];
   audit: PlannedAuditAction[];
 }
+
+// --- Managed Container Start (NDF Step 018: `docker start`, KEIN run/create) --
+
+export type ContainerStartStatus =
+  | 'started'
+  | 'running'
+  | 'notFound'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/**
+ * Agent-Request zum **Starten** eines bereits erstellten managed TS3-Containers.
+ *
+ * `licenseAccepted` muss explizit `true` sein (Nutzer hat die TS3-Lizenzbedingungen bestätigt) –
+ * sonst wird nicht gestartet. Es werden keine Secrets übergeben; der Start nutzt nur die `instanceId`.
+ */
+export interface Ts3ContainerStartRequest {
+  instanceId: string;
+  licenseAccepted: boolean;
+}
+
+/** Ergebnis von `docker start` (managed). Enthält NIE Secrets/ENV-Werte/Roh-Docker-Ausgabe. */
+export interface ContainerStartResult {
+  status: ContainerStartStatus;
+  containerName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}

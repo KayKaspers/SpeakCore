@@ -119,6 +119,8 @@ test('valid plan creates (not runs/starts) container with labels, ports, volume,
 
   // Secret als ENV im create-Aufruf ...
   assert.ok(create!.includes(`TS3SERVERQUERY_ADMIN_PASSWORD=${SECRET}`));
+  // ... und die (nicht-geheime) Lizenz-ENV (muss beim create gesetzt sein; docker start kann keine ENV ergänzen).
+  assert.ok(create!.includes('TS3SERVER_LICENSE=accept'));
 });
 
 test('secret appears only in the docker create args, never in the result', async () => {

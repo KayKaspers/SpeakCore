@@ -209,6 +209,14 @@ Container-**ENV** (`TS3SERVERQUERY_ADMIN_PASSWORD`) übergeben – **kein Log-Le
 Managed-Only, idempotent (`exists`)/Konfliktschutz (`conflict`). Nie Secret im Client/Audit/Agent-Response.
 Details: [ADR-0023](DECISIONS.md).
 
+**Container-Start (Step 018):** `CONTAINER_CREATED → RUNNING`, **OWNER-only**, serverseitig:
+`core/container-start` → `lib/agent-client` → Agent `POST /docker/provision/start-container` →
+**`docker start`** (nur bereits vorhandener managed Container). Erfordert eine **explizite
+Lizenz-Checkbox** (`licenseAccepted`); ohne Zustimmung kein Start (`licenseRequired`). Audit hält die
+Zustimmung fest (`docker.containerStart.licenseConfirmed`). Idempotent (`running`)/Konfliktschutz
+(`conflict`)/`notFound`; **kein** `run/create/stop/rm`, **kein Log-Lesen**. `TS3SERVER_LICENSE=accept`
+wird beim Create gesetzt (ENV am Start nicht ergänzbar). Details: [ADR-0024](DECISIONS.md).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

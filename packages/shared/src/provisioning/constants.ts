@@ -94,3 +94,12 @@ export const TS3_DATA_MOUNT_PATH = '/var/ts3server';
  * (SpeakCore liest **nie** Docker-Logs). Der Wert ist ein Secret und wird nie geplant/geloggt.
  */
 export const TS3_QUERY_ADMIN_PASSWORD_ENV = 'TS3SERVERQUERY_ADMIN_PASSWORD';
+
+/**
+ * Nicht-geheime Lizenz-ENV des TS3-Images (NDF Step 018). **Befund:** Das Image benötigt
+ * `TS3SERVER_LICENSE=accept` **beim `docker create`** – `docker start` kann keine ENV ergänzen.
+ * Die ENV ist beim Create **inert** (create startet nichts); der Container läuft erst nach
+ * **expliziter Nutzer-Lizenzzustimmung beim Start**. Siehe ADR-0024 / RISKS R-05.
+ */
+export const TS3_LICENSE_ENV = 'TS3SERVER_LICENSE';
+export const TS3_LICENSE_ACCEPT = 'accept';

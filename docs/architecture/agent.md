@@ -32,6 +32,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/docker/inventory` | **read-only** Inventar der SpeakCore-managed Docker-Ressourcen (Token-gated) |
 | POST | `/docker/provision/prepare` | **write** (Flag-gated): managed **Network + Volume** anlegen (kein Container) |
 | POST | `/docker/provision/create-container` | **write** (Flag-gated): managed **Container erstellen** (`docker create`, **kein Start**) |
+| POST | `/docker/provision/start-container` | **write** (Flag-gated): managed **Container starten** (`docker start`, Lizenzzustimmung nötig) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
 
@@ -138,7 +139,30 @@ Erste **echte Container-Erstellung** – bewusst getrennt vom Start ([ADR-0023](
 Status `CONTAINER_PENDING → CONTAINER_CREATED`. Bei Fehler bleibt der Status `CONTAINER_PENDING` mit
 generischem Fehlerschlüssel (kein Roh-Agent-/Secret-Leak).
 
-> Container-**Start** (Lizenzzustimmung, Healthcheck, TS3-Connect) folgt in einem eigenen, geprüften Step.
+## `/docker/provision/start-container` – Container starten mit Lizenzzustimmung (Step 018)
+
+Erster **Start** eines bereits erstellten managed Containers ([ADR-0024](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker start speakcore-ts3-<instanceId>`** (nie `run`/`create`); der Name wird aus der
+  `instanceId` abgeleitet und der Container muss ein gültiges **Managed-Label** tragen (sonst
+  `conflict`/`notFound`). Vorprüfung nur über managed-gefilterte Listen (`container ls [--all] --filter …`).
+- **Zwei Schutzschichten:** Token-Gate **und** `AGENT_DOCKER_WRITE_ENABLED` (`false` ⇒ `writeDisabled`).
+  `execFile`, statische Argumente, keine Shell, kein Socket. **Keine** Secrets im Request/Ergebnis.
+- **Lizenzzustimmung:** Der Start-Request muss `licenseAccepted === true` enthalten (Defense-in-Depth
+  zusätzlich zur Web-Checkbox), sonst wird nicht gestartet. **`TS3SERVER_LICENSE`** wird bereits beim
+  Create gesetzt (ENV lässt sich beim Start nicht ergänzen) – der Serverlauf wird durch die Zustimmung
+  freigegeben.
+- **Idempotenz:** läuft bereits ⇒ `running` (kein Start). **Konflikt:** fremder gleichnamiger Container
+  ⇒ `conflict`. Fehlt ⇒ `notFound` (kein falscher RUNNING). Docker nicht verfügbar ⇒ `unavailable`.
+- **Kein** `run/create/stop/rm/inspect/exec/cp/logs`, **kein** compose, **kein** Log-Lesen, **keine**
+  Portprüfung/Healthchecks/ServerQuery. Quell-Scan-Tests erzwingen die verbotenen Kommandos.
+
+**Web-Auslösung (Step 018):** OWNER-only Server Action (`/servers/[id]`, **Lizenz-Checkbox** + Button
+„Container starten"); Status `CONTAINER_CREATED → RUNNING`. Ohne Zustimmung `licenseRequired` (kein Start).
+Bei Fehler bleibt der Status `CONTAINER_CREATED` mit generischem Fehlerschlüssel.
+
+> Read-only **Healthcheck**, **TS3-ServerQuery-Connect** zum managed Server und **Stop** folgen als
+> eigene, geprüfte Steps.
 
 ## Sicherheitsprinzipien
 

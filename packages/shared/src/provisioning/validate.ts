@@ -17,6 +17,11 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= 1 && port <= 65535;
 }
 
+/** Prüft die `instanceId` (server-seitig erzeugt; Defense-in-Depth gegen manipulierte Requests). */
+export function isValidInstanceId(id: string): boolean {
+  return typeof id === 'string' && INSTANCE_ID_RE.test(id);
+}
+
 /** Basis-Image-Name ohne Tag/Digest. Robust gegen fehlende Werte (untrusted Input). */
 export function imageBaseName(image: string): string {
   return String(image ?? '')
