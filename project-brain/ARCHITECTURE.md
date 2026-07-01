@@ -197,6 +197,11 @@ je nach Ergebnis auf `RESOURCES_PREPARED`/`_PARTIAL`/`_FAILED` bzw. DRAFT (write
 gesetzt. **Keine Secrets** im Record; **noch kein Container/Start.** Abgrenzung external/managed:
 [docs/architecture/adapter-layer.md](../docs/architecture/adapter-layer.md).
 
+**Container-Vorbereitung (Step 015):** `RESOURCES_PREPARED → CONTAINER_PENDING`. SpeakCore generiert
+das ServerQuery-Admin-Secret selbst und legt es **verschlüsselt** in `ServerCredential` ab
+([ADR-0018](DECISIONS.md)); der Container-Plan wird rekonstruiert/revalidiert. **Kein Docker/Agent,
+kein Container/Start.** Secret nie im Client/Log/Audit (R-14 früh entschärft).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

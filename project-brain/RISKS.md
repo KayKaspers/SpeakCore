@@ -25,10 +25,12 @@
 - **Beschreibung:** Das offizielle TeamSpeak-3-Image gibt beim ersten Start Initial-Credentials
   (ServerAdmin-Token/Query-Passwort) in die Container-Logs aus. Ein ungefiltertes Log-Handling
   könnte diese Secrets exponieren.
-- **Gegenmaßnahmen (geplant, Step 010 dokumentiert):** Secrets von SpeakCore **selbst generieren**
-  und verschlüsselt speichern ([ADR-0018](DECISIONS.md)); Query-Passwort möglichst per ENV/Secret
-  vorgeben statt aus Logs auslesen; Container-Logs nie ungefiltert an Client/Audit weitergeben;
-  Managed-Only-Prinzip ([ADR-0020](DECISIONS.md)). Konkrete Umsetzung im echten Installations-Step.
+- **Gegenmaßnahmen (umgesetzt ab Step 015):** SpeakCore **generiert das Secret selbst**
+  (`generateSecret`, alphanumerisch) und legt es **verschlüsselt** ab ([ADR-0018](DECISIONS.md)) –
+  **bevor** ein Container existiert; es wird **nicht aus Docker-Logs gelesen**, nie geloggt/auditiert/
+  im Client ausgegeben. Beim späteren Container-Create wird das Query-Passwort per ENV/Secret
+  vorgegeben statt aus Logs zu übernehmen. Managed-Only ([ADR-0020](DECISIONS.md)). **Rest:** finale
+  Absicherung des Log-Handlings beim echten Container-Create.
 
 ## R-02 – Unsichere Speicherung von TS3-Query-Zugängen / Secrets
 - **E:** mittel · **A:** hoch · **Risiko:** hoch

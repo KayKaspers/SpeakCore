@@ -22,7 +22,9 @@
   read-only Docker-Inventar und – als **OWNER** unter `/servers/provision`, hinter Feature-Flag +
   Token – das kontrollierte Anlegen von managed **Network/Volume**. Die Vorbereitung ist jetzt als
   **managed Server-Eintrag** (Status „Ressourcen vorbereitet") gespeichert und unter `/servers`
-  sichtbar. Es wird weiterhin **kein** Container erstellt und **kein** TS3-Server gestartet.*
+  sichtbar. Ab Step 015 kann die **Container-Erstellung vorbereitet** werden (Status
+  „Container-Erstellung vorbereitet"): SpeakCore erzeugt ein Secret und speichert es verschlüsselt.
+  Es wird weiterhin **kein** Container erstellt und **kein** TS3-Server gestartet.*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore

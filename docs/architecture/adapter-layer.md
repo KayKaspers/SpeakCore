@@ -50,8 +50,14 @@ Secrets/Roh-Antworten). Weiterhin **keine** Steuerung/Installation.
 **External vs. Managed (ab Step 014):** `ServerInstance.mode` unterscheidet
 - **`external`** – ein bestehender, read-only verbundener TS3-Server (Query-Zugang verschlüsselt).
 - **`managed`** – von SpeakCore vorbereitete Ressourcen (Network/Volume) mit persistentem
-  `provisioningStatus` (DRAFT → RESOURCES_PREPARED/…); **noch kein Container, kein Start**. Managed
-  Records enthalten **keine** Secrets. Container-Erstellung/Start folgen in späteren Steps.
+  `provisioningStatus` (DRAFT → RESOURCES_PREPARED → **CONTAINER_PENDING** → …); **noch kein
+  Container, kein Start**. Managed Records enthalten **keine** Secrets im `ServerInstance`.
+
+**Container-Vorbereitung (Step 015):** `RESOURCES_PREPARED → CONTAINER_PENDING` erzeugt ein
+**verschlüsseltes** ServerQuery-Admin-Secret (in `ServerCredential`) und finalisiert die Plan-Namen –
+**ohne** Docker/Agent, **ohne** Container/Start. Das Secret wird nie angezeigt/geloggt und **nicht**
+aus Docker-Logs gelesen. Der eigentliche `docker create` (managed, **ohne** Start) folgt als
+eigener Step.
 
 ## Datenfluss
 

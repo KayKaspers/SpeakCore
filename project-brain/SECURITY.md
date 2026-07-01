@@ -132,6 +132,12 @@ automatische Aktivierung.
 werden ausschließlich server-seitig** aus dem validierten Plan erzeugt – **kein** Nutzereinfluss.
 Der Record enthält **keine Secrets/Roh-Agent-/Docker-Daten**. `writeDisabled`/`unavailable`/
 `unreachable` führen **nicht** zu einem irreführenden „prepared"-Status (bleibt DRAFT).
+
+**Container-Vorbereitung (Step 015):** Übergang `RESOURCES_PREPARED → CONTAINER_PENDING` (OWNER-only,
+**kein Docker/Agent**). SpeakCore **generiert das ServerQuery-Admin-Secret selbst** (alphanumerisch,
+≥ 32 Zeichen) und speichert es **verschlüsselt** ([ADR-0018](DECISIONS.md)) – **nie** im Client/Log/
+Audit, **nicht** aus Docker-Logs gelesen (frühe R-14-Entschärfung). Ohne `SECRET_ENCRYPTION_KEY`
+bricht die Aktion ab (Status unverändert). Idempotent (kein Überschreiben bestehender Credentials).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
   (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.

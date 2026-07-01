@@ -79,6 +79,7 @@ model ServerInstance {
   host            String?
   queryPort       Int?
   voicePort       Int?
+  fileTransferPort Int?
   virtualServerId Int?
   runState        String            @default("unknown")
   lastConnectedAt DateTime?

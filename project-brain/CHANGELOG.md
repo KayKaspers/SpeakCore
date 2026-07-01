@@ -5,6 +5,45 @@
 
 ## [Unreleased]
 
+### NDF Step 015 – Container Pending & Secret-Vorbereitung (2026-07-01)
+
+> **Kein Docker-Container, kein TS3-Start.** Übergang `RESOURCES_PREPARED → CONTAINER_PENDING`
+> inkl. generiertem, **verschlüsseltem** Secret und finalisiertem Container-Plan.
+
+#### Added
+- **OWNER-only Aktion** „Container-Erstellung vorbereiten" (`/servers/[id]`, managed): nur für
+  `provisioningStatus = RESOURCES_PREPARED`; setzt nach Erfolg `CONTAINER_PENDING`. Rate-limitiert.
+- **Secret-Generierung** (`generateSecret`, `node:crypto`): kryptographisch sicher, **nur
+  alphanumerisch** (Shell-/ENV-sicher), ≥ 32 Zeichen. Wird **verschlüsselt** gespeichert
+  (`ServerCredential`, AES-256-GCM, [ADR-0018](DECISIONS.md)); Benutzername server-seitig fest
+  (`serveradmin`). **Nie** im Client/Log/Audit; **nicht** aus Docker-Logs gelesen (mitigiert R-14).
+- **Ohne `SECRET_ENCRYPTION_KEY` bricht die Aktion ab** – Status bleibt `RESOURCES_PREPARED`.
+- **Container-Plan finalisiert:** Plan wird aus persistierten Werten **rekonstruiert & revalidiert**
+  (Step-010-Logik); `managedContainerName/NetworkName/VolumeName` (re)persistiert. Prisma:
+  `fileTransferPort` ergänzt (Migration `20260701140500_add_file_transfer_port`).
+- **Idempotenz:** bereits `CONTAINER_PENDING` ⇒ `alreadyPending` (kein neues Secret/keine
+  Überschreibung). Ungültiger Status ⇒ `invalidState`.
+- **Audit:** `ts3.containerPrepare.requested/secretCreated/completed/failed` (Target = ServerInstance-ID,
+  **keine Secrets**).
+- **UI (DE/EN):** managed Detailseite mit Vorbereiten-Button + Hinweisen (kein Container/kein Start/
+  Secret wird verschlüsselt gespeichert); bei `CONTAINER_PENDING` Status + „Nächster Schritt:
+  Container erzeugen". **Kein Secret** angezeigt.
+- Tests: Secret-Generator (Charset/Länge/Unique), Status-Guard, Audit ohne Secrets, Quell-Scan
+  (kein Docker/Agent im Web-Code). 116/116 grün.
+
+#### Security
+- OWNER-only; **kein Docker-Aufruf, keine Agent-Aktion**, kein Socket. Secret nur verschlüsselt in
+  DB (per DB-Smoke bestätigt: keine Secret-Spalten in `ServerInstance`, Passwort entschlüsselbar).
+  External-Credentials (Step 008/009) bleiben unberührt.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (116/116) · `prisma validate` ✅.
+- DB-Smoke: `RESOURCES_PREPARED → CONTAINER_PENDING`, 32-Zeichen-Secret verschlüsselt/entschlüsselbar,
+  idempotent (1 Credential), fehlender Key blockiert (Status unverändert).
+
+#### Notes
+- **Weiterhin kein Container/Start.** Nächster Step: echtes `docker create` (managed, **ohne** Start).
+
 ### NDF Step 014 – Managed ServerInstance & Provisioning-State (2026-07-01)
 
 > **Kein Container, kein TS3-Start.** Die in Step 013 vorbereiteten Ressourcen sind nun **persistent**

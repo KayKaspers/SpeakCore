@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
-import { refreshServerAction } from '../actions';
+import { prepareContainerAction, refreshServerAction } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 
 export const dynamic = 'force-dynamic';
@@ -79,6 +79,13 @@ export default async function ServerDetailPage({
             </p>
           )}
 
+          {notice &&
+            ['encryptionMissing', 'invalidState', 'invalidPlan', 'rateLimited'].includes(notice) && (
+              <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
+                {t(`managed.notice.${notice}`)}
+              </p>
+            )}
+
           <dl className="space-y-2 text-sc-sm">
             {rows.map((row) => (
               <div key={row.label} className="flex justify-between gap-4">
@@ -91,7 +98,22 @@ export default async function ServerDetailPage({
           <div className="mt-4 space-y-1 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
             <p>• {t('managed.containerNotCreated')}</p>
             <p>• {t('managed.noServerStarted')}</p>
+            {provStatus === 'RESOURCES_PREPARED' && <p>• {t('managed.prepareHintSecret')}</p>}
+            {provStatus === 'CONTAINER_PENDING' && <p>• {t('managed.nextStepCreate')}</p>}
           </div>
+
+          {provStatus === 'RESOURCES_PREPARED' && (
+            <form action={prepareContainerAction} className="mt-6">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="id" value={server.id} />
+              <button
+                type="submit"
+                className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
+              >
+                {t('managed.prepareButton')}
+              </button>
+            </form>
+          )}
         </section>
 
         <footer className="mt-6">

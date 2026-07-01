@@ -46,6 +46,7 @@ export async function prepareManagedTs3Resources(
       instanceId: input.instanceId,
       voicePort: input.voicePort,
       queryPort: input.queryPort,
+      fileTransferPort: input.fileTransferPort,
       runState: 'unknown',
       provisioningStatus: 'DRAFT',
       lastProvisioningStep: 'PREPARE_RESOURCES',

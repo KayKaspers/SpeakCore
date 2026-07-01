@@ -13,6 +13,7 @@ import {
   testTs3Connection,
   type CreateExternalServerInput,
 } from '@/core/servers';
+import { prepareManagedContainer } from '@/core/container-prepare';
 
 export interface AddServerState {
   errorKey?: string;
@@ -130,4 +131,34 @@ export async function removeServerAction(formData: FormData): Promise<void> {
 
   await removeServer(id, user.email);
   redirect(`/${locale}/servers`);
+}
+
+/**
+ * Bereitet die Container-Erstellung eines managed Servers vor (RESOURCES_PREPARED → CONTAINER_PENDING):
+ * generiert + speichert ein verschlüsseltes Secret. OWNER-only. **Kein Docker-Container/Start.**
+ */
+export async function prepareContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:prepare:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await prepareManagedContainer(id, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'pending' || result.status === 'alreadyPending') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // encryptionMissing | invalidState | invalidPlan
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }

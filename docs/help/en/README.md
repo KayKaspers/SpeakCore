@@ -21,8 +21,9 @@
 - Installing a new TeamSpeak 3 server — *later. As of Step 010–014: safety foundation, read-only
   Docker inventory, and – as **OWNER** under `/servers/provision`, behind a feature flag + token – the
   controlled creation of managed **network/volume**. The preparation is now stored as a **managed
-  server record** (status “Resources prepared”) and visible under `/servers`. Still **no** container
-  is created and **no** TS3 server is started.*
+  server record** (status “Resources prepared”) and visible under `/servers`. From Step 015 the
+  **container creation can be prepared** (status “Container creation prepared”): SpeakCore generates a
+  secret and stores it encrypted. Still **no** container is created and **no** TS3 server is started.*
 - Start/stop/restart a server
 - Reading logs
 - Backup & Restore
