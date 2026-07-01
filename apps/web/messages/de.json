@@ -76,6 +76,51 @@
     "rateLimited": "Zu viele Anmeldeversuche. Bitte später erneut versuchen.",
     "generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
   },
+  "servers": {
+    "title": "Server",
+    "subtitle": "Bestehende TeamSpeak-3-Server read-only verbinden.",
+    "connectButton": "Bestehenden TS3-Server verbinden",
+    "empty": "Noch keine Server verbunden.",
+    "backToDashboard": "Zurück zum Dashboard",
+    "backToList": "Zurück zur Übersicht",
+    "new": {
+      "title": "Bestehenden TS3-Server verbinden",
+      "hint": "Zugangsdaten werden verschlüsselt gespeichert und nie im Klartext angezeigt.",
+      "name": "Anzeigename",
+      "host": "Host",
+      "queryPort": "Query-Port",
+      "voicePort": "Voice-Port",
+      "virtualServerId": "Virtuelle Server-ID",
+      "username": "Query-Benutzername",
+      "password": "Query-Passwort",
+      "submit": "Verbindung testen & speichern"
+    },
+    "status": {
+      "title": "Status",
+      "reachable": "Erreichbar",
+      "unreachable": "Nicht erreichbar",
+      "unreachableHint": "Der Server konnte nicht erreicht werden. Prüfe Host, Port und Zugangsdaten.",
+      "name": "Servername",
+      "version": "Version",
+      "platform": "Plattform",
+      "clients": "Clients online",
+      "uptime": "Laufzeit",
+      "notAvailable": "nicht verfügbar",
+      "readonlyNote": "Nur lesend. Start/Stopp, Verwaltung und Installation folgen später."
+    },
+    "errors": {
+      "nameRequired": "Bitte einen Anzeigenamen eingeben.",
+      "hostRequired": "Bitte einen Host eingeben.",
+      "hostInvalid": "Der Host ist ungültig.",
+      "hostBlocked": "Dieser Host ist aus Sicherheitsgründen nicht erlaubt.",
+      "portInvalid": "Der Port ist ungültig (1–65535).",
+      "virtualServerInvalid": "Die virtuelle Server-ID ist ungültig.",
+      "credentialsRequired": "Bitte Benutzername und Passwort eingeben.",
+      "encryptionMissing": "SECRET_ENCRYPTION_KEY ist nicht gesetzt – Zugangsdaten können nicht sicher gespeichert werden.",
+      "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
+      "connectionFailed": "Verbindung fehlgeschlagen. Bitte Angaben prüfen."
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen, {name}",

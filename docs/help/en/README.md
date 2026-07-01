@@ -13,8 +13,10 @@
   unreachable. No external reachability tests are performed; no IP addresses are shown*
 - Environment types (Proxmox VM/LXC, Bare Metal, VPS, NAS/Home)
 - Understanding the System Check
-- Connecting an existing TeamSpeak 3 server
-- Installing a new TeamSpeak 3 server
+- Connecting an existing TeamSpeak 3 server — *from Step 008: connect an existing server
+  **read-only** (host, query port, query credentials) and view basic status
+  (name/version/clients/uptime). Credentials are stored encrypted. No control/installation yet.*
+- Installing a new TeamSpeak 3 server — *later*
 - Start/stop/restart a server
 - Reading logs
 - Backup & Restore

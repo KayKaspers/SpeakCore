@@ -73,7 +73,21 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - Secrets ausschließlich über Umgebung/sicheren Store, **niemals** im Repository
   (siehe `.gitignore`: `.env*`, `secrets/`, `*.key`, `*.pem`, `*.sqlite`).
 - `.env.example` dokumentiert benötigte Variablen ohne echte Werte.
-- TS3-Query-Credentials werden verschlüsselt persistiert (Schlüssel getrennt vom Datenbestand).
+- TS3-Query-Credentials werden **verschlüsselt** persistiert: **AES-256-GCM**, Schlüssel aus
+  `SECRET_ENCRYPTION_KEY` ([ADR-0018](DECISIONS.md)). Ohne Schlüssel keine Speicherung; nie im
+  Klartext, nie im Log/Audit, nie im Client. Key-Rotation noch offen (RISKS/Roadmap).
+
+## 4b. TS3-Verbindungen (read-only, Step 008)
+
+- Nur **eingeloggte OWNER** können Server verbinden/ansehen (Server Actions, CSRF-Mitigation).
+- Es werden **ausschließlich read-only** ServerQuery-Kommandos genutzt (`login`/`use`/`serverinfo`);
+  **keine** Steuerung (kein Stop/Edit/Kick/Ban/Channel-/Gruppen-/Dateiaktionen). Timeouts gesetzt;
+  Fehlermeldungen generisch (kein Secret-/Detail-Leak); Query-Antworten werden nicht ungefiltert
+  an den Client gegeben.
+- **SSRF-Härtung:** Host-Eingaben werden validiert; Cloud-Metadaten (`169.254.169.254`), Link-Local
+  und `0.0.0.0`/`::` sind blockiert. Private LAN/localhost bleiben erlaubt (legitimes Self-Hosting)
+  – das verbleibende SSRF-Restrisiko ist in [RISKS.md](RISKS.md) R-13 dokumentiert. Verbindungstests
+  sind rate-limitiert.
 
 ## 6. Agent-Sicherheit
 

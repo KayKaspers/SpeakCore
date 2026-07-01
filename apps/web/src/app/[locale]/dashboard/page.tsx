@@ -38,12 +38,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
           {NAV_KEYS.map((key, index) => {
-            // 'systemcheck' verlinkt auf die Demo-Seite; übrige bleiben Platzhalter.
-            if (key === 'systemcheck') {
+            // 'systemcheck' und 'servers' sind verlinkt; übrige bleiben Platzhalter.
+            if (key === 'systemcheck' || key === 'servers') {
               return (
                 <Link
                   key={key}
-                  href={`/${locale}/systemcheck`}
+                  href={`/${locale}/${key}`}
                   className="rounded-sc-md px-3 py-2 text-sc-sm text-sc-text-secondary hover:text-sc-text-primary"
                 >
                   {tNav(key)}

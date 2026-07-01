@@ -90,6 +90,17 @@
   bewusst minimal gehalten (kein Pfad-/ENV-Leak; **Netzwerk nur Booleans/Anzahl, keine IP-Adressen**
   – Step 007). Spätere Härtung: Token verpflichtend + mTLS.
 
+## R-13 – SSRF über TS3-Host-Eingabe (read-only)
+- **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
+- **Beschreibung:** Der Verbindungstest baut eine TCP-Verbindung zu einem **owner-eingegebenen**
+  Host auf. Private LAN/localhost sind erlaubt (Self-Hosting), daher könnte ein Owner theoretisch
+  interne Dienste im eigenen Netz ansprechen. Es werden jedoch nur read-only ServerQuery-Kommandos
+  gesendet und die Antwort wird nicht ungefiltert an den Client gegeben.
+- **Gegenmaßnahmen:** Nur **authentifizierte OWNER**; Blockliste für Cloud-Metadaten/Link-Local/
+  unspezifizierte Adressen; Timeouts; Rate-Limit; generische Fehler; kein Roh-Response-Leak.
+- **Rest/geplant:** strengere Egress-Kontrolle (Allowlist/DNS-Rebinding-Schutz/Auflösungsprüfung)
+  als späterer Security-Step. Bewusst offen, um legitimes LAN-Self-Hosting nicht zu brechen.
+
 ## R-10 – i18n-Drift (DE/EN)
 - **E:** mittel · **A:** niedrig · **Risiko:** niedrig
 - **Beschreibung:** Übersetzungen veralten gegenüber dem Code.
@@ -112,5 +123,6 @@
 | R-08 | WebUI-Sicherheit | mittel *(reduziert)* |
 | R-09 | Komplexität/Bus-Faktor | mittel |
 | R-11 | CSP `'unsafe-inline'` | mittel |
+| R-13 | SSRF über TS3-Host-Eingabe | niedrig-mittel |
 | R-10 | i18n-Drift | niedrig |
 | R-12 | Agent-Snapshot ohne Token | niedrig |

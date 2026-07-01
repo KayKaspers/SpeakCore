@@ -67,13 +67,32 @@ model RateLimitHit {
   @@index([key, createdAt])
 }
 
-/// Verwaltete Serverinstanz. 0.1: ausschließlich type = "teamspeak3".
-/// In Step 003 noch ungenutzt (keine TS3-Anbindung) – nur Schema-Vorbereitung.
+/// Verwaltete Serverinstanz. 0.1: type = "teamspeak3".
+/// Step 008: `mode = "external"` = bestehender, read-only verbundener TS3-Server.
 model ServerInstance {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   @default("teamspeak3")
-  runState  String   @default("unknown")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String            @id @default(cuid())
+  name            String
+  type            String            @default("teamspeak3")
+  mode            String            @default("external")
+  host            String?
+  queryPort       Int?
+  voicePort       Int?
+  virtualServerId Int?
+  runState        String            @default("unknown")
+  lastConnectedAt DateTime?
+  credential      ServerCredential?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+/// Verschlüsselte ServerQuery-Zugangsdaten (AES-256-GCM, Schlüssel aus SECRET_ENCRYPTION_KEY).
+/// NIEMALS im Klartext, nie im Log/Audit, nie im Client.
+model ServerCredential {
+  id                String         @id @default(cuid())
+  serverInstanceId  String         @unique
+  server            ServerInstance @relation(fields: [serverInstanceId], references: [id], onDelete: Cascade)
+  encryptedUsername String
+  encryptedPassword String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }

@@ -175,6 +175,31 @@
   Garantie**, und werden später kalibriert. Grundregel: **unbekannte Werte ⇒ nie grün**. Echte
   Messwerte liefern spätere Agent-Sonden; die Logik bleibt davon unberührt.
 
+## ADR-0017 – Eigener minimaler TS3-ServerQuery-Client (keine externe Bibliothek)
+
+- **Status:** accepted (Step 008)
+- **Kontext:** Für „bestehenden TS3-Server read-only verbinden" wird ein ServerQuery-Client
+  benötigt. Verfügbare npm-Bibliotheken bringen größere Abhängigkeits-/Feature-Flächen mit.
+- **Entscheidung:** **Eigene, kleine Implementierung** (Protokoll rein/testbar, Transport via
+  `node:net`), beschränkt auf read-only Kommandos (`login`/`use`/`serverinfo`). Läuft im
+  **Web-Backend**, nicht im Agent (keine Agent-Erweiterung in diesem Step).
+- **Begründung:** Minimale, geprüfte Angriffsfläche; kein Supply-Chain-Risiko; der read-only Umfang
+  ist klein genug. Passt zur „minimale Abhängigkeiten"-Linie (vgl. Agent, [ADR-0010](DECISIONS.md)).
+- **Konsequenzen:** Protokoll-Edge-Cases selbst zu pflegen. Bei wachsendem Funktionsumfang (Steuerung)
+  Re-Evaluierung; Adapter bleibt hinter dem generischen Vertrag ([ADR-0008](DECISIONS.md)).
+
+## ADR-0018 – Secret-Verschlüsselung: AES-256-GCM aus `SECRET_ENCRYPTION_KEY`
+
+- **Status:** accepted (Step 008)
+- **Entscheidung:** Gespeicherte Secrets (TS3-Query-Zugänge) werden mit **AES-256-GCM**
+  verschlüsselt; der 32-Byte-Schlüssel wird per SHA-256 aus `SECRET_ENCRYPTION_KEY` abgeleitet.
+  Format `v1:iv:tag:ciphertext`. Ohne gesetzten Schlüssel werden **keine** Secrets gespeichert.
+- **Begründung:** Authentifizierte Verschlüsselung (Integrität), keine zusätzliche Abhängigkeit
+  (`node:crypto`), einfacher Betrieb (ein Env-Wert). Erfüllt Safe-Defaults ([SECURITY.md](SECURITY.md)).
+- **Konsequenzen:** **Key-Rotation** noch nicht implementiert (Re-Encrypt-Migration später).
+  Verlust des Schlüssels ⇒ gespeicherte Secrets unlesbar (dokumentiert). Schlüssel gehört in einen
+  sicheren Store, nie ins Repo.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

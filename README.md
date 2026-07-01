@@ -99,7 +99,11 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   geschütztes Dashboard, Audit-Log, generischer Adapter-**Typvertrag**.
 - **Härtung (Step 004):** DB-gestütztes Login-/Setup-Rate-Limiting, zentrale Security-Header +
   Baseline-CSP, Session-Cleanup.
-- **Noch nicht:** TS3-Verbindung/-Installation, Docker-/Host-Steuerung, Plugin-/Community-Module.
+- **Preflight (Step 005–007):** Bewertungslogik + `/systemcheck` mit echten read-only Agent-Daten
+  (System, Umgebung, Netzwerk) und Demo-Fallback.
+- **TS3 (Step 008):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
+  Basisstatus ansehen; Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
+- **Noch nicht:** TS3-Installation/-Steuerung (Start/Stop), Docker-/Host-Steuerung, Plugin-/Community-Module.
 
 ## Mitwirken
 

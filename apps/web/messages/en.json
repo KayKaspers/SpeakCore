@@ -76,6 +76,51 @@
     "rateLimited": "Too many sign-in attempts. Please try again later.",
     "generic": "Sign-in failed. Please try again."
   },
+  "servers": {
+    "title": "Servers",
+    "subtitle": "Connect existing TeamSpeak 3 servers read-only.",
+    "connectButton": "Connect existing TS3 server",
+    "empty": "No servers connected yet.",
+    "backToDashboard": "Back to dashboard",
+    "backToList": "Back to overview",
+    "new": {
+      "title": "Connect existing TS3 server",
+      "hint": "Credentials are stored encrypted and never shown in plain text.",
+      "name": "Display name",
+      "host": "Host",
+      "queryPort": "Query port",
+      "voicePort": "Voice port",
+      "virtualServerId": "Virtual server ID",
+      "username": "Query username",
+      "password": "Query password",
+      "submit": "Test connection & save"
+    },
+    "status": {
+      "title": "Status",
+      "reachable": "Reachable",
+      "unreachable": "Unreachable",
+      "unreachableHint": "The server could not be reached. Check host, port and credentials.",
+      "name": "Server name",
+      "version": "Version",
+      "platform": "Platform",
+      "clients": "Clients online",
+      "uptime": "Uptime",
+      "notAvailable": "not available",
+      "readonlyNote": "Read-only. Start/stop, management and installation will follow later."
+    },
+    "errors": {
+      "nameRequired": "Please enter a display name.",
+      "hostRequired": "Please enter a host.",
+      "hostInvalid": "The host is invalid.",
+      "hostBlocked": "This host is not allowed for security reasons.",
+      "portInvalid": "The port is invalid (1–65535).",
+      "virtualServerInvalid": "The virtual server ID is invalid.",
+      "credentialsRequired": "Please enter a username and password.",
+      "encryptionMissing": "SECRET_ENCRYPTION_KEY is not set – credentials cannot be stored securely.",
+      "rateLimited": "Too many attempts. Please try again later.",
+      "connectionFailed": "Connection failed. Please check your details."
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome, {name}",

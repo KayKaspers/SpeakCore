@@ -30,6 +30,18 @@ Ein Adapter stellt mindestens bereit:
 - **0.1:** ausschließlich **TS3-Adapter** (TeamSpeak 3 ServerQuery).
 - **Vorbereitet, nicht implementiert:** TS6-Adapter (WebQuery/API), Mumble-Adapter.
 
+### Stand Step 008 – TS3 read-only
+
+Erster produktiver Teil des TS3-Adapters: **bestehenden Server read-only verbinden**. Eigener,
+minimaler ServerQuery-Client ([ADR-0017](../../project-brain/DECISIONS.md)) mit `login` → `use` →
+`serverinfo` liefert Basisstatus (Name/Version/Plattform/Clients/Uptime/erreichbar). Query-Zugänge
+werden **verschlüsselt** gespeichert ([ADR-0018](../../project-brain/DECISIONS.md)).
+
+- **Nur read-only** – die schreibenden Methoden des generischen Interfaces (`provision`, `start`,
+  `stop`, `restart`, `backup`, `restore`) sind bewusst **noch nicht** implementiert.
+- Läuft im **Web-Backend**, nicht im Agent (keine Host-/Docker-Aktion nötig). Installation/Steuerung
+  über den Agent folgen in späteren Steps.
+
 ## Datenfluss
 
 ```

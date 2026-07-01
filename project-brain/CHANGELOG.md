@@ -5,6 +5,40 @@
 
 ## [Unreleased]
 
+### NDF Step 008 – TS3-Adapter: bestehenden Server read-only verbinden (2026-07-01)
+
+#### Added
+- **Read-only TS3-ServerQuery-Client** (eigene, minimale Implementierung, ADR-0017): `login` →
+  `use` → `serverinfo`; liefert Basisstatus (Name, Version, Plattform, Clients online/max, Uptime,
+  erreichbar ja/nein). Protokoll-Handling (Escaping/Parsing) rein & testbar; Transport via `node:net`
+  mit Timeouts. **Läuft im Web-Backend, nicht im Agent** (keine Agent-Erweiterung).
+- **Verschlüsselte Secret-Speicherung** (ADR-0018): AES-256-GCM, Schlüssel aus `SECRET_ENCRYPTION_KEY`.
+  Ohne Schlüssel werden **keine** Zugangsdaten gespeichert. Nie im Klartext/Log/Audit/Client.
+- **Host-/Port-Validierung** (SSRF-bewusst): blockiert Cloud-Metadaten (`169.254.169.254`),
+  Link-Local und `0.0.0.0`/`::`; private LAN/localhost bleiben erlaubt (Self-Hosting).
+- **Prisma:** `ServerInstance` erweitert (mode/host/queryPort/voicePort/virtualServerId/…) + neues
+  `ServerCredential`-Modell (verschlüsselt) + SQLite-Migration `20260701052610_ts3_external_server`.
+- **UI (DE/EN):** `/servers` (Liste + leerer Zustand), `/servers/new` (Formular „Verbindung testen &
+  speichern"), `/servers/[id]` (read-only Status). Dashboard-Nav „Server" verlinkt.
+- **Audit-Log:** `server.test` (Erfolg/Fehler), `server.connected`. Rate-Limit für Verbindungstests
+  (je Owner, 10/10 min).
+- Tests: Secret-Crypto (Roundtrip/Manipulation/fehlender Key), Host-Validierung, TS3-Protokoll,
+  TS3-Client mit Mock (nur erlaubte Kommandos), Quell-Scan gegen gefährliche Kommandos. 72/72 grün.
+
+#### Security
+- Nur eingeloggte **OWNER**; Server Actions (CSRF-Mitigation); Timeouts; Credentials nie im Client/
+  Fehlertext; generische Fehlermeldungen. Nur read-only ServerQuery-Kommandos – **kein** serverstop/
+  serveredit/clientkick/banadd/channel*/gruppen*/Dateiübertragung.
+- ADR-0017/0018; SSRF-Restrisiko dokumentiert (RISKS R-13).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (72/72) · `prisma validate` ✅.
+- Runtime-Smoke: `/de/servers` & `/de/servers/new` sind geschützt (Redirect Login).
+
+#### Notes
+- **Keine** TS3-Installation, kein Start/Stop/Restart, kein Channel-/User-/Rechte-Management, kein
+  Backup, keine Docker-Steuerung, keine TS6-Funktion. Steuerung/Installation folgen später.
+
 ### NDF Step 007 – Read-only Environment- & Netzwerk-Sonden (2026-06-30)
 
 #### Added

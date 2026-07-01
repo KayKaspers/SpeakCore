@@ -13,8 +13,10 @@
   ist. Es laufen **keine** externen Erreichbarkeitstests; es werden **keine IP-Adressen** angezeigt*
 - Umgebungstypen (Proxmox VM/LXC, Bare Metal, VPS, NAS/Home)
 - Systemcheck verstehen
-- TeamSpeak-3-Server verbinden
-- Neuen TeamSpeak-3-Server installieren
+- TeamSpeak-3-Server verbinden — *ab Step 008: bestehenden Server **read-only** verbinden
+  (Host, Query-Port, Query-Zugang) und Basisstatus (Name/Version/Clients/Uptime) ansehen.
+  Zugangsdaten werden verschlüsselt gespeichert. Noch keine Steuerung/Installation.*
+- Neuen TeamSpeak-3-Server installieren — *später*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore
