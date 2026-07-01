@@ -18,10 +18,10 @@
   Ab Step 009: Status manuell **aktualisieren**, letzten Check/letzte Verbindung sehen und den
   Server wieder **entfernen** (Zugangsdaten werden dabei gelöscht). Zugangsdaten sind verschlüsselt
   gespeichert. Weiterhin keine Steuerung/Installation.*
-- Neuen TeamSpeak-3-Server installieren — *später. Stand Step 010–012: Sicherheitsfundament
-  (Managed-Only, Validierung, Blueprint), read-only Docker-Inventar und – hinter Feature-Flag +
-  Token – das kontrollierte Anlegen von managed **Network/Volume**. Es wird weiterhin **kein**
-  Container erstellt und **kein** TS3-Server gestartet.*
+- Neuen TeamSpeak-3-Server installieren — *später. Stand Step 010–013: Sicherheitsfundament,
+  read-only Docker-Inventar und – als **OWNER** unter `/servers/provision`, hinter Feature-Flag +
+  Token – das kontrollierte Anlegen von managed **Network/Volume** (serverseitig, mit Audit). Es wird
+  weiterhin **kein** Container erstellt und **kein** TS3-Server gestartet.*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore

@@ -1,5 +1,10 @@
 import 'server-only';
-import type { DockerInventory, SystemInfo } from '@speakcore/types';
+import type {
+  DockerInventory,
+  ProvisionPrepareResult,
+  SystemInfo,
+  Ts3ProvisionInput,
+} from '@speakcore/types';
 
 export type AgentSnapshotResult =
   | { status: 'connected'; info: SystemInfo }
@@ -57,6 +62,36 @@ export async function fetchDockerInventory(timeoutMs = 2500): Promise<DockerInve
     });
     if (!res.ok) return null;
     return (await res.json()) as DockerInventory;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent die Vorbereitung managed Ressourcen (Network/Volume) aus – **serverseitig**.
+ * `null`, wenn der Agent nicht erreichbar ist. Enthält keine Secrets. Kein Container/Start.
+ */
+export async function prepareManagedResources(
+  input: Ts3ProvisionInput,
+  timeoutMs = 8000,
+): Promise<ProvisionPrepareResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/prepare`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(input),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as ProvisionPrepareResult;
   } catch {
     return null;
   } finally {

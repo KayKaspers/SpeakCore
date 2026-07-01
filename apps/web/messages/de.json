@@ -131,6 +131,38 @@
       "encryptionMissing": "SECRET_ENCRYPTION_KEY ist nicht gesetzt – Zugangsdaten können nicht sicher gespeichert werden.",
       "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
       "connectionFailed": "Verbindung fehlgeschlagen. Bitte Angaben prüfen."
+    },
+    "provision": {
+      "title": "Ressourcen vorbereiten",
+      "openButton": "Ressourcen vorbereiten",
+      "intro": "Bereitet nur das managed Docker-Netzwerk und -Volume vor.",
+      "warnNoContainer": "Es wird KEIN TeamSpeak-3-Container erstellt.",
+      "warnNoStart": "Es wird KEIN Server gestartet.",
+      "warnFlag": "Docker-Schreibaktionen müssen im Agent explizit aktiviert sein (AGENT_DOCKER_WRITE_ENABLED).",
+      "displayName": "Anzeigename",
+      "voicePort": "Voice-Port",
+      "queryPort": "Query-Port",
+      "fileTransferPort": "Dateitransfer-Port",
+      "mode": "Modus",
+      "modeSimple": "Simple",
+      "modeExpert": "Expert",
+      "submit": "Ressourcen vorbereiten",
+      "resultTitle": "Ergebnis",
+      "network": "Netzwerk",
+      "volume": "Volume",
+      "outcome": {
+        "created": "erstellt",
+        "exists": "vorhanden",
+        "conflict": "Namenskonflikt (nicht verwaltet)",
+        "error": "Fehler"
+      },
+      "writeDisabledHint": "Docker-Schreibaktionen sind im Agent deaktiviert. Setze AGENT_DOCKER_WRITE_ENABLED=true nur bewusst – ausschließlich, wenn der Agent nicht öffentlich erreichbar ist und ein Token gesetzt ist.",
+      "unavailableHint": "Docker ist nicht verfügbar oder der Agent ist nicht erreichbar. Es wurde nichts geändert.",
+      "invalidHint": "Die Eingaben sind ungültig. Bitte prüfen.",
+      "rollbackHint": "In diesem Schritt werden erstellte Ressourcen nicht automatisch entfernt.",
+      "auditHint": "Die Aktion wurde im Audit-Log protokolliert (ohne Secrets).",
+      "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
+      "backToServers": "Zurück zu den Servern"
     }
   },
   "dashboard": {

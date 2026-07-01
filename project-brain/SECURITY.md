@@ -119,6 +119,13 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 server-seitig **re-validiert** (Step-010-Logik); Ressourcen nur aus dem internen Plan (keine freien
 Docker-Parameter). Idempotent; gleichnamige **fremde** Ressource ⇒ `conflict` (nie anfassen/löschen).
 Kein Socket/Shell; Ergebnis ohne Secrets/Hostpfade. Rollback rein deklarativ (kein automatisches `rm`).
+
+**Web-Auslösung (Step 013):** nur **OWNER** über eine Server Action (`/servers/provision`), die den
+Agent **serverseitig** aufruft. **Agent-URL/Token bleiben serverseitig** (nie im Client); kein
+direkter Browser→Agent-Aufruf; keine freien Docker-Parameter (Input server-seitig aus festen Werten
+gebaut + re-validiert). Normalisierte **Audit-Events** werden in der DB persistiert – **ohne Secrets/
+Roh-Agent-Details**. Rate-limitiert. Bei deaktiviertem Flag: klarer `writeDisabled`-Hinweis, keine
+automatische Aktivierung.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
   (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.

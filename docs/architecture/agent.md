@@ -114,6 +114,10 @@ Erste **schreibende** Docker-Funktion, extrem eng begrenzt ([ADR-0021](../../pro
 
 > Container-Erstellung/-Start folgen erst in eigenen, geprüften Steps.
 
+**Web-Auslösung (Step 013):** nur **OWNER** über eine Server Action (`/servers/provision`); der
+Browser ruft den Agent **nie** direkt auf, Agent-URL/Token bleiben serverseitig. Der Agent-Response
+wird normalisiert und als **Audit-Events** (ohne Secrets) in der Web-DB persistiert.
+
 ## Sicherheitsprinzipien
 
 - **Nicht öffentlich exponiert** (privates Compose-Netz / Loopback).

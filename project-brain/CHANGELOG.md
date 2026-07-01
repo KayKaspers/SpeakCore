@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 013 – Web-Integration & Audit für Managed Docker Prepare (2026-07-01)
+
+> **Kein Container, kein TS3-Start.** Die Web-App kann als **OWNER** kontrolliert die Network/Volume-
+> Vorbereitung beim Agent auslösen und auditieren.
+
+#### Added
+- **Web-Service** `prepareManagedTs3Resources(input, actor)` (`core/provisioning.ts`): re-validiert
+  den Input (Step-010-Logik), ruft **serverseitig** `POST /docker/provision/prepare` beim Agent auf
+  (`lib/agent-client.ts` → `prepareManagedResources`), **persistiert normalisierte Audit-Events** in
+  der Web-DB und liefert ein UI-taugliches Ergebnis (**keine Secrets/Roh-Agent-Details**).
+- **Reine Helfer** (`core/provisioning-helpers.ts`, testbar): `buildProvisionInput` (fixes
+  `imageName`/`restartPolicy`, **keine** freien Docker-Parameter), `buildProvisionAuditEntries`
+  (normalisierte Events, keine Secrets), `isOwner`.
+- **Server Action + UI** `/servers/provision` (**OWNER-only**, `force-dynamic`): Formular
+  (Anzeigename, Ports, Simple/Expert) + Warnhinweise („kein Container", „kein Start", „Write-Flag
+  muss aktiv sein"). Ergebnisanzeige pro Ressource (`created/exists/conflict`) sowie
+  `writeDisabled/unavailable/unreachable/invalid` mit klaren Hinweisen; Rollback-/Audit-Hinweis.
+  Rate-limitiert (je Owner). Link von `/servers`.
+- Audit-Aktionen: `docker.prepare.requested`, `docker.network.created/exists`,
+  `docker.volume.created/exists`, `docker.prepare.conflict/writeDisabled/unavailable/invalid`.
+- Web-Agent-Client um `prepareManagedResources()` (POST, Token aus Env, Timeout) erweitert.
+- Tests: `isOwner`, `buildProvisionInput` (keine verbotenen Felder), Audit-Mapping (created/exists/
+  conflict/writeDisabled/unreachable), keine Secrets im Audit, Quell-Scan (kein Docker-Kommando/
+  `AGENT_URL` im Web-Provisioning-Code – Agent nur über `lib/agent-client`). 108/108 grün.
+
+#### Security
+- **OWNER-only**; Server Action/serverseitiger Fetch; **Agent-URL/Token nur serverseitig** (nie im
+  Client); kein direkter Browser→Agent-Aufruf; keine freien Docker-Parameter; keine Secrets/Roh-
+  Docker-Fehler im Client. Ergebnisse und Audit ohne Secrets/Hostpfade.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (108/108) · `prisma validate` (kein Schema geändert).
+- Runtime-Smoke: `/de/servers/provision` lädt und ist OWNER-geschützt (Redirect Login).
+
+#### Notes
+- **Es entsteht weiterhin kein Container und kein laufender TS3-Server.** Bei deaktiviertem
+  Write-Flag meldet die UI `writeDisabled` mit klarem Sicherheitshinweis (keine automatische Aktivierung).
+
 ### NDF Step 012 – Erste Managed Docker Write-Aktion: Network & Volume (2026-07-01)
 
 > **Kein Container, kein TS3-Start.** Erste schreibende Docker-Funktion, extrem eng begrenzt:

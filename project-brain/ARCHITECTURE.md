@@ -180,6 +180,16 @@ Session: HttpOnly-Cookie (Roh-Token)  ↔  DB speichert HMAC(SESSION_SECRET, tok
 Auth-Routen sind `force-dynamic` (pro Request ausgewertet). Details:
 [SECURITY.md](SECURITY.md) §4, [ADR-0012](DECISIONS.md)/[ADR-0013](DECISIONS.md).
 
+Managed-Docker-Prepare-Flow (ab Step 013), **OWNER-only**, **serverseitig**:
+
+```
+Browser (Owner) → Server Action → core/provisioning → lib/agent-client (Token aus Env)
+                → Agent POST /docker/provision/prepare → Docker (nur Network/Volume)
+Ergebnis → normalisiert → UI  +  Audit-Events → AuditLog (DB, ohne Secrets)
+```
+
+Der Browser spricht den Agent **nie** direkt an; Agent-URL/Token bleiben serverseitig.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

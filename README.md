@@ -104,7 +104,10 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **TS3 (Step 008–009):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
   Basisstatus ansehen, **aktualisieren** und Server wieder **entfernen** (Credentials werden gelöscht);
   Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
-- **Noch nicht:** TS3-Installation/-Steuerung (Start/Stop), Docker-/Host-Steuerung, Plugin-/Community-Module.
+- **Agent-Docker (Step 010–013):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
+  Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
+  Network/Volume (`/servers/provision`, mit Audit) — **kein Container, kein TS3-Start**.
+- **Noch nicht:** TS3-Container-Erstellung/-Installation/-Steuerung (Start/Stop), Plugin-/Community-Module.
 
 ## Mitwirken
 

@@ -131,6 +131,38 @@
       "encryptionMissing": "SECRET_ENCRYPTION_KEY is not set – credentials cannot be stored securely.",
       "rateLimited": "Too many attempts. Please try again later.",
       "connectionFailed": "Connection failed. Please check your details."
+    },
+    "provision": {
+      "title": "Prepare resources",
+      "openButton": "Prepare resources",
+      "intro": "Prepares only the managed Docker network and volume.",
+      "warnNoContainer": "NO TeamSpeak 3 container is created.",
+      "warnNoStart": "NO server is started.",
+      "warnFlag": "Docker write actions must be explicitly enabled in the agent (AGENT_DOCKER_WRITE_ENABLED).",
+      "displayName": "Display name",
+      "voicePort": "Voice port",
+      "queryPort": "Query port",
+      "fileTransferPort": "File transfer port",
+      "mode": "Mode",
+      "modeSimple": "Simple",
+      "modeExpert": "Expert",
+      "submit": "Prepare resources",
+      "resultTitle": "Result",
+      "network": "Network",
+      "volume": "Volume",
+      "outcome": {
+        "created": "created",
+        "exists": "exists",
+        "conflict": "name conflict (unmanaged)",
+        "error": "error"
+      },
+      "writeDisabledHint": "Docker write actions are disabled in the agent. Set AGENT_DOCKER_WRITE_ENABLED=true deliberately only – and only if the agent is not publicly reachable and a token is set.",
+      "unavailableHint": "Docker is unavailable or the agent is unreachable. Nothing was changed.",
+      "invalidHint": "The inputs are invalid. Please check.",
+      "rollbackHint": "In this step, created resources are not removed automatically.",
+      "auditHint": "The action was recorded in the audit log (without secrets).",
+      "rateLimited": "Too many attempts. Please try again later.",
+      "backToServers": "Back to servers"
     }
   },
   "dashboard": {

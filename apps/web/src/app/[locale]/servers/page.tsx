@@ -40,12 +40,20 @@ export default async function ServersPage({ params }: { params: Promise<{ locale
           </div>
           <p className="mt-1 text-sc-sm text-sc-text-secondary">{t('subtitle')}</p>
         </div>
-        <Link
-          href={`/${locale}/servers/new`}
-          className="shrink-0 rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
-        >
-          {t('connectButton')}
-        </Link>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <Link
+            href={`/${locale}/servers/provision`}
+            className="rounded-sc-md border border-sc-border-strong px-4 py-2 text-center text-sc-sm text-sc-text-secondary"
+          >
+            {t('provision.openButton')}
+          </Link>
+          <Link
+            href={`/${locale}/servers/new`}
+            className="rounded-sc-md bg-sc-primary px-4 py-2 text-center text-sc-sm font-medium text-white"
+          >
+            {t('connectButton')}
+          </Link>
+        </div>
       </header>
 
       {servers.length === 0 ? (

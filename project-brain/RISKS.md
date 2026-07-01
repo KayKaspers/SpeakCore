@@ -114,6 +114,8 @@
   **kein** automatisches `rm`, kein Container/Start; `execFile` ohne Shell, statische Argumente,
   kein Socket. Ergebnis ohne Secrets.
 - **Rest/geplant:** automatisches Rollback-`rm` und Container-Erstellung als eigene, geprüfte Steps.
+- **Stand Step 013:** Web-Auslösung nur **OWNER**, serverseitig (Agent-URL/Token nie im Client),
+  rate-limitiert, normalisiertes Audit ohne Secrets.
 
 ## R-13 – SSRF über TS3-Host-Eingabe (read-only)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
