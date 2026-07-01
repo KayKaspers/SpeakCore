@@ -2,13 +2,15 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getServer, getServerStatus } from '@/core/servers';
+import { getServer } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
+import { refreshServerAction } from '../actions';
+import { RemoveServerButton } from '../RemoveServerButton';
 
 export const dynamic = 'force-dynamic';
 
-function formatUptime(seconds: number | undefined): string {
-  if (seconds === undefined) return '—';
+function formatUptime(seconds: number | null): string {
+  if (seconds === null || seconds === undefined) return '—';
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -17,10 +19,13 @@ function formatUptime(seconds: number | undefined): string {
 
 export default async function ServerDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const { locale, id } = await params;
+  const { notice } = await searchParams;
   if (!(await getCurrentUser())) {
     redirect(`/${locale}/login`);
   }
@@ -31,20 +36,21 @@ export default async function ServerDetailPage({
   }
 
   const t = await getTranslations('servers');
-  const status = await getServerStatus(id);
+  const reachable = server.lastStatus === 'reachable';
+  const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleString(locale) : t('status.never'));
 
   const rows: { label: string; value: string }[] = [
-    { label: t('status.name'), value: status.name ?? t('status.notAvailable') },
-    { label: t('status.version'), value: status.version ?? t('status.notAvailable') },
-    { label: t('status.platform'), value: status.platform ?? t('status.notAvailable') },
+    { label: t('status.name'), value: server.statusName ?? t('status.notAvailable') },
+    { label: t('status.version'), value: server.statusVersion ?? t('status.notAvailable') },
+    { label: t('status.platform'), value: server.statusPlatform ?? t('status.notAvailable') },
     {
       label: t('status.clients'),
       value:
-        status.clientsOnline !== undefined && status.maxClients !== undefined
-          ? `${status.clientsOnline} / ${status.maxClients}`
+        server.statusClientsOnline !== null && server.statusMaxClients !== null
+          ? `${server.statusClientsOnline} / ${server.statusMaxClients}`
           : t('status.notAvailable'),
     },
-    { label: t('status.uptime'), value: formatUptime(status.uptimeSeconds) },
+    { label: t('status.uptime'), value: formatUptime(server.statusUptimeSeconds) },
   ];
 
   return (
@@ -54,28 +60,34 @@ export default async function ServerDetailPage({
         <div>
           <h1 className="text-sc-h1 font-semibold text-sc-text-primary">{server.name}</h1>
           <p className="font-mono text-sc-caption text-sc-text-secondary">
-            {server.host}:{server.queryPort}
+            {server.host}:{server.queryPort} · {t('status.readonlyBadge')}
           </p>
         </div>
       </header>
 
+      {notice === 'rateLimited' && (
+        <p className="mb-4 rounded-sc-md bg-sc-warning/15 px-4 py-3 text-sc-sm text-sc-warning">
+          {t('errors.rateLimited')}
+        </p>
+      )}
+
       <section className="rounded-sc-lg border border-sc-border bg-sc-surface p-6">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-sc-h2 font-medium text-sc-text-primary">{t('status.title')}</h2>
           <span
             className={`inline-flex items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${
-              status.reachable ? 'bg-sc-success/15 text-sc-success' : 'bg-sc-error/15 text-sc-error'
+              reachable ? 'bg-sc-success/15 text-sc-success' : 'bg-sc-error/15 text-sc-error'
             }`}
           >
             <span
-              className={`inline-block h-2 w-2 rounded-full ${status.reachable ? 'bg-sc-success' : 'bg-sc-error'}`}
+              className={`inline-block h-2 w-2 rounded-full ${reachable ? 'bg-sc-success' : 'bg-sc-error'}`}
               aria-hidden
             />
-            {status.reachable ? t('status.reachable') : t('status.unreachable')}
+            {reachable ? t('status.reachable') : t('status.unreachable')}
           </span>
         </div>
 
-        {status.reachable && (
+        {reachable ? (
           <dl className="space-y-2 text-sc-sm">
             {rows.map((row) => (
               <div key={row.label} className="flex justify-between gap-4">
@@ -84,11 +96,38 @@ export default async function ServerDetailPage({
               </div>
             ))}
           </dl>
+        ) : (
+          <p className="text-sc-sm text-sc-text-secondary">
+            {server.statusMessageKey
+              ? t(`errors.${server.statusMessageKey}`)
+              : t('status.unreachableHint')}
+          </p>
         )}
 
-        {!status.reachable && (
-          <p className="text-sc-sm text-sc-text-secondary">{t('status.unreachableHint')}</p>
-        )}
+        <dl className="mt-4 space-y-1 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
+          <div className="flex justify-between gap-4">
+            <dt>{t('status.lastCheck')}</dt>
+            <dd>{fmtDate(server.lastStatusCheckedAt)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt>{t('status.lastConnected')}</dt>
+            <dd>{fmtDate(server.lastConnectedAt)}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <form action={refreshServerAction}>
+            <input type="hidden" name="locale" value={locale} />
+            <input type="hidden" name="id" value={server.id} />
+            <button
+              type="submit"
+              className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
+            >
+              {t('status.refresh')}
+            </button>
+          </form>
+          <RemoveServerButton locale={locale} id={server.id} />
+        </div>
       </section>
 
       <footer className="mt-6 flex items-center justify-between">

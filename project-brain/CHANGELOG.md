@@ -5,6 +5,38 @@
 
 ## [Unreleased]
 
+### NDF Step 009 – TS3 read-only Feinschliff (2026-07-01)
+
+#### Added
+- **Status aktualisieren:** Button auf der Detailseite verbindet read-only (`serverinfo`), speichert
+  einen **Status-Snapshot** und auditiert. Rate-limitiert (je Owner); bei Sperre generischer Hinweis.
+- **Persistierter Status** (kein Live-Connect bei jedem Seitenaufruf): `lastStatus`,
+  `lastStatusCheckedAt`, `lastConnectedAt`, generischer `statusMessageKey` sowie Snapshot
+  (Name/Version/Plattform/Clients/Uptime). Liste zeigt Status-Badge + „Letzter Check".
+- **Server entfernen** (OWNER, Bestätigung in der UI): löscht den Server; **Credentials werden per
+  DB-Cascade mitgelöscht**. **Keine** Verbindung/Aktion zum TS3-Server. Auditiert.
+- **Audit-Log:** `server.test`, `server.status_refresh` (success/failure), `server.removed`.
+- **UI/UX (DE/EN):** Liste mit Status/letztem Check; Detailseite mit Refresh-Button, Entfernen mit
+  Zwei-Stufen-Bestätigung, letztem Fehler (generisch), read-only-Hinweis; Hilfetexte im Formular
+  (Query-/Voice-Port erklärt); Empty States.
+- Prisma: `ServerInstance` um Status-Snapshot-Felder erweitert + Migration
+  `20260701..._ts3_status_snapshot`.
+- Tests: `statusToServerUpdate` (Snapshot/Fehler/keine Secret-artigen Keys). Cascade-Löschung der
+  Credentials per DB verifiziert. 75/75 grün.
+
+#### Security
+- OWNER-only; keine Secrets/Roh-Antworten im Client; Fehlermeldungen generisch; kein Klartext-Fehler
+  mit Secrets gespeichert. Nur bereits erlaubte read-only ServerQuery-Kommandos; keine neuen
+  Netzwerkfunktionen. Host-Validierung/SSRF-Politik unverändert (RISKS R-13).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (75/75) · `prisma validate` ✅.
+- Cascade: Entfernen eines Servers löscht die zugehörigen Credentials (DB-geprüft).
+
+#### Notes
+- **Keine** Steuerung/Installation: kein Start/Stop/Restart, kein Channel-/User-/Rechte-Management,
+  kein Backup, keine Docker-/Host-Aktion. Reiner read-only Feinschliff.
+
 ### NDF Step 008 – TS3-Adapter: bestehenden Server read-only verbinden (2026-07-01)
 
 #### Added

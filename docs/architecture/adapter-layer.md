@@ -42,6 +42,11 @@ werden **verschlüsselt** gespeichert ([ADR-0018](../../project-brain/DECISIONS.
 - Läuft im **Web-Backend**, nicht im Agent (keine Host-/Docker-Aktion nötig). Installation/Steuerung
   über den Agent folgen in späteren Steps.
 
+**Stand Step 009 (Feinschliff):** Status kann manuell **aktualisiert** werden (persistierter
+Snapshot statt Live-Connect bei jedem Aufruf); Server können **entfernt** werden (Credentials per
+DB-Cascade mitgelöscht, ohne TS3-Aktion). Fehler werden **generisch** gespeichert/angezeigt (keine
+Secrets/Roh-Antworten). Weiterhin **keine** Steuerung/Installation.
+
 ## Datenfluss
 
 ```

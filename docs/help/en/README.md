@@ -15,7 +15,9 @@
 - Understanding the System Check
 - Connecting an existing TeamSpeak 3 server — *from Step 008: connect an existing server
   **read-only** (host, query port, query credentials) and view basic status
-  (name/version/clients/uptime). Credentials are stored encrypted. No control/installation yet.*
+  (name/version/clients/uptime). From Step 009: manually **refresh** status, see last check/last
+  connection, and **remove** the server (credentials are deleted). Credentials are stored encrypted.
+  Still no control/installation.*
 - Installing a new TeamSpeak 3 server — *later*
 - Start/stop/restart a server
 - Reading logs

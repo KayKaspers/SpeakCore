@@ -80,7 +80,17 @@ model ServerInstance {
   virtualServerId Int?
   runState        String            @default("unknown")
   lastConnectedAt DateTime?
-  credential      ServerCredential?
+  // Persistierter read-only Status-Snapshot (Step 009). KEINE Secrets, keine Roh-Antworten.
+  lastStatus          String?   // "reachable" | "unreachable"
+  lastStatusCheckedAt DateTime?
+  statusMessageKey    String? // generischer i18n-Fehlerschlüssel, null wenn erreichbar
+  statusName          String?
+  statusVersion       String?
+  statusPlatform      String?
+  statusClientsOnline Int?
+  statusMaxClients    Int?
+  statusUptimeSeconds Int?
+  credential          ServerCredential? @relation
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }

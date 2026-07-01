@@ -52,6 +52,7 @@ export function NewServerForm({ locale }: { locale: string }) {
               defaultValue={10011}
               className={inputClass}
             />
+            <p className="mt-1 text-sc-caption text-sc-text-muted">{t('new.queryPortHint')}</p>
           </div>
         </div>
 
@@ -67,6 +68,7 @@ export function NewServerForm({ locale }: { locale: string }) {
               defaultValue={9987}
               className={inputClass}
             />
+            <p className="mt-1 text-sc-caption text-sc-text-muted">{t('new.voicePortHint')}</p>
           </div>
           <div>
             <label className={labelClass} htmlFor="virtualServerId">

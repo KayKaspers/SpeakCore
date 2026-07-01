@@ -6,7 +6,13 @@ import { validatePort, validateServerHost } from '@/core/host-validation';
 import { isEncryptionConfigured } from '@/core/crypto';
 import { logAudit } from '@/core/audit';
 import { checkRateLimit, recordRateLimitHit, type RateLimitConfig } from '@/core/rate-limit';
-import { createExternalServer, testTs3Connection, type CreateExternalServerInput } from '@/core/servers';
+import {
+  createExternalServer,
+  refreshServerStatus,
+  removeServer,
+  testTs3Connection,
+  type CreateExternalServerInput,
+} from '@/core/servers';
 
 export interface AddServerState {
   errorKey?: string;
@@ -76,18 +82,52 @@ export async function addServerAction(
   };
 
   // Verbindung testen (read-only). Bei Fehler generisch melden – keine Secrets/Details leaken.
+  let status;
   try {
-    const status = await testTs3Connection(input);
-    if (!status.reachable) {
-      await logAudit({ action: 'server.test', actor: user.email, target: host, result: 'failure' });
-      return { errorKey: 'connectionFailed' };
-    }
-    await logAudit({ action: 'server.test', actor: user.email, target: host });
+    status = await testTs3Connection(input);
   } catch {
+    status = { reachable: false } as const;
+  }
+  if (!status.reachable) {
     await logAudit({ action: 'server.test', actor: user.email, target: host, result: 'failure' });
     return { errorKey: 'connectionFailed' };
   }
+  await logAudit({ action: 'server.test', actor: user.email, target: host });
 
-  const created = await createExternalServer(input, user.email);
+  const created = await createExternalServer(input, user.email, status);
   redirect(`/${locale}/servers/${created.id}`);
+}
+
+/** Aktualisiert den read-only Status eines Servers (OWNER-only, rate-limitiert). */
+export async function refreshServerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `ts3:connect:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  await refreshServerStatus(id, user.email);
+  redirect(`/${locale}/servers/${id}`);
+}
+
+/** Entfernt einen Server inkl. Credentials (OWNER-only, Bestätigung erfolgt in der UI). */
+export async function removeServerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  await removeServer(id, user.email);
+  redirect(`/${locale}/servers`);
 }

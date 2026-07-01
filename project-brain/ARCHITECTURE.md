@@ -75,10 +75,11 @@ stop, restart, status, logs, backup, restore, connectExisting). 0.1 implementier
 Spricht TeamSpeak 3 **ServerQuery**. Verwaltet bestehende und neu installierte TS3-Server.
 Speichert Query-Zugänge ausschließlich verschlüsselt (siehe [SECURITY.md](SECURITY.md)).
 
-**Stand Step 008:** implementiert ist der **read-only**-Teil – „bestehenden Server verbinden" mit
-Basisstatus (eigener minimaler ServerQuery-Client, [ADR-0017](DECISIONS.md); AES-256-GCM-Secrets,
-[ADR-0018](DECISIONS.md)). Läuft im **Web-Backend**, nicht im Agent. Installation/Start/Stopp folgen
-später über den Agent. Nur read-only Kommandos (`login`/`use`/`serverinfo`).
+**Stand Step 008/009:** implementiert ist der **read-only**-Teil – „bestehenden Server verbinden",
+Basisstatus **aktualisieren** und Server **entfernen** (Credentials per DB-Cascade). Eigener
+minimaler ServerQuery-Client ([ADR-0017](DECISIONS.md)); AES-256-GCM-Secrets ([ADR-0018](DECISIONS.md)).
+Läuft im **Web-Backend**, nicht im Agent. Installation/Start/Stopp folgen später über den Agent.
+Nur read-only Kommandos (`login`/`use`/`serverinfo`).
 
 ### 3.6 Datenbank
 SQLite für 0.1, Zugriff über ORM (Prisma, [ADR-0002](DECISIONS.md)). Schema so gehalten,

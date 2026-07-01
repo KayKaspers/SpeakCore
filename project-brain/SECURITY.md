@@ -87,7 +87,11 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - **SSRF-Härtung:** Host-Eingaben werden validiert; Cloud-Metadaten (`169.254.169.254`), Link-Local
   und `0.0.0.0`/`::` sind blockiert. Private LAN/localhost bleiben erlaubt (legitimes Self-Hosting)
   – das verbleibende SSRF-Restrisiko ist in [RISKS.md](RISKS.md) R-13 dokumentiert. Verbindungstests
-  sind rate-limitiert.
+  **und Status-Aktualisierungen** sind rate-limitiert.
+- **Status-Snapshot (Step 009):** Es werden nur nicht-sensible Status-Metadaten persistiert
+  (erreichbar, Name/Version/Plattform/Clients/Uptime, generischer Fehlerschlüssel) – **keine
+  Secrets, keine rohen ServerQuery-Antworten**. **Server entfernen** löscht die Credentials per
+  DB-Cascade und baut **keine** Verbindung zum TS3-Server auf.
 
 ## 6. Agent-Sicherheit
 

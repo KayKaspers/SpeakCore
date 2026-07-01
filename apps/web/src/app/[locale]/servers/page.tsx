@@ -7,6 +7,17 @@ import { BrandMark } from '@/components/BrandMark';
 
 export const dynamic = 'force-dynamic';
 
+function statusBadgeClass(lastStatus: string | null): string {
+  if (lastStatus === 'reachable') return 'bg-sc-success/15 text-sc-success';
+  if (lastStatus === 'unreachable') return 'bg-sc-error/15 text-sc-error';
+  return 'bg-sc-surface-raised text-sc-text-secondary';
+}
+function statusDotClass(lastStatus: string | null): string {
+  if (lastStatus === 'reachable') return 'bg-sc-success';
+  if (lastStatus === 'unreachable') return 'bg-sc-error';
+  return 'bg-sc-text-muted';
+}
+
 export default async function ServersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!(await getCurrentUser())) {
@@ -15,6 +26,9 @@ export default async function ServersPage({ params }: { params: Promise<{ locale
 
   const t = await getTranslations('servers');
   const servers = await listServers();
+
+  const statusLabel = (s: string | null) =>
+    s === 'reachable' ? t('status.reachable') : s === 'unreachable' ? t('status.unreachable') : t('status.statusUnknown');
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -50,18 +64,27 @@ export default async function ServersPage({ params }: { params: Promise<{ locale
             <li key={server.id}>
               <Link
                 href={`/${locale}/servers/${server.id}`}
-                className="flex items-center justify-between rounded-sc-lg border border-sc-border bg-sc-surface p-4 hover:border-sc-border-strong"
+                className="flex items-center justify-between gap-4 rounded-sc-lg border border-sc-border bg-sc-surface p-4 hover:border-sc-border-strong"
               >
-                <span>
-                  <span className="block text-sc-body font-medium text-sc-text-primary">
+                <span className="min-w-0">
+                  <span className="block truncate text-sc-body font-medium text-sc-text-primary">
                     {server.name}
                   </span>
                   <span className="block font-mono text-sc-caption text-sc-text-secondary">
-                    {server.host}:{server.queryPort}
+                    {server.host}:{server.queryPort} · TeamSpeak 3
+                  </span>
+                  <span className="block text-sc-caption text-sc-text-muted">
+                    {t('status.lastCheck')}:{' '}
+                    {server.lastStatusCheckedAt
+                      ? new Date(server.lastStatusCheckedAt).toLocaleString(locale)
+                      : t('status.never')}
                   </span>
                 </span>
-                <span className="rounded-sc-sm bg-sc-primary/10 px-2 py-1 text-sc-caption text-sc-primary">
-                  TeamSpeak 3
+                <span
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-sc-sm px-3 py-1 text-sc-sm font-medium ${statusBadgeClass(server.lastStatus)}`}
+                >
+                  <span className={`inline-block h-2 w-2 rounded-full ${statusDotClass(server.lastStatus)}`} aria-hidden />
+                  {statusLabel(server.lastStatus)}
                 </span>
               </Link>
             </li>

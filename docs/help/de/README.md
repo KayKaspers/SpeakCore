@@ -15,7 +15,9 @@
 - Systemcheck verstehen
 - TeamSpeak-3-Server verbinden — *ab Step 008: bestehenden Server **read-only** verbinden
   (Host, Query-Port, Query-Zugang) und Basisstatus (Name/Version/Clients/Uptime) ansehen.
-  Zugangsdaten werden verschlüsselt gespeichert. Noch keine Steuerung/Installation.*
+  Ab Step 009: Status manuell **aktualisieren**, letzten Check/letzte Verbindung sehen und den
+  Server wieder **entfernen** (Zugangsdaten werden dabei gelöscht). Zugangsdaten sind verschlüsselt
+  gespeichert. Weiterhin keine Steuerung/Installation.*
 - Neuen TeamSpeak-3-Server installieren — *später*
 - Server starten/stoppen/neustarten
 - Logs lesen
