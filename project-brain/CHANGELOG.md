@@ -5,6 +5,47 @@
 
 ## [Unreleased]
 
+### NDF Step 012 – Erste Managed Docker Write-Aktion: Network & Volume (2026-07-01)
+
+> **Kein Container, kein TS3-Start.** Erste schreibende Docker-Funktion, extrem eng begrenzt:
+> nur managed **Network** + **Volume** aus einem validierten Provisioning-Plan.
+
+#### Added
+- **Agent-Endpunkt `POST /docker/provision/prepare`** (token-gated): legt idempotent das managed
+  Voice-**Network** (`speakcore-network-voice`) und das managed **Volume**
+  (`speakcore-volume-ts3-<instanceId>`) mit SpeakCore-Labels an. **Kein** Container, kein Start.
+- **Feature-Flag `AGENT_DOCKER_WRITE_ENABLED`** (Default **false**): ohne Opt-in wird **keine**
+  Docker-Schreibaktion ausgeführt (Antwort `status: "writeDisabled"`).
+- **Serverseitige Re-Validierung** mit der Step-010-Logik (`validateTs3ProvisionInput`) – der Agent
+  vertraut **nie** freien Nutzerparametern; Ressourcen entstehen nur aus dem intern gebauten Plan
+  (`createTs3ProvisioningPlan`). Kein freies Image/Args/Host-Mount/privileged/Socket.
+- **Idempotenz & Konfliktschutz:** bereits vorhandene **managed** Ressource ⇒ `exists` (kein
+  erneutes Anlegen); gleichnamige **nicht** verwaltete Ressource ⇒ `conflict` (nicht anfassen/
+  verändern/löschen). Availability-Probe ⇒ `unavailable` (kein Crash).
+- **Deklarativer Rollback-Plan** (nur was in diesem Lauf erzeugt wurde) – **keine** automatische
+  `rm`-Ausführung in Step 012. Audit-Events (`docker.network.*`/`docker.volume.*`) ohne Secrets.
+- Ergebnis-Typen in `packages/types` (`ProvisionPrepareResult`, `ManagedResourceResult`,
+  `ManagedRollbackEntry`, …). Kontrollierte Docker-CLI (`execFile`, statische Argumente, Timeout,
+  keine Shell, kein Socket) in `docker-cli.ts`; Logik mit **injizierbarem** exec (`docker-write.ts`).
+- ADR-0021 (Write-Opt-in-Flag + erster Write-Scope Network/Volume).
+- Tests (Mock-exec, kein echtes Docker): write-disabled, Token-401, Plan→create-Kommandos + Labels,
+  managed-exists (idempotent), unmanaged-Namenskonflikt, keine Secrets im Result, Source-Scan gegen
+  schreibende/inspizierende Kommandos + Socket. 102/102 grün.
+
+#### Security
+- Write nur bei **Flag + gültigem Token**; `/health`/`/version` unverändert, `/docker/inventory`
+  bleibt read-only. Kein Socket, keine Shell, keine freien Docker-Parameter. Fremde Ressourcen
+  werden **nie** verändert/gelöscht. Ergebnis enthält **keine** Secrets/Hostpfade.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (102/102).
+- Runtime-Smoke (gebauter Agent, sichere Default-Konfiguration): `POST /docker/provision/prepare`
+  → **401** ohne Token, **`writeDisabled`** mit Token (Flag aus) – **keine** Docker-Ressource erzeugt.
+
+#### Notes
+- **Es entsteht weiterhin kein Container und kein laufender TS3-Server.** Container-Erstellung/Start
+  sowie automatisches Remove folgen als eigene, geprüfte Steps.
+
 ### NDF Step 011 – Managed-Only Docker Inventory (read-only) (2026-07-01)
 
 > Erste echte Docker-Nähe im Agent – **ausschließlich lesend**. Kein Erstellen/Starten/Stoppen/

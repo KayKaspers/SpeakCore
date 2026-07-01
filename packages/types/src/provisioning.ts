@@ -149,3 +149,38 @@ export interface Ts3ProvisioningPlan {
   rollback: RollbackStep[];
   audit: PlannedAuditAction[];
 }
+
+// --- Managed Write (NDF Step 012: nur Network/Volume, kein Container) --------
+
+export type ManagedWriteOutcome = 'created' | 'exists' | 'conflict' | 'error';
+
+export interface ManagedResourceResult {
+  /** `container` kommt in Step 012 NICHT vor (nur network/volume). */
+  kind: 'volume' | 'network';
+  name: string;
+  outcome: ManagedWriteOutcome;
+}
+
+/** Deklarativer Rollback-Eintrag – **keine** automatische Löschung in Step 012. */
+export interface ManagedRollbackEntry {
+  kind: 'volume' | 'network';
+  name: string;
+  noteKey: string;
+}
+
+export type ProvisionPrepareStatus =
+  | 'ok'
+  | 'partial'
+  | 'conflict'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/** Ergebnis der Vorbereitung (Network/Volume). Enthält NIE Secrets. */
+export interface ProvisionPrepareResult {
+  status: ProvisionPrepareStatus;
+  resources: ManagedResourceResult[];
+  errors?: ValidationError[];
+  rollbackPlan: ManagedRollbackEntry[];
+  audit: PlannedAuditAction[];
+}

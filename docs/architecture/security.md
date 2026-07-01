@@ -23,8 +23,10 @@ Nur die WebUI/API ist exponiert. Der Agent ist nicht öffentlich erreichbar.
 Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für spätere Installationen gilt das
 **Managed-Only-Prinzip** (nur selbst erzeugte, gelabelte Ressourcen), eine Aktions-Allowlist und
 Docker-Argumente aus einem validierten Plan – **kein Docker-Socket im Web-Container**. Stand
-Step 011: nur **read-only** – Planung/Validierung (Step 010) sowie ein lesendes Inventar der
-SpeakCore-managed Ressourcen (`/docker/inventory`, Step 011). **Keine** schreibende Docker-Aktion. Details:
+Step 012: read-only (Planung/Validierung Step 010, Inventar Step 011) **plus** eine erste, eng
+begrenzte **Write-Aktion** – nur managed **Network/Volume** (`/docker/provision/prepare`), hinter
+**Token + Feature-Flag** (`AGENT_DOCKER_WRITE_ENABLED`, Default `false`), idempotent, **kein
+Container/Start**, kein Anfassen fremder Ressourcen. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

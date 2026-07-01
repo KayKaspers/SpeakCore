@@ -104,6 +104,17 @@
   bewusst minimal gehalten (kein Pfad-/ENV-Leak; **Netzwerk nur Booleans/Anzahl, keine IP-Adressen**
   – Step 007). Spätere Härtung: Token verpflichtend + mTLS.
 
+## R-15 – Erste schreibende Docker-Aktion (Network/Volume)
+- **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
+- **Beschreibung:** Mit Step 012 kann der Agent erstmals Docker-Ressourcen **erzeugen**
+  (managed Network/Volume). Fehlkonfiguration oder Missbrauch könnte ungewollte Ressourcen anlegen.
+- **Gegenmaßnahmen:** **Feature-Flag** `AGENT_DOCKER_WRITE_ENABLED` (Default false) **und**
+  Token-Gate; **Managed-Only** + Labels; server-seitige **Re-Validierung** ([ADR-0020](DECISIONS.md)/
+  [ADR-0021](DECISIONS.md)); **Idempotenz**; **kein** Anfassen fremder Ressourcen (`conflict`);
+  **kein** automatisches `rm`, kein Container/Start; `execFile` ohne Shell, statische Argumente,
+  kein Socket. Ergebnis ohne Secrets.
+- **Rest/geplant:** automatisches Rollback-`rm` und Container-Erstellung als eigene, geprüfte Steps.
+
 ## R-13 – SSRF über TS3-Host-Eingabe (read-only)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
 - **Beschreibung:** Der Verbindungstest baut eine TCP-Verbindung zu einem **owner-eingegebenen**
@@ -139,5 +150,6 @@
 | R-11 | CSP `'unsafe-inline'` | mittel |
 | R-14 | Secrets in Docker-Logs (Provisionierung) | mittel |
 | R-13 | SSRF über TS3-Host-Eingabe | niedrig-mittel |
+| R-15 | Erste schreibende Docker-Aktion | niedrig-mittel |
 | R-10 | i18n-Drift | niedrig |
 | R-12 | Agent-Snapshot ohne Token | niedrig |

@@ -17,9 +17,13 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= 1 && port <= 65535;
 }
 
-/** Basis-Image-Name ohne Tag/Digest. */
+/** Basis-Image-Name ohne Tag/Digest. Robust gegen fehlende Werte (untrusted Input). */
 export function imageBaseName(image: string): string {
-  return image.split('@')[0].split(':')[0].trim().toLowerCase();
+  return String(image ?? '')
+    .split('@')[0]
+    .split(':')[0]
+    .trim()
+    .toLowerCase();
 }
 
 export function isAllowedImage(image: string): boolean {

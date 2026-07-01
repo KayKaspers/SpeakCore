@@ -2,9 +2,39 @@ import http from 'node:http';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
+import type { Ts3ProvisionInput } from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
 import { gatherSystemInfo } from './system-info';
 import { gatherDockerInventory } from './docker-inventory';
+import { prepareProvision } from './docker-write';
+import { dockerExec } from './docker-cli';
+
+const MAX_BODY_BYTES = 64 * 1024;
+
+function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new Error('payload too large'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      try {
+        const raw = Buffer.concat(chunks).toString('utf8');
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch {
+        reject(new Error('invalid json'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
 
 const startedAt = Date.now();
 
@@ -60,6 +90,28 @@ async function handle(
     }
     const inventory = await gatherDockerInventory();
     sendJson(res, 200, inventory);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/prepare') {
+    // Erste schreibende Aktion: nur managed Network/Volume anlegen (kein Container/TS3).
+    // Token-Pflicht + Write-Feature-Flag; Ergebnis enthält keine Secrets.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await prepareProvision(body as Ts3ProvisionInput, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
     return;
   }
 

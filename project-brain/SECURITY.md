@@ -112,6 +112,13 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
   separater Begründung + Härtung.
 - **Verboten (immer abgelehnt):** privileged, Docker-Socket-Mount, Host-Mounts/Pfade, freie
   Docker-Args, Images außerhalb der Allowlist, reservierte Ports im Simple Mode.
+
+**Erste Write-Aktion (Step 012, [ADR-0021](DECISIONS.md)):** `POST /docker/provision/prepare` legt
+**nur** managed **Network + Volume** an (kein Container/Start). Doppelter Schutz: **Token-Gate** +
+**Feature-Flag** `AGENT_DOCKER_WRITE_ENABLED` (Default `false` ⇒ `writeDisabled`). Input wird
+server-seitig **re-validiert** (Step-010-Logik); Ressourcen nur aus dem internen Plan (keine freien
+Docker-Parameter). Idempotent; gleichnamige **fremde** Ressource ⇒ `conflict` (nie anfassen/löschen).
+Kein Socket/Shell; Ergebnis ohne Secrets/Hostpfade. Rollback rein deklarativ (kein automatisches `rm`).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
   (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.

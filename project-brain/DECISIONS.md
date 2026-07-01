@@ -233,6 +233,22 @@
 - **Konsequenzen:** Löschen/Steuern später nur für Ressourcen mit gültigen Managed-Labels. Secrets
   werden generiert + verschlüsselt gespeichert ([ADR-0018](DECISIONS.md)), nie geloggt (RISKS R-14).
 
+## ADR-0021 – Schreibende Docker-Aktionen nur mit Opt-in-Flag, Start Network/Volume
+
+- **Status:** accepted (Step 012)
+- **Kontext:** Die erste schreibende Docker-Funktion soll maximal risikoarm eingeführt werden.
+- **Entscheidung:** Schreibende Agent-Aktionen sind hinter einem **Feature-Flag**
+  `AGENT_DOCKER_WRITE_ENABLED` (Default **false**) UND dem **Token-Gate** gekapselt. Der erste
+  erlaubte Write-Umfang ist **nur** managed **Network** + **Volume** (kein Container/Start). Aktionen
+  laufen ausschließlich gegen einen server-seitig **re-validierten** Provisioning-Plan
+  ([ADR-0020](DECISIONS.md)); Docker-CLI via `execFile` mit intern erzeugten, statischen Argumenten.
+- **Begründung:** Sicheres, testbares Inkrement; kein Container-Risiko; Fehlkonfiguration bleibt
+  ohne Wirkung (Flag aus). Managed-Only + Idempotenz + Konfliktschutz (`conflict` bei fremder
+  gleichnamiger Ressource, kein Anfassen).
+- **Konsequenzen:** **Kein** automatisches `rm` in diesem Step (nur deklarativer Rollback-Plan).
+  Container-Erstellung/-Start und automatisches Remove sind eigene, spätere ADRs/Steps. Ergebnis
+  enthält nie Secrets.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

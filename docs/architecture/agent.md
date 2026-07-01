@@ -30,6 +30,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/version` | Name/Version/NDF-Step (offen) |
 | GET | `/system/snapshot` | **read-only** Systemdaten für Preflight (Token-gated, wenn gesetzt) |
 | GET | `/docker/inventory` | **read-only** Inventar der SpeakCore-managed Docker-Ressourcen (Token-gated) |
+| POST | `/docker/provision/prepare` | **write** (Flag-gated): managed **Network + Volume** anlegen (kein Container) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
 
@@ -93,8 +94,25 @@ Ressourcen (Filter `label=speakcore.managed=true`):
   Kommando-Ausführung im Container, Datei-Kopie, Compose, **Docker-Socket**. Nicht verfügbar ⇒
   `status: "unavailable"` (kein Crash).
 
-> Schreibende Aktionen (Netzwerk/Volume/Container anlegen) folgen erst in einem späteren Step gegen
-> den validierten Provisioning-Plan (Step 010), mit Rollback/Audit.
+> Read-only Inventar seit Step 011.
+
+## `/docker/provision/prepare` – erste Write-Aktion: Network & Volume (Step 012)
+
+Erste **schreibende** Docker-Funktion, extrem eng begrenzt ([ADR-0021](../../project-brain/DECISIONS.md)):
+
+- **Nur** managed **Network** (`speakcore-network-voice`) + **Volume** (`speakcore-volume-ts3-<id>`)
+  mit SpeakCore-Labels. **Kein Container, kein TS3-Start, kein Entfernen.**
+- **Zwei Schutzschichten:** Token-Gate **und** Feature-Flag `AGENT_DOCKER_WRITE_ENABLED`
+  (Default `false` ⇒ Antwort `writeDisabled`, keine Aktion).
+- **Re-Validierung** des Inputs mit der Step-010-Logik; Ressourcen entstehen nur aus dem intern
+  gebauten, validierten Plan – **keine** freien Docker-Parameter (Image/Args/Host-Mount/privileged/
+  Socket). Docker-CLI via `execFile`, statische Argumente, Timeout, keine Shell.
+- **Idempotenz:** managed vorhanden ⇒ `exists`; **Konflikt:** gleichnamige, nicht verwaltete
+  Ressource ⇒ `conflict` (nicht anfassen/verändern/löschen). Nicht verfügbar ⇒ `unavailable`.
+- **Rollback** nur **deklarativ** (was in diesem Lauf erzeugt wurde); **kein** automatisches
+  `rm` in diesem Step. Ergebnis enthält **keine** Secrets.
+
+> Container-Erstellung/-Start folgen erst in eigenen, geprüften Steps.
 
 ## Sicherheitsprinzipien
 
