@@ -24,7 +24,9 @@
   **managed Server-Eintrag** (Status „Ressourcen vorbereitet") gespeichert und unter `/servers`
   sichtbar. Ab Step 015 kann die **Container-Erstellung vorbereitet** werden (Status
   „Container-Erstellung vorbereitet"): SpeakCore erzeugt ein Secret und speichert es verschlüsselt.
-  Es wird weiterhin **kein** Container erstellt und **kein** TS3-Server gestartet.*
+  Ab Step 017 kann der **Container erstellt** werden (Status „Container erstellt"): via `docker create`,
+  das Secret wird dem Container als ENV vorgegeben (kein Log-Lesen). Der Container wird **erstellt, aber
+  nicht gestartet** – der TS3-Server läuft danach **noch nicht**; Secrets werden nie angezeigt.*
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore

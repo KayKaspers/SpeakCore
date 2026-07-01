@@ -14,6 +14,7 @@ import {
   type CreateExternalServerInput,
 } from '@/core/servers';
 import { prepareManagedContainer } from '@/core/container-prepare';
+import { createManagedContainerForServer } from '@/core/container-create';
 
 export interface AddServerState {
   errorKey?: string;
@@ -160,5 +161,37 @@ export async function prepareContainerAction(formData: FormData): Promise<void> 
     redirect(`/${locale}/servers/${id}`);
   }
   // encryptionMissing | invalidState | invalidPlan
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Erstellt den managed TS3-Container (CONTAINER_PENDING → CONTAINER_CREATED). OWNER-only,
+ * rate-limitiert. Entschlüsselt das Secret serverseitig und übergibt es dem Agent (ENV).
+ * **Kein Container-Start, kein Log-Lesen, kein Secret im Client.**
+ */
+export async function createContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:create:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await createManagedContainerForServer(id, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'created' || result.status === 'exists') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // invalidState | encryptionMissing | credentialMissing | invalidPlan
+  //   | writeDisabled | unavailable | unreachable | conflict | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }

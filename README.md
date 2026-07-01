@@ -104,10 +104,12 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **TS3 (Step 008–009):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
   Basisstatus ansehen, **aktualisieren** und Server wieder **entfernen** (Credentials werden gelöscht);
   Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
-- **Agent-Docker (Step 010–015):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
+- **Agent-Docker (Step 010–017):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
   Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
-  Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`) und Container-
-  Vorbereitung (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret — **kein Container, kein TS3-Start**.
+  Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`), Container-Vorbereitung
+  (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret und **echte Container-Erstellung**
+  (`CONTAINER_CREATED`, `docker create`) mit Secret-Übergabe per ENV (kein Log-Lesen) — **kein
+  Container-Start, kein TS3-Start**.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.

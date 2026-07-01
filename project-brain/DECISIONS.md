@@ -271,6 +271,27 @@
   als eigener Step möglich. Der neue Schlüssel wird über `SECRET_ENCRYPTION_KEY_NEW` nur temporär
   bereitgestellt; **Backup vor Rotation empfohlen**.
 
+## ADR-0023 – Managed Container-Erstellung ohne Start, Secret per ENV
+
+- **Status:** accepted (Step 017)
+- **Kontext:** Der erste echte Docker-`create` für einen managed TS3-Container soll maximal risikoarm
+  erfolgen – ohne Start, ohne Log-Lesen, ohne Secret-Exposition.
+- **Entscheidung:** Neue Agent-Aktion **`CREATE_TS3_CONTAINER`** (`POST /docker/provision/create-container`)
+  führt **ausschließlich `docker create`** aus (kein `run`/`start`), hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**
+  ([ADR-0021](DECISIONS.md)). Argumente stammen aus einem server-seitig **revalidierten** Plan
+  ([ADR-0020](DECISIONS.md)): fester Name/Netzwerk/Volume (named, **kein** Host-Mount), Ports und
+  Restart-Policy aus Allowlist, Managed-Labels. Das ServerQuery-Admin-Passwort ([ADR-0018](DECISIONS.md))
+  wird **web-seitig entschlüsselt**, an den Agent übergeben und als Container-**ENV**
+  `TS3SERVERQUERY_ADMIN_PASSWORD` gesetzt – so entsteht **kein** Zufallspasswort in den Logs
+  (**R-14 geschlossen**). Idempotenz (managed `exists`) und Konfliktschutz (fremder Name ⇒ `conflict`,
+  keine Übernahme). Persistenz: `CONTAINER_PENDING → CONTAINER_CREATED`.
+- **Begründung:** Trennung von *Erstellen* und *Starten* hält jeden Schritt klein und prüfbar; ENV-Vorgabe
+  des Query-Passworts vermeidet das Auslesen von Docker-Logs vollständig. Kein Secret im Client/Audit/
+  Agent-Response.
+- **Konsequenzen:** **Container-Start** (Lizenzzustimmung `TS3SERVER_LICENSE`, Healthcheck, TS3-Connect)
+  ist ein **eigener, späterer Step/ADR**. Automatisches Rollback-`rm` bleibt deklarativ (kein `rm` in
+  diesem Step). Ergebnis/Audit enthalten nie Secrets/ENV-Werte/Roh-Docker-Ausgabe.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

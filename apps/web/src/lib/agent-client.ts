@@ -1,8 +1,10 @@
 import 'server-only';
 import type {
+  ContainerCreateResult,
   DockerInventory,
   ProvisionPrepareResult,
   SystemInfo,
+  Ts3ContainerCreateRequest,
   Ts3ProvisionInput,
 } from '@speakcore/types';
 
@@ -92,6 +94,37 @@ export async function prepareManagedResources(
     });
     if (!res.ok) return null;
     return (await res.json()) as ProvisionPrepareResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent das **Erstellen** (nicht Starten) des managed TS3-Containers aus – **serverseitig**.
+ * Der Request enthält das ServerQuery-Admin-Secret (nur Web→Agent, nie im Browser). `null`, wenn der
+ * Agent nicht erreichbar ist. Die Antwort enthält **kein** Secret. Kein Start, kein Log-Lesen.
+ */
+export async function createManagedContainer(
+  request: Ts3ContainerCreateRequest,
+  timeoutMs = 8000,
+): Promise<ContainerCreateResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/create-container`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as ContainerCreateResult;
   } catch {
     return null;
   } finally {

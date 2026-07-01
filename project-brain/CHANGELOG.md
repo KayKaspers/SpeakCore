@@ -5,6 +5,45 @@
 
 ## [Unreleased]
 
+### NDF Step 017 – Managed CREATE_TS3_CONTAINER ohne Start (2026-07-01)
+
+> **Container wird erstellt, aber NICHT gestartet.** Übergang `CONTAINER_PENDING → CONTAINER_CREATED`.
+> Kein `docker run/start`, kein Log-Lesen, keine Secret-Ausgabe.
+
+#### Added
+- **Agent-Aktion `createTs3Container`** (`apps/agent/src/docker-container.ts`) + Endpunkt
+  **`POST /docker/provision/create-container`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): erstellt
+  via **`docker create`** (nie `run`/`start`) einen managed Container aus einem **revalidierten** Plan.
+  `execFile` ohne Shell, statische Argumente, Managed-Only-Labels/-Name, named Volume (kein Host-Mount).
+  Ergebnisstatus `created|exists|conflict|error|writeDisabled|invalid|unavailable`; **Idempotenz**
+  (managed exists ⇒ kein Create) und **Konfliktschutz** (fremder gleichnamiger Container ⇒ `conflict`).
+- **Secret-Übergabe per ENV:** Das in Step 015 erzeugte ServerQuery-Admin-Passwort wird **serverseitig**
+  entschlüsselt und dem Agent übergeben, der es als Container-ENV `TS3SERVERQUERY_ADMIN_PASSWORD` setzt.
+  Dadurch erzeugt das TS3-Image **kein** Zufallspasswort in den Logs → **R-14 geschlossen**. Secret
+  erscheint NIE im Browser/Log/Audit/Agent-Response.
+- **Web-Service** `createManagedContainerForServer` (`src/core/container-create.ts`) + reine Helfer
+  (`container-create-helpers.ts`) + **OWNER-only Server Action** `createContainerAction` (rate-limitiert).
+  Status-Guard: nur `CONTAINER_PENDING`/`CONTAINER_CREATED`; sonst `invalidState`. Fehlender
+  `SECRET_ENCRYPTION_KEY`/Credential blockiert (Status unverändert). Erfolg ⇒ `CONTAINER_CREATED` +
+  `managedContainerName`. Fehler ⇒ Status bleibt `CONTAINER_PENDING` mit generischem Fehlerschlüssel.
+- **Audit:** `docker.containerCreate.requested/completed/failed`, `docker.container.created/exists/conflict`
+  (Target = ServerInstance-ID, **keine Secrets/ENV/Roh-Docker-Ausgabe**).
+- **UI (DE/EN):** managed Detailseite mit „Container erzeugen"-Button (bei `CONTAINER_PENDING`) inkl.
+  Hinweisen (wird erstellt, **nicht gestartet**; TS3 läuft danach **nicht**; Secrets werden nicht
+  angezeigt); bei `CONTAINER_CREATED` Statusanzeige + „erstellt, aber noch nicht gestartet".
+- Tests: Agent (create-Args/Labels/Ports/Volume/ENV, idempotent/exists, conflict, unavailable, error,
+  Secret nur in create-Args nicht im Ergebnis, Token/Flag-Gate, Quell-Scan verbotener Kommandos) und
+  Web (Guard/Audit/Fehlerschlüssel, kein Secret im Audit, Quell-Scan). 152 Tests grün.
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein** `run/start/stop/rm/
+  inspect/exec/cp/logs`, **kein** compose, **kein** Socket/Host-Mount/privileged, **keine** freien
+  Docker-Parameter. Quell-Scan-Tests erzwingen dies. **[ADR-0023](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (152) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 016 – Secret Encryption Key Rotation Foundation (2026-07-01)
 
 > **Kein Docker, kein Container, kein TS3-Start, keine öffentliche UI/API.** Sichere Grundlage,

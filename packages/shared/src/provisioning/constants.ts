@@ -87,3 +87,10 @@ export const TS3_VOICE_CONTAINER_PORT = 9987; // udp
 export const TS3_QUERY_CONTAINER_PORT = 10011; // tcp
 export const TS3_FILETRANSFER_CONTAINER_PORT = 30033; // tcp
 export const TS3_DATA_MOUNT_PATH = '/var/ts3server';
+
+/**
+ * ENV-Name, über den das ServerQuery-Admin-Passwort **vorgegeben** wird (NDF Step 017).
+ * Dadurch erzeugt das TS3-Image kein Zufallspasswort in den Container-Logs → hält R-14 geschlossen
+ * (SpeakCore liest **nie** Docker-Logs). Der Wert ist ein Secret und wird nie geplant/geloggt.
+ */
+export const TS3_QUERY_ADMIN_PASSWORD_ENV = 'TS3SERVERQUERY_ADMIN_PASSWORD';

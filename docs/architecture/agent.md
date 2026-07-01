@@ -31,6 +31,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/system/snapshot` | **read-only** Systemdaten für Preflight (Token-gated, wenn gesetzt) |
 | GET | `/docker/inventory` | **read-only** Inventar der SpeakCore-managed Docker-Ressourcen (Token-gated) |
 | POST | `/docker/provision/prepare` | **write** (Flag-gated): managed **Network + Volume** anlegen (kein Container) |
+| POST | `/docker/provision/create-container` | **write** (Flag-gated): managed **Container erstellen** (`docker create`, **kein Start**) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
 
@@ -112,11 +113,32 @@ Erste **schreibende** Docker-Funktion, extrem eng begrenzt ([ADR-0021](../../pro
 - **Rollback** nur **deklarativ** (was in diesem Lauf erzeugt wurde); **kein** automatisches
   `rm` in diesem Step. Ergebnis enthält **keine** Secrets.
 
-> Container-Erstellung/-Start folgen erst in eigenen, geprüften Steps.
-
 **Web-Auslösung (Step 013):** nur **OWNER** über eine Server Action (`/servers/provision`); der
 Browser ruft den Agent **nie** direkt auf, Agent-URL/Token bleiben serverseitig. Der Agent-Response
 wird normalisiert und als **Audit-Events** (ohne Secrets) in der Web-DB persistiert.
+
+## `/docker/provision/create-container` – Container erstellen ohne Start (Step 017)
+
+Erste **echte Container-Erstellung** – bewusst getrennt vom Start ([ADR-0023](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker create`** (nie `run`/`start`) eines managed Containers (`speakcore-ts3-<id>`) aus dem
+  revalidierten Plan: festes Netzwerk, **named Volume** (`-v name:/var/ts3server`, **kein Host-Pfad**),
+  Ports (voice/udp, query/tcp, filetransfer/tcp), Restart-Policy aus Allowlist, Managed-Labels.
+- **Zwei Schutzschichten** wie bei prepare: Token-Gate **und** `AGENT_DOCKER_WRITE_ENABLED`
+  (`false` ⇒ `writeDisabled`). `execFile`, statische Argumente, keine Shell, kein Socket.
+- **Secret per ENV:** das ServerQuery-Admin-Passwort wird **serverseitig** entschlüsselt, dem Agent
+  übergeben und als `TS3SERVERQUERY_ADMIN_PASSWORD` gesetzt ⇒ **kein** Zufallspasswort in den Logs,
+  **kein Log-Lesen** (R-14 geschlossen). Secret erscheint **nie** im Ergebnis/Audit/Log.
+- **Idempotenz:** managed Container vorhanden ⇒ `exists` (kein Create). **Konflikt:** gleichnamiger,
+  nicht verwalteter Container ⇒ `conflict` (nicht anfassen). Docker nicht verfügbar ⇒ `unavailable`.
+- **Kein** `stop/rm/inspect/exec/cp/logs`, **kein** compose, **kein** Start, **keine** Healthchecks/
+  Portprüfung. Quell-Scan-Tests erzwingen die verbotenen Kommandos.
+
+**Web-Auslösung (Step 017):** OWNER-only Server Action (`/servers/[id]`, Button „Container erzeugen");
+Status `CONTAINER_PENDING → CONTAINER_CREATED`. Bei Fehler bleibt der Status `CONTAINER_PENDING` mit
+generischem Fehlerschlüssel (kein Roh-Agent-/Secret-Leak).
+
+> Container-**Start** (Lizenzzustimmung, Healthcheck, TS3-Connect) folgt in einem eigenen, geprüften Step.
 
 ## Sicherheitsprinzipien
 

@@ -34,12 +34,14 @@ werden dabei nie ausgegeben. Details: [SECURITY.md §5](../../project-brain/SECU
 Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für spätere Installationen gilt das
 **Managed-Only-Prinzip** (nur selbst erzeugte, gelabelte Ressourcen), eine Aktions-Allowlist und
 Docker-Argumente aus einem validierten Plan – **kein Docker-Socket im Web-Container**. Stand
-Step 012–015: read-only (Planung/Validierung, Inventar) **plus** eng begrenzte **Write-Aktion** –
-nur managed **Network/Volume** (`/docker/provision/prepare`), hinter **Token + Feature-Flag**
-(`AGENT_DOCKER_WRITE_ENABLED`, Default `false`), idempotent, **kein Container/Start**. In Step 015
-folgt die **Container-Vorbereitung** (`CONTAINER_PENDING`) rein web-seitig: SpeakCore generiert das
-Query-Admin-Secret selbst und speichert es **verschlüsselt** – **ohne** Docker, ohne Container/Start,
-ohne Secret in Logs. Details:
+Step 012–017: read-only (Planung/Validierung, Inventar) **plus** eng begrenzte **Write-Aktionen** –
+managed **Network/Volume** (`/docker/provision/prepare`) und **Container erstellen**
+(`/docker/provision/create-container`, **`docker create`, kein Start**), beide hinter **Token +
+Feature-Flag** (`AGENT_DOCKER_WRITE_ENABLED`, Default `false`), idempotent, Managed-Only. In Step 015
+erzeugt die **Container-Vorbereitung** (`CONTAINER_PENDING`) rein web-seitig das Query-Admin-Secret und
+speichert es **verschlüsselt**; in **Step 017** wird der Container erstellt (`CONTAINER_CREATED`) und das
+Secret dem Agent **serverseitig** übergeben, der es als **ENV** setzt – **kein Log-Lesen**, kein
+Secret in Logs, **kein Start**. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

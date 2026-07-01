@@ -202,6 +202,13 @@ das ServerQuery-Admin-Secret selbst und legt es **verschlüsselt** in `ServerCre
 ([ADR-0018](DECISIONS.md)); der Container-Plan wird rekonstruiert/revalidiert. **Kein Docker/Agent,
 kein Container/Start.** Secret nie im Client/Log/Audit (R-14 früh entschärft).
 
+**Container-Erstellung (Step 017):** `CONTAINER_PENDING → CONTAINER_CREATED`, **OWNER-only**,
+serverseitig: `core/container-create` → `lib/agent-client` → Agent `POST /docker/provision/create-container`
+→ **`docker create` (kein Start)**. Das Secret wird serverseitig entschlüsselt und dem Agent als
+Container-**ENV** (`TS3SERVERQUERY_ADMIN_PASSWORD`) übergeben – **kein Log-Lesen** (R-14 geschlossen),
+Managed-Only, idempotent (`exists`)/Konfliktschutz (`conflict`). Nie Secret im Client/Audit/Agent-Response.
+Details: [ADR-0023](DECISIONS.md).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

@@ -50,14 +50,18 @@ Secrets/Roh-Antworten). Weiterhin **keine** Steuerung/Installation.
 **External vs. Managed (ab Step 014):** `ServerInstance.mode` unterscheidet
 - **`external`** – ein bestehender, read-only verbundener TS3-Server (Query-Zugang verschlüsselt).
 - **`managed`** – von SpeakCore vorbereitete Ressourcen (Network/Volume) mit persistentem
-  `provisioningStatus` (DRAFT → RESOURCES_PREPARED → **CONTAINER_PENDING** → …); **noch kein
-  Container, kein Start**. Managed Records enthalten **keine** Secrets im `ServerInstance`.
+  `provisioningStatus` (DRAFT → RESOURCES_PREPARED → **CONTAINER_PENDING** → **CONTAINER_CREATED** → …);
+  bis Step 017 **kein Start**. Managed Records enthalten **keine** Secrets im `ServerInstance`.
 
 **Container-Vorbereitung (Step 015):** `RESOURCES_PREPARED → CONTAINER_PENDING` erzeugt ein
 **verschlüsseltes** ServerQuery-Admin-Secret (in `ServerCredential`) und finalisiert die Plan-Namen –
 **ohne** Docker/Agent, **ohne** Container/Start. Das Secret wird nie angezeigt/geloggt und **nicht**
-aus Docker-Logs gelesen. Der eigentliche `docker create` (managed, **ohne** Start) folgt als
-eigener Step.
+aus Docker-Logs gelesen.
+
+**Container-Erstellung (Step 017):** `CONTAINER_PENDING → CONTAINER_CREATED` – der Adapter delegiert an
+den Agent, der **`docker create` (kein Start)** ausführt. Das Secret wird **serverseitig** entschlüsselt
+und dem Agent als Container-**ENV** (`TS3SERVERQUERY_ADMIN_PASSWORD`) übergeben – kein Log-Lesen
+([ADR-0023](../../project-brain/DECISIONS.md)). Container-**Start** folgt als eigener Step.
 
 ## Datenfluss
 

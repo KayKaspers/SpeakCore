@@ -177,11 +177,23 @@
       "prepareButton": "Container-Erstellung vorbereiten",
       "prepareHintSecret": "Es wird ein Secret generiert und verschlüsselt gespeichert.",
       "nextStepCreate": "Nächster Schritt: Container erzeugen.",
+      "createButton": "Container erzeugen",
+      "createHintNotStarted": "Der Container wird erstellt, aber nicht gestartet.",
+      "createHintNoServer": "Der TS3-Server läuft danach noch nicht.",
+      "createHintNoSecret": "Secrets werden nicht angezeigt.",
+      "containerCreatedHint": "Container erstellt, aber noch nicht gestartet.",
+      "nextStepStart": "Nächster Schritt (später): Container starten.",
       "notice": {
         "encryptionMissing": "SECRET_ENCRYPTION_KEY ist nicht gesetzt – Aktion abgebrochen.",
         "invalidState": "In diesem Status nicht möglich.",
         "invalidPlan": "Der Provisioning-Plan ist ungültig.",
-        "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen."
+        "rateLimited": "Zu viele Versuche. Bitte später erneut versuchen.",
+        "credentialMissing": "Kein gespeichertes Secret vorhanden – bitte zuerst vorbereiten.",
+        "writeDisabled": "Docker-Schreibaktionen sind im Agent deaktiviert.",
+        "unavailable": "Docker/Agent ist nicht verfügbar.",
+        "unreachable": "Agent nicht erreichbar.",
+        "conflict": "Namenskonflikt mit einer nicht verwalteten Ressource.",
+        "error": "Container konnte nicht erstellt werden."
       },
       "status": {
         "DRAFT": "Entwurf",
@@ -198,7 +210,9 @@
         "unavailable": "Docker/Agent ist nicht verfügbar.",
         "unreachable": "Agent nicht erreichbar.",
         "conflict": "Namenskonflikt mit einer nicht verwalteten Ressource.",
-        "invalid": "Ungültige Eingaben."
+        "invalid": "Ungültige Eingaben.",
+        "createFailed": "Container konnte nicht erstellt werden.",
+        "invalidPlan": "Der Provisioning-Plan ist ungültig."
       }
     }
   },

@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
-import { prepareContainerAction, refreshServerAction } from '../actions';
+import { createContainerAction, prepareContainerAction, refreshServerAction } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 
 export const dynamic = 'force-dynamic';
@@ -42,11 +42,11 @@ export default async function ServerDetailPage({
   if (server.mode === 'managed') {
     const provStatus = server.provisioningStatus ?? 'DRAFT';
     const badge =
-      provStatus === 'RESOURCES_PREPARED'
+      provStatus === 'RESOURCES_PREPARED' || provStatus === 'CONTAINER_CREATED'
         ? 'bg-sc-success/15 text-sc-success'
         : provStatus === 'RESOURCE_PREPARE_PARTIAL'
           ? 'bg-sc-warning/15 text-sc-warning'
-          : provStatus === 'RESOURCE_PREPARE_FAILED'
+          : provStatus === 'RESOURCE_PREPARE_FAILED' || provStatus === 'ERROR'
             ? 'bg-sc-error/15 text-sc-error'
             : 'bg-sc-surface-raised text-sc-text-secondary';
     const rows: { label: string; value: string }[] = [
@@ -80,7 +80,18 @@ export default async function ServerDetailPage({
           )}
 
           {notice &&
-            ['encryptionMissing', 'invalidState', 'invalidPlan', 'rateLimited'].includes(notice) && (
+            [
+              'encryptionMissing',
+              'invalidState',
+              'invalidPlan',
+              'rateLimited',
+              'credentialMissing',
+              'writeDisabled',
+              'unavailable',
+              'unreachable',
+              'conflict',
+              'error',
+            ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
               </p>
@@ -96,10 +107,21 @@ export default async function ServerDetailPage({
           </dl>
 
           <div className="mt-4 space-y-1 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
-            <p>• {t('managed.containerNotCreated')}</p>
+            {provStatus === 'CONTAINER_CREATED' ? (
+              <p>• {t('managed.containerCreatedHint')}</p>
+            ) : (
+              <p>• {t('managed.containerNotCreated')}</p>
+            )}
             <p>• {t('managed.noServerStarted')}</p>
             {provStatus === 'RESOURCES_PREPARED' && <p>• {t('managed.prepareHintSecret')}</p>}
-            {provStatus === 'CONTAINER_PENDING' && <p>• {t('managed.nextStepCreate')}</p>}
+            {provStatus === 'CONTAINER_PENDING' && (
+              <>
+                <p>• {t('managed.createHintNotStarted')}</p>
+                <p>• {t('managed.createHintNoServer')}</p>
+                <p>• {t('managed.createHintNoSecret')}</p>
+              </>
+            )}
+            {provStatus === 'CONTAINER_CREATED' && <p>• {t('managed.nextStepStart')}</p>}
           </div>
 
           {provStatus === 'RESOURCES_PREPARED' && (
@@ -111,6 +133,19 @@ export default async function ServerDetailPage({
                 className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
               >
                 {t('managed.prepareButton')}
+              </button>
+            </form>
+          )}
+
+          {provStatus === 'CONTAINER_PENDING' && (
+            <form action={createContainerAction} className="mt-6">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="id" value={server.id} />
+              <button
+                type="submit"
+                className="rounded-sc-md bg-sc-primary px-4 py-2 text-sc-sm font-medium text-white"
+              >
+                {t('managed.createButton')}
               </button>
             </form>
           )}

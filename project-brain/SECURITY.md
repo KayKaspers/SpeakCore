@@ -146,9 +146,18 @@ Der Record enthält **keine Secrets/Roh-Agent-/Docker-Daten**. `writeDisabled`/`
 ≥ 32 Zeichen) und speichert es **verschlüsselt** ([ADR-0018](DECISIONS.md)) – **nie** im Client/Log/
 Audit, **nicht** aus Docker-Logs gelesen (frühe R-14-Entschärfung). Ohne `SECRET_ENCRYPTION_KEY`
 bricht die Aktion ab (Status unverändert). Idempotent (kein Überschreiben bestehender Credentials).
+**Container-Erstellung ohne Start (Step 017, [ADR-0023](DECISIONS.md)):** Übergang
+`CONTAINER_PENDING → CONTAINER_CREATED`. Der Agent führt **nur `docker create`** aus (nie `run`/`start`),
+hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, aus einem revalidierten Plan (fester Name/Netzwerk/
+named Volume – **kein Host-Mount**, Ports/Restart aus Allowlist, Managed-Labels). Das Query-Admin-Secret
+wird **serverseitig entschlüsselt**, dem Agent übergeben und als Container-**ENV**
+`TS3SERVERQUERY_ADMIN_PASSWORD` gesetzt ⇒ **kein Zufallspasswort in Logs, kein Log-Lesen** (R-14
+geschlossen). OWNER-only, Idempotenz (`exists`) + Konfliktschutz (`conflict`). Kein Browser→Agent; Secret
+nie im Client/Audit/Agent-Response. **Kein** `stop/rm/inspect/exec/cp/logs`, **kein** compose, **kein**
+Socket/privileged.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
-  nie in Docker-Logs/Audit/Client. Restrisiko: manche Images geben Initial-Credentials im Log aus
-  (RISKS R-14) – muss bei der echten Umsetzung gezielt behandelt werden.
+  nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
+  (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).
 
 ### Read-only-Snapshot & Docker-Inventar (Step 006/007/011)
 

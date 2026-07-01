@@ -23,7 +23,10 @@
   controlled creation of managed **network/volume**. The preparation is now stored as a **managed
   server record** (status “Resources prepared”) and visible under `/servers`. From Step 015 the
   **container creation can be prepared** (status “Container creation prepared”): SpeakCore generates a
-  secret and stores it encrypted. Still **no** container is created and **no** TS3 server is started.*
+  secret and stores it encrypted. From Step 017 the **container can be created** (status “Container
+  created”): via `docker create`, with the secret passed to the container as an ENV (no log reading).
+  The container is **created but not started** – the TS3 server is **not** running yet; secrets are
+  never displayed.*
 - Start/stop/restart a server
 - Reading logs
 - Backup & Restore

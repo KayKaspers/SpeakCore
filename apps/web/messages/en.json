@@ -177,11 +177,23 @@
       "prepareButton": "Prepare container creation",
       "prepareHintSecret": "A secret is generated and stored encrypted.",
       "nextStepCreate": "Next step: create the container.",
+      "createButton": "Create container",
+      "createHintNotStarted": "The container is created but not started.",
+      "createHintNoServer": "The TS3 server will not be running afterwards.",
+      "createHintNoSecret": "Secrets are not displayed.",
+      "containerCreatedHint": "Container created, but not started yet.",
+      "nextStepStart": "Next step (later): start the container.",
       "notice": {
         "encryptionMissing": "SECRET_ENCRYPTION_KEY is not set – action aborted.",
         "invalidState": "Not possible in this state.",
         "invalidPlan": "The provisioning plan is invalid.",
-        "rateLimited": "Too many attempts. Please try again later."
+        "rateLimited": "Too many attempts. Please try again later.",
+        "credentialMissing": "No stored secret found – please prepare first.",
+        "writeDisabled": "Docker write actions are disabled in the agent.",
+        "unavailable": "Docker/agent is unavailable.",
+        "unreachable": "Agent unreachable.",
+        "conflict": "Name conflict with an unmanaged resource.",
+        "error": "The container could not be created."
       },
       "status": {
         "DRAFT": "Draft",
@@ -198,7 +210,9 @@
         "unavailable": "Docker/agent is unavailable.",
         "unreachable": "Agent unreachable.",
         "conflict": "Name conflict with an unmanaged resource.",
-        "invalid": "Invalid inputs."
+        "invalid": "Invalid inputs.",
+        "createFailed": "The container could not be created.",
+        "invalidPlan": "The provisioning plan is invalid."
       }
     }
   },

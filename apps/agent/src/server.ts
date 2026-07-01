@@ -2,11 +2,12 @@ import http from 'node:http';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
-import type { Ts3ProvisionInput } from '@speakcore/types';
+import type { Ts3ContainerCreateRequest, Ts3ProvisionInput } from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
 import { gatherSystemInfo } from './system-info';
 import { gatherDockerInventory } from './docker-inventory';
 import { prepareProvision } from './docker-write';
+import { createTs3Container } from './docker-container';
 import { dockerExec } from './docker-cli';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -108,6 +109,29 @@ async function handle(
       return;
     }
     const result = await prepareProvision(body as Ts3ProvisionInput, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/create-container') {
+    // Managed Container ERSTELLEN (kein Start). Token-Pflicht + Write-Feature-Flag.
+    // Der Request-Body enthält das ServerQuery-Admin-Secret (nur serverseitig, als ENV gesetzt).
+    // Es wird NICHT geloggt; das Ergebnis enthält keine Secrets.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await createTs3Container(body as Ts3ContainerCreateRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
     });

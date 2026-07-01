@@ -184,3 +184,34 @@ export interface ProvisionPrepareResult {
   rollbackPlan: ManagedRollbackEntry[];
   audit: PlannedAuditAction[];
 }
+
+// --- Managed Container Create (NDF Step 017: `docker create`, KEIN Start) -----
+
+export type ContainerCreateStatus =
+  | 'created'
+  | 'exists'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/**
+ * Agent-Request zum **Erstellen** (nicht Starten) eines managed TS3-Containers.
+ *
+ * `queryAdminPassword` ist ein **Secret**: wird ausschließlich serverseitig übergeben, vom Agent als
+ * Container-**ENV** gesetzt und NIE geloggt, geplant oder im Ergebnis zurückgegeben.
+ */
+export interface Ts3ContainerCreateRequest {
+  input: Ts3ProvisionInput;
+  queryAdminUsername: string;
+  queryAdminPassword: string;
+}
+
+/** Ergebnis von `docker create` (managed). Enthält NIE Secrets/ENV-Werte/Roh-Docker-Ausgabe. */
+export interface ContainerCreateResult {
+  status: ContainerCreateStatus;
+  containerName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}

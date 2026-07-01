@@ -20,17 +20,18 @@
   Stand Step 011: Docker-Nähe ist bislang **rein lesend** (`/docker/inventory`, nur managed
   Ressourcen, kein Socket/Schreiben); schreibende Aktionen kommen erst als eigener, geprüfter Step.
 
-## R-14 – Secrets in Docker-Logs bei TS3-Provisionierung (spätere Umsetzung)
-- **E:** mittel · **A:** mittel · **Risiko:** mittel
+## R-14 – Secrets in Docker-Logs bei TS3-Provisionierung (geschlossen ab Step 017)
+- **E:** mittel · **A:** mittel · **Risiko:** mittel → **niedrig (mitigiert)**
 - **Beschreibung:** Das offizielle TeamSpeak-3-Image gibt beim ersten Start Initial-Credentials
   (ServerAdmin-Token/Query-Passwort) in die Container-Logs aus. Ein ungefiltertes Log-Handling
   könnte diese Secrets exponieren.
-- **Gegenmaßnahmen (umgesetzt ab Step 015):** SpeakCore **generiert das Secret selbst**
+- **Gegenmaßnahmen (Step 015 + Step 017):** SpeakCore **generiert das Secret selbst**
   (`generateSecret`, alphanumerisch) und legt es **verschlüsselt** ab ([ADR-0018](DECISIONS.md)) –
-  **bevor** ein Container existiert; es wird **nicht aus Docker-Logs gelesen**, nie geloggt/auditiert/
-  im Client ausgegeben. Beim späteren Container-Create wird das Query-Passwort per ENV/Secret
-  vorgegeben statt aus Logs zu übernehmen. Managed-Only ([ADR-0020](DECISIONS.md)). **Rest:** finale
-  Absicherung des Log-Handlings beim echten Container-Create.
+  **bevor** ein Container existiert. Beim Container-Create wird das Query-Passwort per **ENV**
+  (`TS3SERVERQUERY_ADMIN_PASSWORD`, [ADR-0023](DECISIONS.md)) vorgegeben ⇒ das Image erzeugt **kein**
+  Zufallspasswort in den Logs. SpeakCore **liest niemals Docker-Logs** (Quell-Scan-Tests erzwingen dies);
+  Secret wird nie geloggt/auditiert/im Client ausgegeben. Managed-Only ([ADR-0020](DECISIONS.md)).
+- **Rest:** beim späteren Container-**Start**/Betrieb weiterhin keine ungefilterte Log-Ausgabe zulassen.
 
 ## R-02 – Unsichere Speicherung von TS3-Query-Zugängen / Secrets
 - **E:** mittel · **A:** hoch · **Risiko:** hoch
@@ -121,6 +122,10 @@
 - **Stand Step 014:** vorbereitete Ressourcen sind an eine managed `ServerInstance` gebunden
   (server-seitig erzeugte `instanceId`/Namen, keine Secrets). **Offen:** verwaiste Docker-Ressourcen,
   falls ein managed Record später entfernt wird (automatisches Remove ist ein eigener, geprüfter Step).
+- **Stand Step 017:** erste **Container-Erstellung** (`docker create`, **kein Start**,
+  [ADR-0023](DECISIONS.md)) – gleiche Guards (Flag + Token, Managed-Only, `execFile`/keine Shell,
+  Idempotenz/`conflict`, kein `rm`); Secret nur als ENV, nie im Ergebnis/Audit/Log. Verwaiste
+  Container bei späterem Entfernen bleiben offen (Remove = eigener Step).
 
 ## R-16 – Fehlerhafte/unvollständige Secret-Key-Rotation (Step 016)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
@@ -168,7 +173,7 @@
 | R-08 | WebUI-Sicherheit | mittel *(reduziert)* |
 | R-09 | Komplexität/Bus-Faktor | mittel |
 | R-11 | CSP `'unsafe-inline'` | mittel |
-| R-14 | Secrets in Docker-Logs (Provisionierung) | mittel |
+| R-14 | Secrets in Docker-Logs (Provisionierung) | niedrig *(mitigiert ab Step 017)* |
 | R-13 | SSRF über TS3-Host-Eingabe | niedrig-mittel |
 | R-15 | Erste schreibende Docker-Aktion | niedrig-mittel |
 | R-16 | Secret-Key-Rotation | niedrig-mittel |
