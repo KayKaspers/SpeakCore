@@ -5,6 +5,42 @@
 
 ## [Unreleased]
 
+### NDF Step 016 – Secret Encryption Key Rotation Foundation (2026-07-01)
+
+> **Kein Docker, kein Container, kein TS3-Start, keine öffentliche UI/API.** Sichere Grundlage,
+> um `SECRET_ENCRYPTION_KEY` später zu wechseln (Re-Encrypt aller `ServerCredential`).
+
+#### Added
+- **Rotations-Service** `rotateServerCredentialEncryptionKeys()` (`src/core/secret-rotation.ts`):
+  entschlüsselt bestehende Credentials mit dem **alten**, verschlüsselt mit dem **neuen** Schlüssel
+  (Format bleibt `v1`, AES-256-GCM). Rein serverseitig (Operator/CLI) – **keine Route, keine API,
+  keine UI**. Rückgabe **nur Zählwerte** (`total/wouldRotate/rotated/skipped/failed` + `dryRun/sameKey`),
+  **nie Secrets**.
+- **Reine Logik** ausgelagert (`src/core/secret-rotation-helpers.ts`): `resolveRotationKeys`
+  (Schlüsselprüfung), `planCredentialRotation` (Re-Encrypt-Planung, idempotentes `skipped` für bereits
+  rotierte Werte, `failed` für unlesbare) – DB-frei und unit-getestet.
+- **Krypto erweitert** (`src/core/crypto.ts`, abwärtskompatibel): `deriveKey`, `encryptWithKey`,
+  `decryptWithKey`, `reencryptValue`. Bestehende `v1`-Werte bleiben mit ihrem Schlüssel lesbar;
+  `encryptSecret/decryptSecret` (env-Schlüssel) unverändert.
+- **Operator-CLI** `pnpm --filter @speakcore/web rotate-secrets [--dry-run]`
+  (`apps/web/scripts/rotate-secrets.ts`): gibt nur Zählwerte aus, keine Secrets/Schlüssel.
+- **Env** `SECRET_ENCRYPTION_KEY_NEW` (nur für Rotation; im Normalbetrieb leer) in `.env.example`
+  dokumentiert.
+- **Audit:** `security.secretRotation.dryRun/started/completed/failed` (Actor `system`, **keine
+  Secrets/Schlüssel/Zählwerte-Leaks**).
+
+#### Security
+- Fehlender **alter oder neuer** Schlüssel ⇒ Abbruch **vor** DB-Zugriff (`RotationConfigError`).
+- **Identischer** alter/neuer Schlüssel ⇒ kontrolliert `sameKey`, nichts wird geschrieben.
+- **All-or-nothing:** Schreibvorgang läuft in einer Prisma-Transaktion; bei hartem Fehler (`failed>0`)
+  wird **nichts** geschrieben. Bereits rotierte Werte werden übersprungen (idempotent, wiederholbar).
+- External- **und** Managed-Credentials werden gleich behandelt und bleiben lesbar. Keine neue
+  öffentliche Angriffsfläche (Quell-Scan-Test + `src/app`-Referenz-Test).
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 015 – Container Pending & Secret-Vorbereitung (2026-07-01)
 
 > **Kein Docker-Container, kein TS3-Start.** Übergang `RESOURCES_PREPARED → CONTAINER_PENDING`

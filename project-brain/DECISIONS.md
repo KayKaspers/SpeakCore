@@ -196,9 +196,9 @@
   Format `v1:iv:tag:ciphertext`. Ohne gesetzten Schlüssel werden **keine** Secrets gespeichert.
 - **Begründung:** Authentifizierte Verschlüsselung (Integrität), keine zusätzliche Abhängigkeit
   (`node:crypto`), einfacher Betrieb (ein Env-Wert). Erfüllt Safe-Defaults ([SECURITY.md](SECURITY.md)).
-- **Konsequenzen:** **Key-Rotation** noch nicht implementiert (Re-Encrypt-Migration später).
-  Verlust des Schlüssels ⇒ gespeicherte Secrets unlesbar (dokumentiert). Schlüssel gehört in einen
-  sicheren Store, nie ins Repo.
+- **Konsequenzen:** **Key-Rotation** als Re-Encrypt-Grundlage in Step 016 ergänzt
+  ([ADR-0022](DECISIONS.md), Operator/CLI, `v1` beibehalten). Verlust des Schlüssels ⇒ gespeicherte
+  Secrets unlesbar (dokumentiert). Schlüssel gehört in einen sicheren Store, nie ins Repo.
 
 ## ADR-0019 – Docker-Zugriffsstrategie: CLI über Agent mit Allowlist & statischen Argumenten
 
@@ -248,6 +248,28 @@
 - **Konsequenzen:** **Kein** automatisches `rm` in diesem Step (nur deklarativer Rollback-Plan).
   Container-Erstellung/-Start und automatisches Remove sind eigene, spätere ADRs/Steps. Ergebnis
   enthält nie Secrets.
+
+## ADR-0022 – Secret-Key-Rotation: Einzelschlüssel-Modell, Re-Encrypt statt Key-ID
+
+- **Status:** accepted (Step 016)
+- **Kontext:** Vor der echten Container-Erstellung soll ein Wechsel von `SECRET_ENCRYPTION_KEY`
+  möglich sein, ohne bestehende (external + managed) `ServerCredential` zu beschädigen.
+- **Entscheidung:** Das Verschlüsselungsformat bleibt bei **`v1:<iv>:<tag>:<ciphertext>`**
+  ([ADR-0018](DECISIONS.md)); ein Key-Identifier im Format wird **bewusst aufgeschoben**. Rotation
+  erfolgt als **Re-Encrypt in place**: alle Werte werden mit dem **alten** Schlüssel entschlüsselt und
+  mit dem **neuen** wieder verschlüsselt (weiterhin AES-256-GCM). Umgesetzt als rein serverseitiger
+  **Operator-/CLI-Vorgang** (`rotateServerCredentialEncryptionKeys`, `pnpm … rotate-secrets`) mit
+  **Dry-Run**, **Transaktion** (all-or-nothing) und **Idempotenz** (bereits rotierte Werte werden
+  übersprungen). **Keine** Web-UI, **keine** Route, **kein** API-Endpunkt.
+- **Begründung:** Einzelschlüssel-Modell (genau ein aktiver Schlüssel) ist für 0.1 ausreichend und
+  minimiert Komplexität/Angriffsfläche; ein Multi-Key-/Key-ID-Format lohnt erst bei parallel gültigen
+  Schlüsseln. Re-Encrypt hält bestehende `v1`-Werte jederzeit entschlüsselbar. Rückgabe nur Zählwerte,
+  nie Secrets/Schlüssel.
+- **Konsequenzen:** Fehlt der alte **oder** neue Schlüssel, bricht die Rotation vor jedem DB-Zugriff
+  ab. Identische Schlüssel ⇒ kontrolliert `sameKey` (kein Schreiben). Ein späterer Wechsel auf ein
+  `v2`-Format mit Key-ID (mehrere gleichzeitig gültige Schlüssel, unterbrechungsfreie Rotation) bleibt
+  als eigener Step möglich. Der neue Schlüssel wird über `SECRET_ENCRYPTION_KEY_NEW` nur temporär
+  bereitgestellt; **Backup vor Rotation empfohlen**.
 
 ---
 

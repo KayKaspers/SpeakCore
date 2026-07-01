@@ -108,6 +108,9 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
   Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`) und Container-
   Vorbereitung (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret — **kein Container, kein TS3-Start**.
+- **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
+  gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
+  inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.
 - **Noch nicht:** echter `docker create`/TS3-Container, Installation/-Steuerung (Start/Stop), Plugin-/Community-Module.
 
 ## Mitwirken

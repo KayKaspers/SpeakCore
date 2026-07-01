@@ -28,7 +28,10 @@
 - Server starten/stoppen/neustarten
 - Logs lesen
 - Backup & Restore
-- Sicherheit & Safe Defaults
+- Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte
+  Zugangsdaten (`SECRET_ENCRYPTION_KEY`) kann rotiert werden. Reiner **Operator-/CLI-Vorgang**
+  (`pnpm --filter @speakcore/web rotate-secrets`, mit `--dry-run` zum gefahrlosen Prüfen) – **keine
+  Web-UI/API**. Vor der Rotation ein **Backup** anlegen; Secrets werden nie angezeigt.*
 - Audit-Log
 
 > Inhalte folgen in einem späteren NDF-Schritt. Englische Entsprechung: [`../en/`](../en/README.md).

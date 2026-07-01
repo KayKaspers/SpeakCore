@@ -18,6 +18,17 @@ Nur die WebUI/API ist exponiert. Der Agent ist nicht öffentlich erreichbar.
 - TS3-Query-Zugänge werden verschlüsselt gespeichert, nie im Klartext, nie im Log.
 - Warnungen bei riskanter Konfiguration (offene Ports, schwache Umgebung via Preflight).
 
+## Secret-Key-Rotation (Step 016)
+
+`SECRET_ENCRYPTION_KEY` lässt sich wechseln, ohne gespeicherte Zugangsdaten zu verlieren: ein
+Operator setzt zusätzlich `SECRET_ENCRYPTION_KEY_NEW` und führt lokal
+`pnpm --filter @speakcore/web rotate-secrets --dry-run` (nur Zählwerte) bzw. ohne `--dry-run` (schreibt
+neu verschlüsselte Werte) aus. Der Vorgang ist **transaktional** (all-or-nothing) und **idempotent**;
+er existiert **nur als CLI**, nicht als Web-UI/Route/API. Danach `SECRET_ENCRYPTION_KEY` auf den neuen
+Wert setzen und `SECRET_ENCRYPTION_KEY_NEW` leeren. **Vor der Rotation ein DB-Backup anlegen.** Secrets
+werden dabei nie ausgegeben. Details: [SECURITY.md §5](../../project-brain/SECURITY.md) /
+[ADR-0022](../../project-brain/DECISIONS.md).
+
 ## Agent & Docker (Ausblick)
 
 Der Agent ist **kein allgemeines Docker-Admin-Interface**. Für spätere Installationen gilt das

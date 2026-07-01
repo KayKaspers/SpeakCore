@@ -122,6 +122,19 @@
   (server-seitig erzeugte `instanceId`/Namen, keine Secrets). **Offen:** verwaiste Docker-Ressourcen,
   falls ein managed Record später entfernt wird (automatisches Remove ist ein eigener, geprüfter Step).
 
+## R-16 – Fehlerhafte/unvollständige Secret-Key-Rotation (Step 016)
+- **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
+- **Beschreibung:** Beim Wechsel von `SECRET_ENCRYPTION_KEY` könnten Credentials unlesbar werden
+  (falscher alter Schlüssel, Abbruch mitten im Vorgang, Verwechslung alt/neu).
+- **Gegenmaßnahmen ([ADR-0022](DECISIONS.md)):** Rotation nur als **Operator-/CLI-Vorgang** (keine
+  UI/Route/API); **Dry-Run** vorab; **Transaktion** (all-or-nothing – bei hartem Fehler wird nichts
+  geschrieben); **Idempotenz** (bereits rotierte Werte werden übersprungen, Wiederholung sicher);
+  Abbruch **vor** DB-Zugriff bei fehlendem altem/neuem Schlüssel; identische Schlüssel ⇒ kein
+  Schreiben; bestehende `v1`-Werte bleiben mit ihrem Schlüssel entschlüsselbar. Ausgabe/Audit nur
+  **Zählwerte**, nie Secrets/Schlüssel.
+- **Rest/geplant:** **DB-Backup vor Rotation** (Betreiberpflicht, dokumentiert); optional späteres
+  `v2`-Format mit Key-ID für unterbrechungsfreie Multi-Key-Rotation.
+
 ## R-13 – SSRF über TS3-Host-Eingabe (read-only)
 - **E:** niedrig · **A:** mittel · **Risiko:** niedrig-mittel
 - **Beschreibung:** Der Verbindungstest baut eine TCP-Verbindung zu einem **owner-eingegebenen**
@@ -158,5 +171,6 @@
 | R-14 | Secrets in Docker-Logs (Provisionierung) | mittel |
 | R-13 | SSRF über TS3-Host-Eingabe | niedrig-mittel |
 | R-15 | Erste schreibende Docker-Aktion | niedrig-mittel |
+| R-16 | Secret-Key-Rotation | niedrig-mittel |
 | R-10 | i18n-Drift | niedrig |
 | R-12 | Agent-Snapshot ohne Token | niedrig |

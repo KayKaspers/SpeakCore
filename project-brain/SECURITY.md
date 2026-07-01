@@ -73,9 +73,17 @@ Zentral in der Next.js-Middleware gesetzt ([ADR-0015](DECISIONS.md), `lib/securi
 - Secrets ausschließlich über Umgebung/sicheren Store, **niemals** im Repository
   (siehe `.gitignore`: `.env*`, `secrets/`, `*.key`, `*.pem`, `*.sqlite`).
 - `.env.example` dokumentiert benötigte Variablen ohne echte Werte.
-- TS3-Query-Credentials werden **verschlüsselt** persistiert: **AES-256-GCM**, Schlüssel aus
-  `SECRET_ENCRYPTION_KEY` ([ADR-0018](DECISIONS.md)). Ohne Schlüssel keine Speicherung; nie im
-  Klartext, nie im Log/Audit, nie im Client. Key-Rotation noch offen (RISKS/Roadmap).
+- TS3-Query-Credentials (external **und** managed) werden **verschlüsselt** persistiert:
+  **AES-256-GCM**, Schlüssel aus `SECRET_ENCRYPTION_KEY` ([ADR-0018](DECISIONS.md)). Ohne Schlüssel
+  keine Speicherung; nie im Klartext, nie im Log/Audit, nie im Client.
+- **Key-Rotation (Step 016, [ADR-0022](DECISIONS.md)):** `SECRET_ENCRYPTION_KEY` kann rotiert werden,
+  indem alle `ServerCredential` mit dem alten Schlüssel ent- und mit einem neuen (`SECRET_ENCRYPTION_KEY_NEW`)
+  wieder verschlüsselt werden (Format bleibt `v1`). Ausschließlich **Operator-/CLI-Vorgang**
+  (`pnpm --filter @speakcore/web rotate-secrets [--dry-run]`) – **keine Web-UI, keine Route, keine API**.
+  **Dry-Run** ändert nichts; der echte Lauf schreibt **transaktional** (all-or-nothing) und ist
+  **idempotent** (bereits rotierte Werte werden übersprungen). Fehlt ein Schlüssel oder sind beide
+  gleich, bricht der Vorgang kontrolliert ab. Ausgabe/Audit enthalten **nur Zählwerte**, nie Secrets
+  oder Schlüssel. **Empfehlung: DB-Backup vor Rotation.**
 
 ## 4b. TS3-Verbindungen (read-only, Step 008)
 
