@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
+import { formatBackupSize, listManagedVolumeBackupsForServer } from '@/core/backup-list';
 import { BrandMark } from '@/components/BrandMark';
 import {
   createContainerAction,
@@ -36,11 +37,12 @@ export default async function ServerDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; backups?: string }>;
 }) {
   const { locale, id } = await params;
-  const { notice } = await searchParams;
-  if (!(await getCurrentUser())) {
+  const { notice, backups: backupsParam } = await searchParams;
+  const user = await getCurrentUser();
+  if (!user) {
     redirect(`/${locale}/login`);
   }
 
@@ -91,6 +93,85 @@ export default async function ServerDetailPage({
     </section>
   );
 
+  // Read-only Backup-Liste (Step 033): NUR Sichtbarkeit – kein Download/Restore/Delete, keine
+  // Docker-Aktion. OWNER-only; wird erst nach Klick geladen (?backups=1), auch für archivierte Server.
+  const showBackupList =
+    backupsParam === '1' && user.role === 'OWNER' && server.mode === 'managed';
+  const backupList = showBackupList
+    ? await listManagedVolumeBackupsForServer(server.id, user.email)
+    : null;
+  const backupListCard =
+    server.mode === 'managed' && user.role === 'OWNER' ? (
+      <section className="mt-6 rounded-sc-lg border border-sc-border bg-sc-surface p-4">
+        <h2 className="text-sc-sm font-medium text-sc-text-primary">{t('managed.backupList.title')}</h2>
+        <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
+          <li>• {t('managed.backupList.sensitiveHint')}</li>
+          <li>• {t('managed.backupList.readOnlyHint')}</li>
+        </ul>
+        {!backupList && (
+          <div className="mt-3">
+            <Link
+              href={`/${locale}/servers/${server.id}?backups=1`}
+              className="rounded-sc-md border border-sc-border-strong px-3 py-2 text-sc-sm text-sc-text-secondary"
+            >
+              {t('managed.backupList.showButton')}
+            </Link>
+          </div>
+        )}
+        {backupList && backupList.status === 'ok' && (
+          <div className="mt-3 space-y-2">
+            {(backupList.backups ?? []).length === 0 ? (
+              <p className="text-sc-sm text-sc-text-secondary">{t('managed.backupList.empty')}</p>
+            ) : (
+              <>
+                <p className="text-sc-caption text-sc-text-muted">
+                  {t('managed.backupList.countLabel', { count: (backupList.backups ?? []).length })}
+                </p>
+                <ul className="space-y-2">
+                  {(backupList.backups ?? []).map((b) => (
+                    <li key={b.fileName} className="rounded-sc-md border border-sc-border p-2">
+                      <p className="break-all font-mono text-sc-caption text-sc-text-primary">
+                        {b.fileName}
+                      </p>
+                      <p className="mt-1 text-sc-caption text-sc-text-secondary">
+                        {formatBackupSize(b.sizeBytes)} · {t('managed.backupList.createdAt')}{' '}
+                        {new Date(b.createdAt).toLocaleString(locale)} ·{' '}
+                        {t('managed.backupList.modifiedAt')}{' '}
+                        {new Date(b.modifiedAt).toLocaleString(locale)}
+                      </p>
+                      <p className="mt-1 text-sc-caption text-sc-text-muted">
+                        {t('managed.backupList.metadataLabel')}:{' '}
+                        {t(`managed.backupList.metadata.${b.metadataStatus}`)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
+        {backupList && backupList.status === 'backupDirUnavailable' && (
+          <p className="mt-3 text-sc-sm text-sc-warning">{t('managed.backupList.dirUnavailable')}</p>
+        )}
+        {backupList && backupList.status === 'unreachable' && (
+          <p className="mt-3 text-sc-sm text-sc-warning">{t('managed.backupList.unreachable')}</p>
+        )}
+        {backupList && (backupList.status === 'error' || backupList.status === 'notManaged') && (
+          <p className="mt-3 text-sc-sm text-sc-warning">{t('managed.backupList.error')}</p>
+        )}
+        {backupList && (
+          <div className="mt-3">
+            <Link
+              href={`/${locale}/servers/${server.id}`}
+              className="text-sc-caption text-sc-text-muted underline"
+            >
+              {t('managed.backupList.hideButton')}
+            </Link>
+          </div>
+        )}
+      </section>
+    ) : null;
+
   // Archivierter managed Server (Step 027): nur Status/Info, KEINE Lifecycle-Aktionen.
   if (server.mode === 'managed' && server.archivedAt) {
     return (
@@ -127,6 +208,7 @@ export default async function ServerDetailPage({
             {t('managed.archive.noActions')}
           </p>
         </section>
+        {backupListCard}
         {exportCard}
         <footer className="mt-6">
           <Link
@@ -489,6 +571,7 @@ export default async function ServerDetailPage({
         </section>
 
         {provStatus !== 'RESOURCES_PREPARED' && server.managedVolumeState !== 'removed' && backupInfoCard}
+        {backupListCard}
         {exportCard}
 
         <footer className="mt-6">

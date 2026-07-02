@@ -401,6 +401,38 @@ export interface VolumeBackupResult {
   audit: PlannedAuditAction[];
 }
 
+// --- Read-only Backup-Liste (NDF Step 033: NUR Sichtbarkeit, kein Download/Restore/Delete) ---
+
+export type BackupListStatus = 'ok' | 'backupDirUnavailable' | 'invalid' | 'unavailable' | 'error';
+
+/** Zustand der zugehörigen `.metadata.json` eines gelisteten Backups. */
+export type BackupMetadataStatus = 'present' | 'missing' | 'invalid';
+
+/** Read-only Listen-Request: NUR die `instanceId` – kein Pfad, kein Muster, keine freien Parameter. */
+export interface Ts3BackupListRequest {
+  instanceId: string;
+}
+
+/**
+ * Ein gelistetes Backup: **nur Dateiname** (kein Host-Pfad), Größe, Zeitstempel und – falls gültig –
+ * die **sanitisierten** Metadaten (nur bekannte Felder, keine Secrets, keine Roh-Dumps).
+ */
+export interface BackupListEntry {
+  fileName: string;
+  sizeBytes: number;
+  createdAt: string;
+  modifiedAt: string;
+  metadataStatus: BackupMetadataStatus;
+  metadata?: BackupMetadata;
+}
+
+/** Ergebnis der read-only Backup-Liste. Keine Host-Pfade, keine Secrets, keine Roh-Datei-Dumps. */
+export interface BackupListResult {
+  status: BackupListStatus;
+  backups?: BackupListEntry[];
+  errors?: ValidationError[];
+}
+
 // --- Managed Volume Backup Blueprint (NDF Step 030: reine Planung, KEINE Ausführung) ---------
 
 /** Zieltyp eines (späteren) Backups – rein konzeptionell, wird NIE zu einem echten Kommando. */

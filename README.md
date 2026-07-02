@@ -3,7 +3,7 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – interne Alpha / NDF Step 032 (echtes Volume-Backup)` — Details:
+**Status:** `0.1 – interne Alpha / NDF Step 033 (read-only Backup-Sichtbarkeit)` — Details:
 [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
@@ -139,7 +139,9 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   gelten als sensibel). Ab **Step 032** das erste **echte Volume-Backup**: read-only Quelle
   (`-v <volume>:/data:ro`), **serverseitiges** Ziel (`AGENT_BACKUP_DIR`) und festes allowlisted Image
   (`alpine:3.20`), nur ohne Container (`RESOURCES_PREPARED`), OWNER-only mit 3 Bestätigungen + getippt
-  `CREATE BACKUP` — Backup-Dateien sind **sensibel**, **kein** Browser-Download.
+  `CREATE BACKUP` — Backup-Dateien sind **sensibel**, **kein** Browser-Download. Ab **Step 033** sind
+  vorhandene Backups **read-only einsehbar** (Dateiname/Größe/Zeitstempel + sanitisierte Metadaten,
+  auch für archivierte Server) — reine Sichtbarkeit, kein Download/Restore/Delete, keine Docker-Aktion.
 - **Kein** Restore/Import, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller

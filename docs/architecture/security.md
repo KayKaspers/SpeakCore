@@ -65,7 +65,10 @@ ausdrücklicher Wahl). **Step 030** ergänzt ein **Volume-Backup-Konzept** (rein
 Volume-Backup** um: read-only Quelle (`:/data:ro`), **serverseitiges** Ziel (`AGENT_BACKUP_DIR`) und
 **festes allowlisted Image** (`alpine:3.20`), statische `execFile`-Args ohne Shell/Socket, konservativ
 **nur ohne Container** der `instanceId`, OWNER-only mit 3 Bestätigungen + getippt `CREATE BACKUP` –
-**kein** Restore/Import/Browser-Download. **Kein Log-Lesen**, kein Inspect,
+**kein** Restore/Import/Browser-Download. **Step 033** ergänzt eine **read-only Backup-Liste**
+(nur Dateiname/Größe/Zeitstempel + sanitisierte Metadaten aus `AGENT_BACKUP_DIR`, striktes
+Namensmuster, kein Docker/`execFile`, kein Download/Restore/Delete/Entpacken, keine Host-Pfade in
+der Antwort). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

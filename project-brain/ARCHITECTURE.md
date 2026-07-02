@@ -311,6 +311,16 @@ getippt `CREATE BACKUP` (Step-030-Guard, Web **und** Agent), Audit `backup.manag
 **keine DB-Schreiboperation außer Audit**. Download/Storage-Konzept, **Restore/Import** und die
 **Hard-Delete-Policy** folgen als eigene, abgesicherte Steps.
 
+**Read-only Backup-Liste (Step 033):** `POST /docker/provision/list-backups` (Token-Gate, **kein**
+Write-Flag – reine Sichtbarkeit ohne Docker/`execFile`/Shell). Listet **nur** Dateien mit striktem
+Muster `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` aus `AGENT_BACKUP_DIR` (keine Subdirs/
+Symlinks/fremden Instanzen); `.metadata.json` (max. 64 KB) wird **sanitisiert** angezeigt (nur
+bekannte Felder, `instanceId`/`backupFileName` müssen passen, sonst `invalid`); `tar.gz`-Inhalte
+werden nie gelesen. Web: OWNER-only Karte auf `/servers/[id]` (aktiv **und archiviert**, Laden erst
+per Klick), `assertBackupListContainsNoSecrets` als Defense-in-Depth, Audit
+`backup.managedVolume.list.*` **ohne Dateiliste**. **Kein** Download/Restore/Delete/Entpacken –
+Sichtbarkeit vor Download, Restore oder Löschung.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

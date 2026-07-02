@@ -75,13 +75,18 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   `CREATE BACKUP` blockt die Aktion mit klarem Hinweis. Ein **echtes** Backup wird in dieser
   nicht-destruktiven Smoke-Runde **nicht** ausgelöst (benötigt Write-Flag + vorhandenes Volume);
   wer es bewusst testet: Datei landet serverseitig in `AGENT_BACKUP_DIR` und ist **sensibel**.
+- **Backup-Liste (Step 033, komplett read-only – gefahrlos):** Auf `/servers/[id]` eines managed
+  Servers in der Karte „Backups (nur Ansicht)" auf **„Backups anzeigen"** klicken. Erwartung:
+  Liste mit Dateiname/Größe/Zeitstempel/Metadatenstatus, „Keine Backups gefunden." bei leerem
+  Verzeichnis oder „Backup-Verzeichnis … nicht verfügbar" ohne `AGENT_BACKUP_DIR`. **Keine**
+  Download-/Restore-/Delete-Buttons; keine Docker-Aktion, kein Write-Flag nötig.
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 358 Tests |
+| lint/typecheck/test/build | ☐ | 379 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

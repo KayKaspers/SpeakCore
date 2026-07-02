@@ -278,6 +278,17 @@ Backup bei `RESOURCES_PREPARED`). OWNER-only, 3 Bestätigungen + getippt `CREATE
 Agent via Step-030-Guard, Defense-in-Depth). `metadata.json` ohne Secrets (`containsSecrets: "unknown"`);
 Ergebnis nur mit Dateiname (kein Host-Pfad), keine Roh-Docker-Ausgabe. **Kein** Restore/Import/
 Browser-Download; Aufbewahrung/Schutz der serverseitigen Dateien liegt beim Betreiber.
+
+**Read-only Backup-Liste (Step 033):** `POST /docker/provision/list-backups` – Token-Gate, **kein**
+Write-Flag (reine Sichtbarkeit). **Kein Docker, kein `execFile`, keine Shell, kein Socket**; gelesen
+wird ausschließlich `AGENT_BACKUP_DIR` (kein Client-Pfad, keine Pfad-Traversal): nur Dateien mit
+**striktem** Namensmuster der angefragten `instanceId`, keine Subdirectories, keine Symlinks, keine
+fremden Dateien. `tar.gz`-Inhalte werden **nie** gelesen/entpackt; `.metadata.json` (max. 64 KB) wird
+**Feld-für-Feld sanitisiert** (nur bekannte Felder, `instanceId`/`backupFileName` müssen passen,
+sonst `invalid` – kein Roh-Dump). Antwort ohne Host-Pfade/Secrets; Web prüft zusätzlich
+(`assertBackupListContainsNoSecrets`) und verwirft verdächtige Antworten. OWNER-only; Audit
+`backup.managedVolume.list.*` ohne Dateiliste/Metadaten. **Kein** Download/Restore/Delete –
+Rotation/Löschung wäre ein eigener, gefährlicher Step.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

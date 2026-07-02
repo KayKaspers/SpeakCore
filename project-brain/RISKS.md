@@ -75,8 +75,9 @@
   Wiederherstellung nach Fehlern/Deprovisionierung.
 - **Gegenmaßnahmen:** **Echtes Volume-Backup seit Step 032** ([ADR-0034](DECISIONS.md)): read-only
   Quelle, serverseitiges Ziel/Image, konservativ nur ohne Container, mehrfache Bestätigung, Audit.
-  Restore niemals destruktiv ohne Bestätigung; Integritätsprüfung der Backups;
-  „dry-run"/Vorschau; Audit-Log; Tests als Teil der Definition of Done.
+  **Read-only Backup-Sichtbarkeit seit Step 033** (Owner sieht, ob/welche Backups existieren – ohne
+  Download/Restore/Delete). Restore niemals destruktiv ohne Bestätigung; Integritätsprüfung der
+  Backups; „dry-run"/Vorschau; Audit-Log; Tests als Teil der Definition of Done.
 - **Rest:** **Restore/Import fehlen weiterhin** (bewusst, eigenes Security-Design); keine
   Integritätsprüfung/Rotation der Backup-Dateien; Aufbewahrung liegt beim Betreiber
   (Backup-Dateien sind **sensibel**).

@@ -1,5 +1,6 @@
 import 'server-only';
 import type {
+  BackupListResult,
   ContainerCreateResult,
   ContainerRemoveResult,
   ContainerStartResult,
@@ -14,6 +15,7 @@ import type {
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
+  Ts3BackupListRequest,
   Ts3ProvisionInput,
   Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
@@ -232,6 +234,37 @@ export async function backupManagedVolume(
     });
     if (!res.ok) return null;
     return (await res.json()) as VolumeBackupResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Listet **read-only** vorhandene Volume-Backups einer Instanz – **serverseitig**. Übergibt nur die
+ * `instanceId` (kein Pfad/Muster). Antwort enthält nur Dateinamen/Größen/Zeitstempel + sanitisierte
+ * Metadaten (keine Host-Pfade, keine Secrets). `null`, wenn der Agent nicht erreichbar ist.
+ */
+export async function listManagedVolumeBackups(
+  request: Ts3BackupListRequest,
+  timeoutMs = 10000,
+): Promise<BackupListResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/list-backups`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as BackupListResult;
   } catch {
     return null;
   } finally {

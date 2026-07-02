@@ -5,6 +5,46 @@
 
 ## [Unreleased]
 
+### NDF Step 033 – Read-only Backup Visibility (2026-07-02)
+
+> **Reine Sichtbarkeit** vorhandener Volume-Backups. Kein Download, kein Restore, kein Delete,
+> kein Entpacken, **keine Docker-Aktion**. Grundsatz: Sichtbarkeit vor Download/Restore/Löschung.
+
+#### Added
+- **Agent `POST /docker/provision/list-backups`** (read-only, Token-Gate, **kein Write-Flag nötig**,
+  `apps/agent/src/backup-list.ts`): listet Backups einer `instanceId` **ausschließlich** aus
+  `AGENT_BACKUP_DIR` – **kein Docker, kein `execFile`, keine Shell, kein Socket**. Nur Dateien mit
+  **striktem** Muster `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` (fester
+  Zeitstempel-Regex); keine Subdirectories, keine Symlinks (Dirent-`isFile`), keine fremden
+  Instanzen, keine sonstigen Dateien. `tar.gz`-Inhalte werden **nie** gelesen/entpackt.
+  Status: `ok/backupDirUnavailable/invalid/unavailable/error`.
+- **Metadaten-Sanitisierung** (`sanitizeBackupMetadataForDisplay`): `.metadata.json` (max. 64 KB)
+  wird nur für exakt passende Backups gelesen; **nur bekannte Felder** werden Feld-für-Feld gemappt
+  (kein Roh-Dump, unbekannte Keys verworfen); `instanceId`/`backupFileName` müssen passen, sonst
+  `metadataStatus: invalid`. Antwort enthält **nur Dateinamen** (keine Host-Pfade), Größe, Zeitstempel.
+- **Web-Service** `apps/web/src/core/backup-list.ts` (+ reine Helfer `backup-list-helpers.ts`):
+  nur managed Server (External ⇒ keine Karte); **auch archivierte** managed Server dürfen ihre
+  Backups sehen (bewusst). `assertBackupListContainsNoSecrets` als Defense-in-Depth (verbotene
+  Keys/Werte/Host-Pfade ⇒ Antwort wird verworfen). Keine DB-Schreiboperation außer Audit.
+- **OWNER-only UI:** read-only Karte „Backups (nur Ansicht)" auf `/servers/[id]` (aktiv **und**
+  archiviert); Liste wird erst nach Klick geladen (`?backups=1`). Zeigt Anzahl, Dateiname, Größe,
+  erstellt/geändert, Metadatenstatus (vorhanden/fehlen/ungültig) + Sensibilitäts-Hinweis. **Keine**
+  Download-/Restore-/Delete-/Import-Buttons. Leere Liste ⇒ „Keine Backups gefunden."
+- **Audit:** `backup.managedVolume.list.requested/completed/failed` – **ohne** Dateiliste, ohne
+  Metadaten-Payload, ohne Host-Pfade, ohne Secrets (Target = ServerInstance-ID).
+- **Tests:** `apps/agent/test/backup-list.test.ts` (13, inkl. HTTP-Test gegen **realen Temp-Ordner**
+  mit fremden Dateien/Subdir) + `apps/web/test/backup-list.test.ts` (8): Muster-Filter, fremde
+  instanceIds/sonstige Dateien/Subdirs nie gelistet, `tar.gz` nie gelesen, Metadaten-Validierung,
+  keine Host-Pfade/Secrets in Response/Audit, Source-Scans (kein Docker/execFile/Delete/Socket).
+
+#### Nicht enthalten (bewusst)
+- Kein Backup-Download, kein Restore, kein Import, kein Backup-Delete/Rotation, kein Hard-Delete,
+  kein Unarchive, keine allgemeine Dateiverwaltung.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (379) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 032 – BACKUP_MANAGED_VOLUME: erstes echtes Volume-Backup (2026-07-02)
 
 > Erster **echter** Backup-Step (auf Basis des Step-030-Blueprints). **Backup-Dateien sind sensibel.**

@@ -69,10 +69,12 @@
   3 checkboxes (sensitive data / storage responsibility / container stopped) + typing **`CREATE BACKUP`**.
   The backup is stored **server-side** in the agent backup directory (`.tar.gz` + `.metadata.json`) –
   **no browser download, no restore, no import**. The file can contain **sensitive TS3 data**: store it
-  securely and restrict access.*
+  securely and restrict access. From Step 033 the **"Backups (view only)"** card (also for archived
+  servers) shows the existing backup files after clicking "Show backups": file name, size,
+  created/modified and metadata status – **visibility only**, no download, no restore, no delete.*
 - Reading logs
-- Backup & Restore — *from Step 032: backups exist (server-side, read-only source); **restore follows
-  later as its own hardened step**.*
+- Backup & Restore — *from Step 032: backups exist (server-side, read-only source); from Step 033:
+  backups are viewable; **restore follows later as its own hardened step**.*
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials
   (`SECRET_ENCRYPTION_KEY`) can be rotated. This is an **operator/CLI-only** task
   (`pnpm --filter @speakcore/web rotate-secrets`, with `--dry-run` for a safe preview) – **no

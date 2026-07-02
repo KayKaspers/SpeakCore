@@ -38,6 +38,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/remove-volume` | **write** (Flag-gated): managed **Datenvolume entfernen** (`docker volume rm`, kein -f, nur ohne Container) |
 | POST | `/docker/provision/remove-network` | **write** (Flag-gated): managed **Voice-Network entfernen** (`docker network rm`, kein -f, nur wenn kein managed Container) |
 | POST | `/docker/provision/backup-volume` | **write** (Flag-gated): managed **Volume-Backup** (read-only Quelle → serverseitiges `AGENT_BACKUP_DIR`, festes Image, nur ohne Container) |
+| POST | `/docker/provision/list-backups` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Liste** aus `AGENT_BACKUP_DIR` (kein Docker, kein execFile, kein Download/Restore/Delete) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -282,6 +283,28 @@ Erstes **echtes** Backup eines managed TS3-Datenvolumes ([ADR-0034](../../projec
 `RESOURCES_PREPARED`, nicht archiviert, Volume nicht `removed`): 3 Checkboxen (sensible Daten /
 Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. Audit:
 `backup.managedVolume.requested/confirmed/blocked/started/completed/failed`.
+
+## `/docker/provision/list-backups` – read-only Backup-Liste (Step 033)
+
+**Reine Sichtbarkeit** vorhandener Volume-Backups (Token-Gate, **kein** Write-Flag nötig):
+
+- **Kein Docker, kein `execFile`, keine Shell, kein Socket** – gelesen werden ausschließlich
+  Verzeichniseinträge + `.metadata.json` aus **`AGENT_BACKUP_DIR`** (kein Pfad/Muster vom Client,
+  keine Pfad-Traversal; Dateinamen kommen nur aus dem eigenen, gefilterten Listing).
+- **Strikter Filter:** nur reguläre Dateien mit exaktem Muster
+  `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` (fester Zeitstempel-Regex). Keine
+  Subdirectories, keine Symlinks (Dirent-`isFile`), keine fremden Instanzen, keine sonstigen Dateien.
+- **`tar.gz`-Inhalte werden nie gelesen/entpackt.** Die zugehörige `.metadata.json` (max. 64 KB) wird
+  nur für exakt passende Backups gelesen und **Feld-für-Feld sanitisiert** (nur bekannte Felder;
+  `instanceId` + `backupFileName` müssen passen, sonst `metadataStatus: invalid`; kein Roh-Dump).
+- Antwort: nur **Dateiname** (kein Host-Pfad), Größe, Zeitstempel, Metadatenstatus
+  (`present/missing/invalid`). Status: `ok/backupDirUnavailable/invalid/unavailable/error`.
+- **Kein** Download, **kein** Restore, **kein** Delete, **keine** Dateiverwaltung.
+
+**Web-Auslösung (Step 033):** OWNER-only Karte „Backups (nur Ansicht)" auf `/servers/[id]` (auch für
+**archivierte** managed Server; External zeigt keine Karte). Laden erst per Klick; Web verwirft
+verdächtige Antworten (`assertBackupListContainsNoSecrets`). Audit:
+`backup.managedVolume.list.requested/completed/failed` – ohne Dateiliste/Metadaten/Host-Pfade.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

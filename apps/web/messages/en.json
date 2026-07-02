@@ -296,6 +296,26 @@
         "createConfirmYes": "Create backup now",
         "createCancel": "Cancel"
       },
+      "backupList": {
+        "title": "Backups (view only)",
+        "sensitiveHint": "Backup files can contain sensitive TS3 data.",
+        "readOnlyHint": "No download, no restore, no delete – visibility only.",
+        "showButton": "Show backups",
+        "hideButton": "Hide list",
+        "empty": "No backups found.",
+        "countLabel": "Backups found: {count}",
+        "createdAt": "created",
+        "modifiedAt": "modified",
+        "metadataLabel": "Metadata",
+        "metadata": {
+          "present": "present",
+          "missing": "missing",
+          "invalid": "invalid"
+        },
+        "dirUnavailable": "The backup directory is unavailable on the agent.",
+        "unreachable": "Agent unreachable – backups cannot be listed.",
+        "error": "Backups could not be listed."
+      },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
         "notActive": "Removing volume/network is not enabled yet.",

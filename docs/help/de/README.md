@@ -74,10 +74,13 @@
   Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. Das Backup wird
   **serverseitig** im Agent-Backup-Verzeichnis abgelegt (`.tar.gz` + `.metadata.json`) – **kein Download
   aus dem Browser, kein Restore, kein Import**. Die Datei kann **sensible TS3-Daten** enthalten: sicher
-  aufbewahren, Zugriff einschränken.*
+  aufbewahren, Zugriff einschränken. Ab Step 033 zeigt die Karte **„Backups (nur Ansicht)"** (auch für
+  archivierte Server) nach Klick auf „Backups anzeigen" die vorhandenen Backup-Dateien: Dateiname,
+  Größe, erstellt/geändert und Metadatenstatus – **reine Sichtbarkeit**, kein Download, kein Restore,
+  kein Löschen.*
 - Logs lesen
-- Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); **Restore folgt
-  später als eigener, abgesicherter Schritt**.*
+- Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
+  Backups einsehbar; **Restore folgt später als eigener, abgesicherter Schritt**.*
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte
   Zugangsdaten (`SECRET_ENCRYPTION_KEY`) kann rotiert werden. Reiner **Operator-/CLI-Vorgang**
   (`pnpm --filter @speakcore/web rotate-secrets`, mit `--dry-run` zum gefahrlosen Prüfen) – **keine

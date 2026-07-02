@@ -1,5 +1,6 @@
 import http from 'node:http';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
@@ -9,6 +10,7 @@ import type {
   Ts3ContainerRemoveRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
+  Ts3BackupListRequest,
   Ts3ProvisionInput,
   Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
@@ -24,6 +26,7 @@ import { removeTs3Container } from './docker-remove';
 import { removeTs3Volume } from './docker-volume-remove';
 import { removeTs3Network } from './docker-network-remove';
 import { backupTs3Volume, DEFAULT_BACKUP_IMAGE } from './docker-backup';
+import { listTs3VolumeBackups, METADATA_MAX_BYTES } from './backup-list';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -213,6 +216,58 @@ async function handle(
           return true;
         } catch {
           return false;
+        }
+      },
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/list-backups') {
+    // READ-ONLY Backup-Liste (Step 033): nur Verzeichniseinträge + metadata.json aus AGENT_BACKUP_DIR.
+    // Token-Gate, KEIN Write-Flag nötig (kein Docker, kein Prozessaufruf, kein Download/Restore/Delete).
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const listBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const result = await listTs3VolumeBackups(body as Ts3BackupListRequest, {
+      listDir: async () => {
+        try {
+          const entries = await readdir(listBackupDir, { withFileTypes: true });
+          // Symlinks/Verzeichnisse ⇒ isFile false (werden im Modul verworfen, nie verfolgt).
+          return entries.map((e) => ({ name: e.name, isFile: e.isFile() }));
+        } catch {
+          return null;
+        }
+      },
+      statFile: async (fileName) => {
+        try {
+          const s = await stat(join(listBackupDir, fileName));
+          if (!s.isFile()) return null;
+          return {
+            sizeBytes: s.size,
+            createdAt: s.birthtime.toISOString(),
+            modifiedAt: s.mtime.toISOString(),
+          };
+        } catch {
+          return null;
+        }
+      },
+      readMetadataFile: async (fileName) => {
+        try {
+          const s = await stat(join(listBackupDir, fileName));
+          if (!s.isFile() || s.size > METADATA_MAX_BYTES) return null;
+          return await readFile(join(listBackupDir, fileName), 'utf8');
+        } catch {
+          return null;
         }
       },
     });
