@@ -83,8 +83,13 @@ Checks**.
 **Container-Stop (Step 021):** `RUNNING → CONTAINER_CREATED` (+ `runState='stopped'`) – der Adapter
 delegiert an den Agent, der **`docker stop`** (nur bereits vorhandener managed Container) ausführt. **Kein**
 neuer Lifecycle-Status, **keine Löschung** (Volume/Network bleiben), kein `rm/restart`, **kein Log-Lesen**
-([ADR-0025](../../project-brain/DECISIONS.md)). **Restart**, **Remove** und ein optionaler
-**Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+([ADR-0025](../../project-brain/DECISIONS.md)).
+
+**Container-Remove (Step 022):** `CONTAINER_CREATED → RESOURCES_PREPARED` (+ `runState='unknown'`) – der
+Adapter delegiert an den Agent, der **`docker rm`** eines **gestoppten** managed Containers ausführt (**kein**
+`-f`/`-v`). **Volume, Network, Credentials und der `ServerInstance`-Record bleiben erhalten**; läuft der
+Container noch ⇒ `stillRunning` ([ADR-0026](../../project-brain/DECISIONS.md)). **Volume-/Network-Remove**,
+**Restart** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

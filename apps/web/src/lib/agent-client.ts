@@ -1,6 +1,7 @@
 import 'server-only';
 import type {
   ContainerCreateResult,
+  ContainerRemoveResult,
   ContainerStartResult,
   ContainerStatusResult,
   ContainerStopResult,
@@ -8,6 +9,7 @@ import type {
   ProvisionPrepareResult,
   SystemInfo,
   Ts3ContainerCreateRequest,
+  Ts3ContainerRemoveRequest,
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
@@ -162,6 +164,37 @@ export async function startManagedContainer(
     });
     if (!res.ok) return null;
     return (await res.json()) as ContainerStartResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent das **Entfernen** des gestoppten managed TS3-Containers aus – **serverseitig**.
+ * Übergibt nur `instanceId` (keine Secrets). `null`, wenn der Agent nicht erreichbar ist.
+ * Kein `-f`/`-v`, keine Volume-/Network-/Credential-Löschung, kein Log-Lesen; Antwort ohne Secret.
+ */
+export async function removeManagedContainer(
+  request: Ts3ContainerRemoveRequest,
+  timeoutMs = 10000,
+): Promise<ContainerRemoveResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/remove-container`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as ContainerRemoveResult;
   } catch {
     return null;
   } finally {

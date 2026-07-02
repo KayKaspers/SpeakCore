@@ -296,3 +296,28 @@ export interface ContainerStopResult {
   errors?: ValidationError[];
   audit: PlannedAuditAction[];
 }
+
+// --- Managed Container Remove (NDF Step 022: `docker rm`, KEIN -f/-v, kein Volume/Network) ----
+
+export type ContainerRemoveStatus =
+  | 'removed'
+  | 'alreadyRemoved'
+  | 'stillRunning'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/** Agent-Request zum **Entfernen** eines gestoppten managed Containers. Nur `instanceId`. */
+export interface Ts3ContainerRemoveRequest {
+  instanceId: string;
+}
+
+/** Ergebnis von `docker rm` (managed). Enthält NIE Secrets/ENV-Werte/Roh-Docker-Ausgabe. */
+export interface ContainerRemoveResult {
+  status: ContainerRemoveStatus;
+  containerName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}

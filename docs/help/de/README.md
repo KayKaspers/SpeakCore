@@ -39,8 +39,12 @@
   konfiguriert" liefert – **kein Portscan, keine automatische Ermittlung**. Ab Step 021 kann der
   Container **gestoppt** werden („Container stoppen" mit Bestätigung): via `docker stop`, Status wechselt
   auf „Container erstellt" (`runState = gestoppt`). **Es wird nichts gelöscht** – Volume und Network
-  bleiben, ein späterer Start ist wieder möglich. **Kein** Log-Lesen, **kein** Inspect, **keine**
-  Reparatur, **keine** Remove-Aktion. Remove/Restart folgen als eigene Schritte.*
+  bleiben, ein späterer Start ist wieder möglich. Ab Step 022 kann ein **gestoppter** Container
+  **entfernt** werden („Container entfernen" mit deutlicher Bestätigung): via `docker rm` (ohne Force),
+  Status zurück auf „Ressourcen vorbereitet". **Es werden nur der Container entfernt** – **Volume,
+  Network und gespeicherte Zugangsdaten bleiben erhalten**, die ServerInstance wird nicht gelöscht.
+  Läuft der Container noch, musst du ihn zuerst stoppen. **Kein** Log-Lesen, **kein** Inspect, **keine**
+  Reparatur. Volume-/Network-Löschung und Restart folgen als eigene Schritte.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

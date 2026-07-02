@@ -34,6 +34,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/create-container` | **write** (Flag-gated): managed **Container erstellen** (`docker create`, **kein Start**) |
 | POST | `/docker/provision/start-container` | **write** (Flag-gated): managed **Container starten** (`docker start`, Lizenzzustimmung nötig) |
 | POST | `/docker/provision/stop-container` | **write** (Flag-gated): managed **Container stoppen** (`docker stop`, kein rm/restart) |
+| POST | `/docker/provision/remove-container` | **write** (Flag-gated): managed **Container entfernen** (`docker rm`, kein -f/-v, nur gestoppt) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -181,6 +182,26 @@ Kontrolliertes **Stoppen** eines laufenden managed Containers ([ADR-0025](../../
 **Web-Auslösung (Step 021):** OWNER-only Server Action (`/servers/[id]`, Stop-Button **mit Bestätigung**);
 Status `RUNNING → CONTAINER_CREATED` + `runState='stopped'`. Bei Fehler bleibt der Status `RUNNING` mit
 generischem Fehlerschlüssel. **Restart/Remove** folgen als eigene Steps.
+
+## `/docker/provision/remove-container` – Container entfernen (Step 022)
+
+Kontrolliertes **Entfernen** eines **gestoppten** managed Containers ([ADR-0026](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker rm speakcore-ts3-<instanceId>`** (nie `-f`/`-v`, nie `volume`/`network` rm, nie
+  `run/create/start/stop/restart`); Name aus `instanceId` abgeleitet, **managed-/instanceId-Label** geprüft.
+  Vorprüfung nur über managed-gefilterte Listen (`container ls [--all] --filter label=…`).
+- **Token + `AGENT_DOCKER_WRITE_ENABLED`** (`false` ⇒ `writeDisabled`). `execFile`, statische Argumente,
+  keine Shell, kein Socket. **Keine** Secrets im Request/Ergebnis.
+- **Nur gestoppte** Container: läuft er noch ⇒ `stillRunning` (kein Remove). Fremder gleichnamiger
+  Container ⇒ `conflict`. Fehlt er ⇒ `alreadyRemoved` (idempotent). Docker nicht verfügbar ⇒ `unavailable`.
+- **Keine Löschung von Volume/Network/Credentials/ServerInstance** – nur der Container wird entfernt.
+  **Kein** `inspect/exec/cp/logs`, **kein** compose, **kein Log-Lesen**. Quell-Scan-Tests erzwingen die
+  verbotenen Kommandos.
+
+**Web-Auslösung (Step 022):** OWNER-only Server Action (`/servers/[id]`, Entfernen-Button **mit deutlicher
+Bestätigung**); Status `CONTAINER_CREATED → RESOURCES_PREPARED` + `runState='unknown'`. Bei laufendem
+Container `stillRunning` (zuerst stoppen). **Volume-/Network-Remove** und vollständiges **Deprovisioning**
+folgen als eigene, deutlich gefährlichere Steps.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

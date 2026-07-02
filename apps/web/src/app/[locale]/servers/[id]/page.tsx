@@ -14,6 +14,7 @@ import {
 } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 import { StopContainerButton } from '../StopContainerButton';
+import { RemoveContainerButton } from '../RemoveContainerButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +113,7 @@ export default async function ServerDetailPage({
               'hostInvalid',
               'hostBlocked',
               'hostRequired',
+              'stillRunning',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -146,7 +148,12 @@ export default async function ServerDetailPage({
                   <p>• {t('managed.containerNotCreated')}</p>
                 )}
                 <p>• {t('managed.noServerStarted')}</p>
-                {provStatus === 'RESOURCES_PREPARED' && <p>• {t('managed.prepareHintSecret')}</p>}
+                {provStatus === 'RESOURCES_PREPARED' && (
+                  <>
+                    <p>• {t('managed.resourcesNoContainer')}</p>
+                    <p>• {t('managed.prepareHintSecret')}</p>
+                  </>
+                )}
                 {provStatus === 'CONTAINER_PENDING' && (
                   <>
                     <p>• {t('managed.createHintNotStarted')}</p>
@@ -226,6 +233,13 @@ export default async function ServerDetailPage({
                 {t('managed.startButton')}
               </button>
             </form>
+          )}
+
+          {provStatus === 'CONTAINER_CREATED' && (
+            <div className="mt-4 border-t border-sc-border pt-4">
+              <p className="mb-2 text-sc-caption text-sc-text-muted">{t('managed.removeHintKeep')}</p>
+              <RemoveContainerButton locale={locale} id={server.id} />
+            </div>
           )}
 
           {provStatus === 'RUNNING' && (

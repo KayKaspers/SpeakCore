@@ -5,6 +5,47 @@
 
 ## [Unreleased]
 
+### NDF Step 022 – REMOVE_MANAGED_CONTAINER ohne Volume-/Network-Löschung (2026-07-01)
+
+> Kontrolliertes **Entfernen** eines **gestoppten** managed Containers. `CONTAINER_CREATED →
+> RESOURCES_PREPARED`. **Kein** `-f`/`-v`, **keine** Volume-/Network-/Credential-/ServerInstance-Löschung.
+
+#### Added
+- **Agent-Aktion `removeTs3Container`** (`apps/agent/src/docker-remove.ts`) + Endpunkt
+  **`POST /docker/provision/remove-container`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): entfernt via
+  **`docker rm <managed-name>`** (nie `-f`/`-v`, nie `volume`/`network` rm, nie `run/create/start/stop/
+  restart`) **nur** einen bereits vorhandenen, per **managed-/instanceId-Label** geprüften, **nicht
+  laufenden** Container. Status `removed | alreadyRemoved | stillRunning | conflict | error |
+  writeDisabled | invalid | unavailable`. Läuft er noch ⇒ `stillRunning` (kein Remove); fremder Name ⇒
+  `conflict`; **fehlt er ⇒ `alreadyRemoved` (idempotent)**.
+- **Web-Service** `removeManagedContainerForServer` (`src/core/container-remove.ts`) + reine Helfer
+  (`container-remove-helpers.ts`) + **OWNER-only Server Action** `removeContainerAction` (rate-limitiert).
+  Guard: `CONTAINER_CREATED`/`RESOURCES_PREPARED` erlaubt; `RUNNING` ⇒ `stillRunning` („zuerst stoppen");
+  sonst `invalidState`. Erfolg ⇒ `RESOURCES_PREPARED` + `runState='unknown'`.
+- **Bewusst erhalten** ([ADR-0026](DECISIONS.md)): Credentials, `managedVolumeName`/`managedNetworkName`
+  und der `ServerInstance`-Record bleiben unangetastet (per reinem `removeSuccessUpdate` + Test
+  abgesichert). `managedContainerName` bleibt deterministisch, dient **nicht** als Existenzbeweis.
+- **UI (DE/EN):** managed Detailseite bei `CONTAINER_CREATED` mit **Entfernen-Button + deutlicher
+  Bestätigung** (nur der Container wird entfernt; Volume/Network/Zugangsdaten bleiben; TS3 wird nicht
+  gestartet/gestoppt; laufenden Container zuerst stoppen); bei `RESOURCES_PREPARED` Hinweis „Ressourcen
+  vorbereitet, Container nicht vorhanden". **Keine** Volume-/Network-Remove- oder ServerInstance-Lösch-Buttons.
+- **Audit:** `docker.containerRemove.requested/completed/failed/conflict/stillRunning`,
+  `docker.container.removed/alreadyRemoved` (Target = ServerInstance-ID, **keine Secrets/Roh-Ausgaben**).
+- Tests: Agent (rm-not-`-f`/`-v`, kein volume/network rm, idempotent `alreadyRemoved`, `stillRunning`,
+  conflict, unavailable, error, Token/Flag-Gate, Quell-Scan) und Web (Guard/Audit/Fehlerschlüssel,
+  `removeSuccessUpdate` schützt Credentials/Volume/Network, Quell-Scan). **235 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein** `-f`/`-v`, **kein Remove
+  laufender Container**, **keine Volume-/Network-Löschung**, **keine Credential-/ServerInstance-Löschung**,
+  kein `run/create/start/stop/restart/inspect/exec/cp/logs`, kein compose, kein Socket/Host-Mount, keine
+  freien Docker-Parameter, keine fremde Ressource verändern. Kein Secret im Client/Audit/Agent-Response,
+  **kein Log-Lesen**. Quell-Scan-Tests erzwingen dies. **[ADR-0026](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (235) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 021 – STOP_MANAGED_CONTAINER (2026-07-01)
 
 > Kontrolliertes **Stoppen** eines laufenden managed Containers. `RUNNING → CONTAINER_CREATED`

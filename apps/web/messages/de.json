@@ -210,6 +210,15 @@
       "stopHintNoDelete": "Es wird nichts gelöscht.",
       "stopHintKeepResources": "Volume und Network bleiben bestehen.",
       "stopHintNoLogs": "Logs werden nicht gelesen.",
+      "resourcesNoContainer": "Ressourcen vorbereitet, Container nicht vorhanden.",
+      "removeButton": "Container entfernen",
+      "removeHintKeep": "Container vorhanden oder vorbereitet, aber nicht laufend.",
+      "removeConfirm1": "Nur der Container wird entfernt.",
+      "removeConfirm2": "Volume, Network und gespeicherte Zugangsdaten bleiben erhalten.",
+      "removeConfirm3": "Der TS3-Server wird nicht gestartet oder gestoppt.",
+      "removeConfirm4": "Falls der Container noch läuft, musst du ihn zuerst stoppen.",
+      "removeConfirmYes": "Ja, Container entfernen",
+      "removeConfirmCancel": "Abbrechen",
       "health": {
         "title": "Healthcheck (read-only)",
         "checkButton": "Status prüfen",
@@ -254,7 +263,9 @@
         "notManaged": "Healthcheck ist nur für managed Server verfügbar.",
         "hostRequired": "Bitte eine Query-Adresse angeben.",
         "hostInvalid": "Ungültige Query-Adresse.",
-        "hostBlocked": "Diese Adresse ist nicht erlaubt (Metadaten/Link-Local/unspezifiziert)."
+        "hostBlocked": "Diese Adresse ist nicht erlaubt (Metadaten/Link-Local/unspezifiziert).",
+        "stillRunning": "Der Container läuft noch – bitte zuerst stoppen.",
+        "removeFailed": "Container konnte nicht entfernt werden."
       },
       "status": {
         "DRAFT": "Entwurf",

@@ -333,6 +333,27 @@
   Lifecycle-Status. **Restart** und **Remove** sind eigene, spätere Steps; eine Log-Ansicht käme nur mit
   Redaction-Konzept.
 
+## ADR-0026 – Container-Remove nur `docker rm` (kein -f/-v), ohne Volume/Network/Credentials
+
+- **Status:** accepted (Step 022)
+- **Kontext:** Ein **gestoppter** managed Container soll entfernt werden können, ohne Volume, Network,
+  Credentials oder den `ServerInstance`-Record zu löschen.
+- **Entscheidung:** Neue Agent-Aktion **`REMOVE_MANAGED_CONTAINER`** (`POST /docker/provision/remove-container`)
+  führt **ausschließlich `docker rm <managed-name>`** aus – **kein `-f`/`-v`**, kein `volume rm`/`network rm`,
+  nie `run`/`create`/`start`/`stop`/`restart`. Hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, nur für einen
+  per Label geprüften **managed**, **nicht laufenden** Container. Läuft er noch ⇒ `stillRunning` (kein Remove,
+  „zuerst stoppen"). **Fehlender Container ⇒ `alreadyRemoved` (idempotent)** – bewusst kein Fehler, da das
+  Ziel (Container weg) erreicht ist und Network/Volume weiterhin vorbereitet bleiben. Nach Erfolg:
+  `CONTAINER_CREATED → RESOURCES_PREPARED`, `runState='unknown'`.
+- **Begründung:** `docker rm` ohne `-v` lässt anonyme/named Volumes unberührt; kein `-f` verhindert das
+  Entfernen laufender Container. Credentials (Step 015) und `managedVolumeName`/`managedNetworkName` bleiben
+  erhalten, damit ein späteres erneutes `CREATE_TS3_CONTAINER` möglich ist. `managedContainerName` bleibt
+  deterministisch (aus `instanceId` ableitbar) und dient **nicht** als Existenzbeweis – Healthcheck/Inventar
+  bleibt Quelle des Ist-Zustands.
+- **Konsequenzen:** **Volume-/Network-Remove** ist ein eigener, deutlich gefährlicherer Step (mit Backup-/
+  Bestätigungskonzept); ebenso **Restart** und ein vollständiges **Deprovisioning** (inkl. ServerInstance/
+  Credential-Löschung). Kein `rm` verwaister Ressourcen in diesem Step.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

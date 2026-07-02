@@ -38,8 +38,11 @@
   **no port scan, no automatic detection**. From Step 021 the container can be **stopped** ("Stop
   container" with confirmation): via `docker stop`, the status returns to "Container created"
   (`runState = stopped`). **Nothing is deleted** – volume and network are kept, and a later start is
-  possible again. **No** log reading, **no** inspect, **no** repair, **no** remove action. Remove/restart
-  follow in their own steps.*
+  possible again. From Step 022 a **stopped** container can be **removed** ("Remove container" with an
+  explicit confirmation): via `docker rm` (no force), status returns to "Resources prepared". **Only the
+  container is removed** – **volume, network and stored credentials are kept**, the server instance is not
+  deleted. If the container is still running, stop it first. **No** log reading, **no** inspect, **no**
+  repair. Volume/network deletion and restart follow in their own steps.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

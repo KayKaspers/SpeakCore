@@ -5,6 +5,7 @@ import type { AgentConfig } from './config';
 import type {
   Ts3ContainerCreateRequest,
   Ts3ContainerStartRequest,
+  Ts3ContainerRemoveRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3ProvisionInput,
@@ -16,6 +17,7 @@ import { prepareProvision } from './docker-write';
 import { createTs3Container } from './docker-container';
 import { startTs3Container } from './docker-start';
 import { stopTs3Container } from './docker-stop';
+import { removeTs3Container } from './docker-remove';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -163,6 +165,28 @@ async function handle(
       return;
     }
     const result = await startTs3Container(body as Ts3ContainerStartRequest, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/remove-container') {
+    // Managed Container ENTFERNEN (nur `docker rm`, kein -f/-v). Token-Pflicht + Write-Feature-Flag.
+    // Keine Volume-/Network-/Credential-Löschung, kein Log-Lesen, keine Secrets im Ergebnis.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await removeTs3Container(body as Ts3ContainerRemoveRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
     });

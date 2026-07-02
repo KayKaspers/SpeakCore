@@ -193,6 +193,15 @@ Container (Name aus `instanceId`). **Keine Löschung** – Container/Volume/Netw
 OWNER-only mit UI-Bestätigung, Idempotenz (`alreadyStopped`) + Konfliktschutz (`conflict`) + `notFound`.
 **Kein** `run/create/start/restart/rm/inspect/exec/cp/logs`, **kein** compose, **kein Log-Lesen**, kein
 Socket/Host-Mount. Kein Browser→Agent; keine Secrets im Request/Ergebnis/Audit.
+
+**Container-Remove (Step 022, [ADR-0026](DECISIONS.md)):** Übergang `CONTAINER_CREATED → RESOURCES_PREPARED`
+(+ `runState='unknown'`). Der Agent führt **nur `docker rm`** aus (**kein `-f`/`-v`**, nie `volume`/`network`
+rm, nie `run/create/start/stop/restart`), hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, **nur** für einen
+per Label geprüften **managed**, **nicht laufenden** Container. Läuft er noch ⇒ `stillRunning` (zuerst
+stoppen). **Volume, Network, Credentials und der `ServerInstance`-Record bleiben erhalten** – nur der
+Container wird entfernt. OWNER-only mit **deutlicher Bestätigung**, Idempotenz (`alreadyRemoved`) +
+Konfliktschutz (`conflict`). **Kein** `inspect/exec/cp/logs`, **kein** compose, **kein Log-Lesen**, kein
+Socket/Host-Mount. Kein Browser→Agent; keine Secrets im Request/Ergebnis/Audit.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

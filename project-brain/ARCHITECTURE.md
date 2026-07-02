@@ -239,6 +239,13 @@ serverseitig: `core/container-stop` → `lib/agent-client` → Agent `POST /dock
 `CONTAINER_CREATED → RUNNING`. Idempotent (`alreadyStopped`)/Konfliktschutz (`conflict`)/`notFound`;
 **kein** `rm/restart/start`, **keine Löschung**, **kein Log-Lesen**. Audit: `docker.containerStop.*`.
 
+**Container-Remove (Step 022):** `CONTAINER_CREATED → RESOURCES_PREPARED` (+ `runState='unknown'`),
+**OWNER-only** mit deutlicher Bestätigung, serverseitig: `core/container-remove` → `lib/agent-client` →
+Agent `POST /docker/provision/remove-container` → **`docker rm`** (nur ein **gestoppter** managed
+Container, **kein** `-f`/`-v`). Läuft er noch ⇒ `stillRunning` (zuerst stoppen); fehlt er ⇒ idempotent
+`alreadyRemoved`; fremder Name ⇒ `conflict`. **Volume, Network, Credentials und der `ServerInstance`-
+Record bleiben erhalten** ([ADR-0026](DECISIONS.md)). Audit: `docker.containerRemove.*`.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

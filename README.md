@@ -104,7 +104,7 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **TS3 (Step 008–009):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
   Basisstatus ansehen, **aktualisieren** und Server wieder **entfernen** (Credentials werden gelöscht);
   Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
-- **Agent-Docker (Step 010–021):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
+- **Agent-Docker (Step 010–022):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
   Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
   Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`), Container-Vorbereitung
   (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret, **echte Container-Erstellung**
@@ -115,8 +115,9 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   UI-Override) aktiviert den read-only TS3-Check (`reachable`/`unreachable`/`notConfigured`) — **kein**
   Log-Lesen/Inspect/Portscan, kein Raten, keine Reparatur. Ab Step 021 lässt sich der Container
   **stoppen** (`docker stop`, zurück auf `CONTAINER_CREATED` + `runState=stopped`) — **ohne Löschung**,
-  ohne `rm`/`restart`.
-- **Noch kein** Remove/Restart des managed Containers, kein Agent-vermittelter Query-Proxy.
+  ohne `rm`/`restart`. Ab Step 022 lässt sich ein **gestoppter** Container **entfernen** (`docker rm` ohne
+  `-f`/`-v`, zurück auf `RESOURCES_PREPARED`) — **Volume, Network, Credentials und ServerInstance bleiben**.
+- **Noch kein** Volume-/Network-Remove (vollständiges Deprovisioning), kein Restart, kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.

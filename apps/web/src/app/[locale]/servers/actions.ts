@@ -17,6 +17,7 @@ import { prepareManagedContainer } from '@/core/container-prepare';
 import { createManagedContainerForServer } from '@/core/container-create';
 import { startManagedContainerForServer } from '@/core/container-start';
 import { stopManagedContainerForServer } from '@/core/container-stop';
+import { removeManagedContainerForServer } from '@/core/container-remove';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -259,6 +260,36 @@ export async function stopContainerAction(formData: FormData): Promise<void> {
     redirect(`/${locale}/servers/${id}`);
   }
   // invalidState | invalidPlan | writeDisabled | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Entfernt den **gestoppten** managed Container (CONTAINER_CREATED → RESOURCES_PREPARED). OWNER-only,
+ * rate-limitiert. **Kein** `-f`/`-v`; Volume, Network, Credentials und ServerInstance bleiben erhalten.
+ */
+export async function removeContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:remove:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await removeManagedContainerForServer(id, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'removed' || result.status === 'alreadyRemoved') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // stillRunning | invalidState | invalidPlan | writeDisabled | unavailable | unreachable | conflict | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 
