@@ -312,6 +312,9 @@
           "missing": "fehlen",
           "invalid": "ungültig"
         },
+        "checksumHint": "SHA-256 prüft die Integrität – es ist keine Verschlüsselung und keine Signatur.",
+        "checksumMissing": "Prüfsumme fehlt",
+        "checksumShow": "Vollständige Prüfsumme anzeigen",
         "dirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
         "unreachable": "Agent nicht erreichbar – Backups können nicht gelistet werden.",
         "error": "Backups konnten nicht gelistet werden."

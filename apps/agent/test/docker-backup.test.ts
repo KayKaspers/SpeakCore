@@ -62,8 +62,11 @@ function makeExec(opts: {
   return { exec, calls };
 }
 
+const SHA256_HEX = 'a'.repeat(24) + 'b'.repeat(40); // 64 Hex-Zeichen (Dummy)
+
 function baseOpts(exec: DockerExec, over: Partial<Parameters<typeof backupTs3Volume>[1]> = {}) {
   const metaWrites: Array<{ path: string; content: string }> = [];
+  const shaCalls: string[] = [];
   const opts = {
     writeEnabled: true,
     exec,
@@ -74,10 +77,14 @@ function baseOpts(exec: DockerExec, over: Partial<Parameters<typeof backupTs3Vol
       metaWrites.push({ path, content });
       return true;
     },
+    computeSha256: async (fileName: string) => {
+      shaCalls.push(fileName);
+      return SHA256_HEX;
+    },
     now: NOW,
     ...over,
   };
-  return { opts, metaWrites };
+  return { opts, metaWrites, shaCalls };
 }
 
 test('write disabled ⇒ no docker action, status writeDisabled', async () => {
@@ -196,6 +203,40 @@ test('valid ⇒ created; static read-only run args, server-side dir/image, metad
   assert.equal(meta.containsSecrets, 'unknown');
   assert.ok(!/password|serveradmin|TS3SERVERQUERY|encryptedPassword|bearer/i.test(metaWrites[0].content));
   assert.ok(!Object.keys(meta).some((k) => /credential|token/i.test(k)), 'no credential/token keys');
+});
+
+test('created backup gets checksum metadata + checksumSha256 in result (Step 034)', async () => {
+  const { exec } = makeExec({ managedVol: true });
+  const { opts, metaWrites, shaCalls } = baseOpts(exec);
+  const result = await backupTs3Volume(validRequest(), opts);
+  assert.equal(result.status, 'created');
+  assert.equal(result.checksumSha256, SHA256_HEX);
+
+  // Prüfsumme wird NUR über die erzeugte tar.gz berechnet – nie über andere Dateien.
+  assert.deepEqual(shaCalls, [result.backupFileName]);
+
+  const meta = JSON.parse(metaWrites[0].content) as {
+    checksum?: { algorithm: string; value: string; createdAt: string };
+  };
+  assert.equal(meta.checksum?.algorithm, 'sha256');
+  assert.equal(meta.checksum?.value, SHA256_HEX);
+  assert.equal(meta.checksum?.createdAt, NOW.toISOString());
+
+  // checksumCreated-Event geplant, aber der WERT steht nicht im Audit:
+  const auditActions = result.audit.map((a) => a.action);
+  assert.ok(auditActions.includes('backup.managedVolume.checksumCreated'));
+  assert.ok(!JSON.stringify(result.audit).includes(SHA256_HEX), 'checksum value must not be in audit');
+});
+
+test('checksum computation failure ⇒ backup still created, metadata without checksum', async () => {
+  const { exec } = makeExec({ managedVol: true });
+  const { opts, metaWrites } = baseOpts(exec, { computeSha256: async () => null });
+  const result = await backupTs3Volume(validRequest(), opts);
+  assert.equal(result.status, 'created');
+  assert.equal(result.checksumSha256, undefined);
+  const meta = JSON.parse(metaWrites[0].content) as Record<string, unknown>;
+  assert.ok(!('checksum' in meta), 'no checksum field when computation failed');
+  assert.ok(!result.audit.some((a) => a.action === 'backup.managedVolume.checksumCreated'));
 });
 
 test('run failure ⇒ error', async () => {

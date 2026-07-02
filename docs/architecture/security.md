@@ -68,7 +68,9 @@ Volume-Backup** um: read-only Quelle (`:/data:ro`), **serverseitiges** Ziel (`AG
 **kein** Restore/Import/Browser-Download. **Step 033** ergänzt eine **read-only Backup-Liste**
 (nur Dateiname/Größe/Zeitstempel + sanitisierte Metadaten aus `AGENT_BACKUP_DIR`, striktes
 Namensmuster, kein Docker/`execFile`, kein Download/Restore/Delete/Entpacken, keine Host-Pfade in
-der Antwort). **Kein Log-Lesen**, kein Inspect,
+der Antwort); **Step 034** ergänzt **SHA-256-Prüfsummen** für neue Backups (serverseitig gestreamt,
+kein Entpacken; **Integrität, keine Verschlüsselung/Signatur**; Anzeige gekürzt in der Backup-Liste,
+Prüfsummenwert nicht im Audit). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

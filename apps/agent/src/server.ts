@@ -1,4 +1,6 @@
 import http from 'node:http';
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { getVersionInfo } from '@speakcore/shared';
@@ -218,6 +220,19 @@ async function handle(
           return false;
         }
       },
+      // SHA-256 der erzeugten Datei (Step 034): gestreamt, kein Entpacken, kein Inhalt im Response.
+      computeSha256: (fileName) =>
+        new Promise<string | null>((resolve) => {
+          try {
+            const hash = createHash('sha256');
+            const stream = createReadStream(join(backupDir, fileName));
+            stream.on('error', () => resolve(null));
+            stream.on('data', (chunk) => hash.update(chunk));
+            stream.on('end', () => resolve(hash.digest('hex')));
+          } catch {
+            resolve(null);
+          }
+        }),
     });
     sendJson(res, 200, result);
     return;

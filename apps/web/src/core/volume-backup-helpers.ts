@@ -38,6 +38,8 @@ export interface VolumeBackupServiceResult {
   status: VolumeBackupServiceStatus;
   serverId?: string;
   backupFileName?: string;
+  /** SHA-256 der erzeugten Datei (kein Secret; reine Integritätsinformation, Step 034). */
+  checksumSha256?: string;
 }
 
 /**
@@ -75,11 +77,16 @@ export function mapBackupConfirmationGuard(
 
 export type VolumeBackupAuditOutcome = 'blocked' | 'agentBlocked' | 'created' | 'failed';
 
-/** Audit-Events (keine Secrets/Backup-Inhalt/Roh-Docker-Ausgabe, Target = ServerInstance-ID). */
+/**
+ * Audit-Events (keine Secrets/Backup-Inhalt/Roh-Docker-Ausgabe, Target = ServerInstance-ID).
+ * `withChecksum` (nur bei `created`) ergänzt `checksumCreated` – bewusst **nur das Ereignis**,
+ * der Prüfsummenwert selbst wird nicht ins Audit übernommen (Step 034).
+ */
 export function buildVolumeBackupAuditEntries(
   outcome: VolumeBackupAuditOutcome,
   actor: string,
   serverId: string,
+  withChecksum = false,
 ): AuditInput[] {
   const t = serverId;
   const entries: AuditInput[] = [{ action: 'backup.managedVolume.requested', actor, target: t }];
@@ -99,6 +106,9 @@ export function buildVolumeBackupAuditEntries(
   entries.push({ action: 'backup.managedVolume.started', actor, target: t });
   if (outcome === 'created') {
     entries.push({ action: 'backup.managedVolume.completed', actor, target: t });
+    if (withChecksum) {
+      entries.push({ action: 'backup.managedVolume.checksumCreated', actor, target: t });
+    }
   } else {
     entries.push({ action: 'backup.managedVolume.failed', actor, target: t, result: 'failure' });
   }

@@ -79,14 +79,16 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Servers in der Karte „Backups (nur Ansicht)" auf **„Backups anzeigen"** klicken. Erwartung:
   Liste mit Dateiname/Größe/Zeitstempel/Metadatenstatus, „Keine Backups gefunden." bei leerem
   Verzeichnis oder „Backup-Verzeichnis … nicht verfügbar" ohne `AGENT_BACKUP_DIR`. **Keine**
-  Download-/Restore-/Delete-Buttons; keine Docker-Aktion, kein Write-Flag nötig.
+  Download-/Restore-/Delete-Buttons; keine Docker-Aktion, kein Write-Flag nötig. Bei Backups aus
+  Step 034 zusätzlich: `SHA-256: <gekürzt>…` + „Vollständige Prüfsumme anzeigen"; ältere Backups
+  zeigen „Prüfsumme fehlt" (beides korrekt).
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 379 Tests |
+| lint/typecheck/test/build | ☐ | 387 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

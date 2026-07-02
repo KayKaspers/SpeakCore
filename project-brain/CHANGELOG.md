@@ -5,6 +5,41 @@
 
 ## [Unreleased]
 
+### NDF Step 034 – Backup Integrity Checksums (2026-07-02)
+
+> Risikoarme **Integritäts**verbesserung: neue Backups erhalten eine **SHA-256-Prüfsumme**, die
+> Backup-Liste zeigt sie an. **Integrität, keine Verschlüsselung/Signatur.** Kein Download, kein
+> Restore, kein Delete, keine neue Docker-Aktion. Grundsatz: Integrität vor Download und Restore.
+
+#### Added / Changed
+- **Checksum-Modell:** verschachteltes `checksum`-Objekt in `BackupMetadata`
+  (`{ algorithm: "sha256", value: <hex>, createdAt }`); `buildBackupMetadata` nimmt es optional
+  entgegen. Ältere Step-032-Backups ohne Prüfsumme bleiben gültig (`Prüfsumme fehlt`).
+- **Backup-Erstellung (Agent, `docker-backup.ts`):** nach erfolgreichem Backup berechnet der Agent
+  die SHA-256 der erzeugten tar.gz **serverseitig** (injizierbarer `computeSha256`-Helper; in der
+  Route gestreamt via `node:crypto`/`createReadStream` – **kein Docker, kein execFile, keine Shell,
+  kein Entpacken**). Prüfsumme wandert in `metadata.json` + Response (`checksumSha256`, kein Secret).
+  Schlägt die Berechnung fehl, bleibt das Backup gültig – Metadaten dann bewusst ohne `checksum`.
+- **Backup-Liste (Step-033-Sanitisierung erweitert):** `checksum` wird Feld-für-Feld validiert
+  (Algorithmus `sha256`, exakt 64 Hex-Zeichen, `createdAt`); **vorhanden-aber-ungültig ⇒
+  `metadataStatus: invalid`**, fehlend bleibt erlaubt. Unbekannte checksum-Keys werden verworfen.
+- **UI:** Backup-Liste zeigt pro Eintrag `SHA-256: <erste 12 Zeichen>…` (Tooltip + aufklappbar
+  „Vollständige Prüfsumme anzeigen") bzw. „Prüfsumme fehlt"; Karten-Hinweis „SHA-256 prüft die
+  Integrität – keine Verschlüsselung/Signatur". Weiterhin **keine** Download-/Restore-/Delete-Buttons.
+- **Audit:** neues Event `backup.managedVolume.checksumCreated` (Web + Agent-Plan) – bewusst **nur
+  das Ereignis, nie der Prüfsummenwert** im Audit.
+- **Tests:** +8 (agent docker-backup: Checksum in Metadaten/Response, Hash nur über die tar.gz,
+  Fehlerfall ohne checksum; agent backup-list: gültige/ungültige Checksum-Varianten, Step-032-
+  Kompatibilität; web: checksumCreated-Audit ohne Wert, `shortChecksum`, Secret-Scan mit Checksum).
+
+#### Nicht enthalten (bewusst)
+- **Kein Verify-Endpunkt** (Neuberechnung + Vergleich für Bestands-Backups) – als Step 035
+  vorbereitet. Keine Signatur, keine Verschlüsselung, keine Rotation, kein Download/Restore/Delete.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (387) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 033 – Read-only Backup Visibility (2026-07-02)
 
 > **Reine Sichtbarkeit** vorhandener Volume-Backups. Kein Download, kein Restore, kein Delete,

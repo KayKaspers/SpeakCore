@@ -47,6 +47,12 @@ export interface BackupVolumeOptions {
   ensureDir: (dir: string) => Promise<boolean>;
   /** Schreibt die Metadaten-Datei. `false` ⇒ Fehler. */
   writeMetadata: (fullPath: string, content: string) => Promise<boolean>;
+  /**
+   * SHA-256 der erzeugten tar.gz-Datei (nur Dateiname im Backup-Verzeichnis; Step 034). Reine
+   * **Integritäts**information (keine Verschlüsselung/Signatur); Inhalt wird gelesen, **nie entpackt**.
+   * `null` ⇒ Prüfsumme nicht ermittelbar: Backup bleibt gültig, Metadaten dann ohne `checksum`.
+   */
+  computeSha256: (fileName: string) => Promise<string | null>;
   now?: Date;
 }
 
@@ -212,12 +218,21 @@ export async function backupTs3Volume(
     };
   }
 
-  // 10) Metadaten schreiben (keine Secrets).
+  // 10) SHA-256-Integritätsprüfsumme über die erzeugte Datei (Step 034; kein Entpacken, kein Inhalt
+  // im Response). Fehlt sie (z. B. Lesefehler), bleibt das Backup gültig – Metadaten dann ohne checksum.
+  const checksumValue = await opts.computeSha256(tarName);
+  const checksum =
+    checksumValue !== null
+      ? { algorithm: 'sha256' as const, value: checksumValue, createdAt: now.toISOString() }
+      : undefined;
+
+  // 11) Metadaten schreiben (keine Secrets).
   const metadata = buildBackupMetadata({
     instanceId,
     serverDisplayName: request.serverDisplayName ?? '',
     volumeName: volume,
     backupFileName: tarName,
+    ...(checksum ? { checksum } : {}),
     createdBy: 'owner',
     createdAt: now.toISOString(),
     notes: [
@@ -236,6 +251,13 @@ export async function backupTs3Volume(
   return {
     status: 'created',
     backupFileName: tarName,
-    audit: [{ action: 'backup.managedVolume.completed', noteKey: 'provisioning.audit.backup.completed' }],
+    ...(checksum ? { checksumSha256: checksum.value } : {}),
+    audit: [
+      { action: 'backup.managedVolume.completed', noteKey: 'provisioning.audit.backup.completed' },
+      // Nur das EVENT – die Prüfsumme selbst wird bewusst nicht ins Audit übernommen.
+      ...(checksum
+        ? [{ action: 'backup.managedVolume.checksumCreated', noteKey: 'provisioning.audit.backup.checksumCreated' }]
+        : []),
+    ],
   };
 }

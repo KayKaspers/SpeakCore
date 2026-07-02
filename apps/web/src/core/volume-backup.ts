@@ -56,8 +56,17 @@ export async function backupManagedVolumeForServer(
   }
 
   if (agent.status === 'created') {
-    for (const e of buildVolumeBackupAuditEntries('created', actor, serverId)) await logAudit(e);
-    return { status: 'created', serverId, backupFileName: agent.backupFileName };
+    // `withChecksum` ergänzt NUR das Event checksumCreated – der Wert kommt nicht ins Audit (Step 034).
+    const withChecksum = typeof agent.checksumSha256 === 'string';
+    for (const e of buildVolumeBackupAuditEntries('created', actor, serverId, withChecksum)) {
+      await logAudit(e);
+    }
+    return {
+      status: 'created',
+      serverId,
+      backupFileName: agent.backupFileName,
+      ...(withChecksum ? { checksumSha256: agent.checksumSha256 } : {}),
+    };
   }
 
   // Agent-seitig blockiert vs. Ausführungsfehler.

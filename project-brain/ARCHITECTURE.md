@@ -321,6 +321,13 @@ per Klick), `assertBackupListContainsNoSecrets` als Defense-in-Depth, Audit
 `backup.managedVolume.list.*` **ohne Dateiliste**. **Kein** Download/Restore/Delete/Entpacken –
 Sichtbarkeit vor Download, Restore oder Löschung.
 
+**Backup-Integrität (Step 034):** neue Backups erhalten eine **SHA-256-Prüfsumme** (verschachteltes
+`checksum`-Objekt in `metadata.json`; serverseitig gestreamt via `node:crypto` – kein Docker/execFile/
+Shell, kein Entpacken). Response enthält `checksumSha256` (kein Secret); die Backup-Liste validiert
+das Feld strikt (64 Hex, `sha256`; vorhanden-aber-ungültig ⇒ `invalid`) und zeigt es gekürzt an.
+**Integrität, keine Verschlüsselung/Signatur**; Audit nur als Event `checksumCreated` ohne Wert.
+Ein read-only **Verify** (Neuberechnung + Vergleich) folgt als eigener Step.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

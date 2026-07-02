@@ -278,6 +278,11 @@ Erstes **echtes** Backup eines managed TS3-Datenvolumes ([ADR-0034](../../projec
   Step-030-Guard `canBackupManagedVolume` wird agent-seitig erneut geprüft (`blocked`).
 - **Kein** Restore/Import/Download, **keine** Remove-Kommandos, **kein** `inspect`/`exec`/`logs`.
   Ergebnis enthält **nur den Dateinamen** (kein Host-Pfad), keine Roh-Docker-Ausgabe, keine Secrets.
+- **SHA-256-Prüfsumme (Step 034):** nach erfolgreichem Backup serverseitig gestreamt berechnet
+  (`node:crypto`, kein execFile/Shell, kein Entpacken) und als `checksum`-Objekt in die
+  `metadata.json` geschrieben; Response enthält `checksumSha256` (kein Secret). **Integrität,
+  keine Verschlüsselung/Signatur.** Schlägt die Berechnung fehl, bleibt das Backup gültig
+  (Metadaten dann ohne `checksum`). Audit nur als Event `checksumCreated`, ohne Wert.
 
 **Web-Auslösung (Step 032):** OWNER-only Server Action (`/servers/[id]`, Gefahrenzone bei
 `RESOURCES_PREPARED`, nicht archiviert, Volume nicht `removed`): 3 Checkboxen (sensible Daten /
@@ -297,6 +302,8 @@ Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. 
 - **`tar.gz`-Inhalte werden nie gelesen/entpackt.** Die zugehörige `.metadata.json` (max. 64 KB) wird
   nur für exakt passende Backups gelesen und **Feld-für-Feld sanitisiert** (nur bekannte Felder;
   `instanceId` + `backupFileName` müssen passen, sonst `metadataStatus: invalid`; kein Roh-Dump).
+  Ein `checksum`-Feld (Step 034) wird strikt validiert (`sha256`, exakt 64 Hex-Zeichen, `createdAt`);
+  vorhanden-aber-ungültig ⇒ `invalid`, fehlend bleibt erlaubt (ältere Step-032-Backups).
 - Antwort: nur **Dateiname** (kein Host-Pfad), Größe, Zeitstempel, Metadatenstatus
   (`present/missing/invalid`). Status: `ok/backupDirUnavailable/invalid/unavailable/error`.
 - **Kein** Download, **kein** Restore, **kein** Delete, **keine** Dateiverwaltung.

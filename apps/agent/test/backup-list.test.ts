@@ -177,6 +177,49 @@ test('result contains no secrets and no absolute host paths', async () => {
   assert.ok(!/[A-Za-z]:\\\\/.test(s), 'no windows host paths');
 });
 
+const SHA256_HEX = 'c'.repeat(24) + 'd'.repeat(40); // 64 Hex-Zeichen (Dummy)
+
+test('metadata with valid checksum ⇒ present, checksum passed through sanitized (Step 034)', async () => {
+  const raw = validMetadata({
+    checksum: { algorithm: 'sha256', value: SHA256_HEX, createdAt: '2026-07-02T10:00:00.000Z', extra: 'dropme' },
+  });
+  const { opts } = makeOpts({
+    entries: [{ name: TAR_B, isFile: true }],
+    metadataByName: { [META_B]: JSON.stringify(raw) },
+  });
+  const result = await listTs3VolumeBackups(req(), opts);
+  const entry = result.backups?.[0];
+  assert.equal(entry?.metadataStatus, 'present');
+  assert.equal(entry?.metadata?.checksum?.algorithm, 'sha256');
+  assert.equal(entry?.metadata?.checksum?.value, SHA256_HEX);
+  assert.ok(!JSON.stringify(result).includes('dropme'), 'unknown checksum keys must be dropped');
+});
+
+test('metadata with invalid checksum ⇒ metadataStatus invalid (checksum fehlend bleibt erlaubt)', async () => {
+  const badCases = [
+    { algorithm: 'md5', value: SHA256_HEX, createdAt: 'x' }, // falscher Algorithmus
+    { algorithm: 'sha256', value: 'not-hex', createdAt: 'x' }, // kein 64er-Hex
+    { algorithm: 'sha256', value: SHA256_HEX }, // createdAt fehlt
+    'just-a-string',
+  ];
+  for (const checksum of badCases) {
+    const { opts } = makeOpts({
+      entries: [{ name: TAR_B, isFile: true }],
+      metadataByName: { [META_B]: JSON.stringify(validMetadata({ checksum })) },
+    });
+    const result = await listTs3VolumeBackups(req(), opts);
+    assert.equal(result.backups?.[0]?.metadataStatus, 'invalid', `case: ${JSON.stringify(checksum)}`);
+    assert.equal(result.backups?.[0]?.metadata, undefined);
+  }
+  // Ohne checksum-Feld (Step-032-Backups) bleiben die Metadaten gültig:
+  const { opts } = makeOpts({
+    entries: [{ name: TAR_B, isFile: true }],
+    metadataByName: { [META_B]: JSON.stringify(validMetadata()) },
+  });
+  const result = await listTs3VolumeBackups(req(), opts);
+  assert.equal(result.backups?.[0]?.metadataStatus, 'present');
+});
+
 test('sanitizeBackupMetadataForDisplay rejects wrong types and wrong constants', () => {
   const expected = { instanceId: INSTANCE, backupFileName: TAR_B };
   assert.equal(sanitizeBackupMetadataForDisplay(null, expected), null);

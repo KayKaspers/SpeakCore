@@ -289,6 +289,15 @@ sonst `invalid` – kein Roh-Dump). Antwort ohne Host-Pfade/Secrets; Web prüft 
 (`assertBackupListContainsNoSecrets`) und verwirft verdächtige Antworten. OWNER-only; Audit
 `backup.managedVolume.list.*` ohne Dateiliste/Metadaten. **Kein** Download/Restore/Delete –
 Rotation/Löschung wäre ein eigener, gefährlicher Step.
+
+**Backup-Integrität (Step 034):** SHA-256-Prüfsumme über die erzeugte tar.gz – **reine
+Integritätsinformation, keine Verschlüsselung, keine Signatur/Authentizität** (wird auch so
+kommuniziert). Berechnung serverseitig gestreamt (`node:crypto`, kein execFile/Shell/Docker, kein
+Entpacken, Dateiinhalt verlässt den Agent nie). Die Prüfsumme ist **kein Secret** (Response/Anzeige
+erlaubt), wird aber **nicht ins Audit** übernommen (nur Event `checksumCreated`). Die Liste
+akzeptiert nur strikt valide `checksum`-Objekte (`sha256`, 64 Hex) – sonst `invalid`. Backup-Dateien
+bleiben **sensibel**; die Prüfsumme schützt nicht vor unbefugtem Lesen, nur vor unbemerkter
+Beschädigung/Veränderung ohne Neuberechnung.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

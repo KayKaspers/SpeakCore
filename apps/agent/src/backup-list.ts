@@ -10,6 +10,7 @@
  */
 import { isValidInstanceId } from '@speakcore/shared';
 import type {
+  BackupChecksum,
   BackupListEntry,
   BackupListResult,
   BackupMetadata,
@@ -49,10 +50,22 @@ export interface ListBackupsOptions {
   readMetadataFile: (fileName: string) => Promise<string | null>;
 }
 
+/** Gültige SHA-256-Checksum-Struktur (Step 034): festes Schema, 64 Hex-Zeichen, kein Pfad/Secret. */
+function sanitizeChecksum(raw: unknown): BackupChecksum | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const c = raw as Record<string, unknown>;
+  if (c.algorithm !== 'sha256') return null;
+  if (typeof c.value !== 'string' || !/^[0-9a-f]{64}$/.test(c.value)) return null;
+  if (typeof c.createdAt !== 'string') return null;
+  return { algorithm: 'sha256', value: c.value, createdAt: c.createdAt };
+}
+
 /**
  * Sanitisiert rohe Metadaten für die Anzeige: **nur bekannte Felder**, korrekte Typen, `instanceId`
  * und `backupFileName` müssen zur gelisteten Datei passen. Unbekannte Felder werden **verworfen**
- * (nie durchgereicht), ungültige Metadaten ⇒ `null` (Anzeige als `invalid`).
+ * (nie durchgereicht), ungültige Metadaten ⇒ `null` (Anzeige als `invalid`). Ein vorhandenes,
+ * aber ungültiges `checksum`-Feld macht die Metadaten ebenfalls `invalid` (fehlend ist erlaubt –
+ * ältere Backups aus Step 032 haben keine Prüfsumme).
  */
 export function sanitizeBackupMetadataForDisplay(
   raw: unknown,
@@ -73,6 +86,13 @@ export function sanitizeBackupMetadataForDisplay(
   if (typeof r.createdBy !== 'string') return null;
   if (!Array.isArray(r.notes) || !r.notes.every((n) => typeof n === 'string')) return null;
 
+  let checksum: BackupChecksum | undefined;
+  if (r.checksum !== undefined) {
+    const sanitized = sanitizeChecksum(r.checksum);
+    if (!sanitized) return null; // vorhanden, aber ungültig ⇒ Metadaten insgesamt invalid
+    checksum = sanitized;
+  }
+
   // Explizites Feld-für-Feld-Mapping – KEIN Spread des Roh-Objekts (unbekannte Keys fallen weg).
   return {
     backupVersion: r.backupVersion,
@@ -83,6 +103,7 @@ export function sanitizeBackupMetadataForDisplay(
     serverDisplayName: r.serverDisplayName,
     volumeName: r.volumeName,
     backupFileName: expected.backupFileName,
+    ...(checksum ? { checksum } : {}),
     containsSecrets: 'unknown',
     createdBy: r.createdBy,
     notes: r.notes as string[],

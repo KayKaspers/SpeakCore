@@ -90,6 +90,15 @@ export function assertBackupListContainsNoSecrets(result: BackupListResult): voi
   walk(result, 'result');
 }
 
+/**
+ * Gekürzte SHA-256-Anzeige (erste 12 Hex-Zeichen + „…"). Reine **Integritäts**information –
+ * keine Verschlüsselung/Signatur. Volle Prüfsumme via Tooltip/`title`.
+ */
+export function shortChecksum(value: string): string {
+  if (!/^[0-9a-f]{64}$/.test(value)) return '—';
+  return `${value.slice(0, 12)}…`;
+}
+
 /** Menschlich lesbare Dateigröße (nur Anzeige; keine Locale-Abhängigkeit nötig). */
 export function formatBackupSize(sizeBytes: number): string {
   if (!Number.isFinite(sizeBytes) || sizeBytes < 0) return '—';

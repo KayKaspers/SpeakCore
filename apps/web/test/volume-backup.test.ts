@@ -55,6 +55,26 @@ test('audit: created ⇒ requested + confirmed + started + completed', () => {
   ]);
 });
 
+test('audit: created with checksum ⇒ appends checksumCreated event WITHOUT the value (Step 034)', () => {
+  const entries = buildVolumeBackupAuditEntries('created', 'o@e.com', 'srv-7', true);
+  assert.deepEqual(entries.map((e) => e.action), [
+    'backup.managedVolume.requested',
+    'backup.managedVolume.confirmed',
+    'backup.managedVolume.started',
+    'backup.managedVolume.completed',
+    'backup.managedVolume.checksumCreated',
+  ]);
+  // Nur das Ereignis – kein Hex-Wert, kein Dateiname im Audit:
+  const s = JSON.stringify(entries);
+  assert.ok(!/[0-9a-f]{64}/.test(s), 'no checksum value in audit');
+  assert.ok(!s.includes('.tar.gz'));
+});
+
+test('audit: withChecksum has no effect on non-created outcomes', () => {
+  const entries = buildVolumeBackupAuditEntries('failed', 'o@e.com', 'srv-7', true);
+  assert.ok(!entries.some((e) => e.action === 'backup.managedVolume.checksumCreated'));
+});
+
 test('audit: web-side block ⇒ requested + blocked (no confirmed)', () => {
   const entries = buildVolumeBackupAuditEntries('blocked', 'o@e.com', 'srv-7');
   assert.deepEqual(entries.map((e) => e.action), [

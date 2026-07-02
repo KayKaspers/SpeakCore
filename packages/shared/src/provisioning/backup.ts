@@ -12,6 +12,7 @@
  * Doku – hier bewusst **keine** konkreten Kommandos/Argumente). Backup-Dateien sind **potenziell sensibel**.
  */
 import type {
+  BackupChecksum,
   BackupMetadata,
   VolumeBackupConfirmations,
   VolumeBackupEvaluation,
@@ -108,6 +109,8 @@ export function buildBackupMetadata(input: {
   serverDisplayName: string;
   volumeName: string;
   backupFileName?: string;
+  /** SHA-256-**Integritäts**prüfsumme (Step 034) – kein Secret; keine Verschlüsselung/Signatur. */
+  checksum?: BackupChecksum;
   createdBy?: string;
   createdAt?: string;
   notes?: string[];
@@ -121,6 +124,7 @@ export function buildBackupMetadata(input: {
     serverDisplayName: input.serverDisplayName,
     volumeName: input.volumeName,
     ...(input.backupFileName ? { backupFileName: input.backupFileName } : {}),
+    ...(input.checksum ? { checksum: input.checksum } : {}),
     containsSecrets: 'unknown',
     createdBy: input.createdBy ?? 'owner',
     notes: input.notes ?? [],

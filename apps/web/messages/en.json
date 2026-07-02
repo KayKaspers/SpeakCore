@@ -312,6 +312,9 @@
           "missing": "missing",
           "invalid": "invalid"
         },
+        "checksumHint": "SHA-256 verifies integrity – it is not encryption and not a signature.",
+        "checksumMissing": "checksum missing",
+        "checksumShow": "Show full checksum",
         "dirUnavailable": "The backup directory is unavailable on the agent.",
         "unreachable": "Agent unreachable – backups cannot be listed.",
         "error": "Backups could not be listed."

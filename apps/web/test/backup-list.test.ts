@@ -8,6 +8,7 @@ import {
   assertBackupListContainsNoSecrets,
   buildBackupListAuditEntries,
   formatBackupSize,
+  shortChecksum,
 } from '../src/core/backup-list-helpers';
 
 const FILE = 'speakcore-backup-ts3-clabc123def456-2026-07-02T10-00-00-000Z.tar.gz';
@@ -89,6 +90,23 @@ test('assertBackupListContainsNoSecrets rejects secret-like keys and values', ()
   const badValue = cleanResult();
   badValue.backups![0].metadata!.notes = ['login serveradmin via query'];
   assert.throws(() => assertBackupListContainsNoSecrets(badValue), /secret-like value/);
+});
+
+test('checksum metadata passes the secret scan (hex is not a secret)', () => {
+  const withChecksum = cleanResult();
+  withChecksum.backups![0].metadata!.checksum = {
+    algorithm: 'sha256',
+    value: 'e'.repeat(64),
+    createdAt: '2026-07-02T10:00:00.000Z',
+  };
+  assert.doesNotThrow(() => assertBackupListContainsNoSecrets(withChecksum));
+});
+
+test('shortChecksum truncates valid sha256 values and rejects garbage', () => {
+  const value = '0123456789abcdef'.repeat(4); // 64 Hex-Zeichen
+  assert.equal(shortChecksum(value), '0123456789ab…');
+  assert.equal(shortChecksum('not-a-checksum'), '—');
+  assert.equal(shortChecksum(''), '—');
 });
 
 test('formatBackupSize renders sensible units', () => {

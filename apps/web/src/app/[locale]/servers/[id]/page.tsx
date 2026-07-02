@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
-import { formatBackupSize, listManagedVolumeBackupsForServer } from '@/core/backup-list';
+import { formatBackupSize, listManagedVolumeBackupsForServer, shortChecksum } from '@/core/backup-list';
 import { BrandMark } from '@/components/BrandMark';
 import {
   createContainerAction,
@@ -107,6 +107,7 @@ export default async function ServerDetailPage({
         <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
           <li>• {t('managed.backupList.sensitiveHint')}</li>
           <li>• {t('managed.backupList.readOnlyHint')}</li>
+          <li>• {t('managed.backupList.checksumHint')}</li>
         </ul>
         {!backupList && (
           <div className="mt-3">
@@ -142,7 +143,26 @@ export default async function ServerDetailPage({
                       <p className="mt-1 text-sc-caption text-sc-text-muted">
                         {t('managed.backupList.metadataLabel')}:{' '}
                         {t(`managed.backupList.metadata.${b.metadataStatus}`)}
+                        {' · '}
+                        {b.metadata?.checksum ? (
+                          <span title={b.metadata.checksum.value}>
+                            SHA-256:{' '}
+                            <span className="font-mono">{shortChecksum(b.metadata.checksum.value)}</span>
+                          </span>
+                        ) : (
+                          <span>{t('managed.backupList.checksumMissing')}</span>
+                        )}
                       </p>
+                      {b.metadata?.checksum && (
+                        <details className="mt-1">
+                          <summary className="cursor-pointer text-sc-caption text-sc-text-muted">
+                            {t('managed.backupList.checksumShow')}
+                          </summary>
+                          <p className="mt-1 break-all font-mono text-sc-caption text-sc-text-secondary">
+                            {b.metadata.checksum.value}
+                          </p>
+                        </details>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -3,7 +3,7 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – interne Alpha / NDF Step 033 (read-only Backup-Sichtbarkeit)` — Details:
+**Status:** `0.1 – interne Alpha / NDF Step 034 (Backup-Integritätsprüfsummen)` — Details:
 [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
@@ -142,6 +142,8 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   `CREATE BACKUP` — Backup-Dateien sind **sensibel**, **kein** Browser-Download. Ab **Step 033** sind
   vorhandene Backups **read-only einsehbar** (Dateiname/Größe/Zeitstempel + sanitisierte Metadaten,
   auch für archivierte Server) — reine Sichtbarkeit, kein Download/Restore/Delete, keine Docker-Aktion.
+  Ab **Step 034** erhalten neue Backups eine **SHA-256-Integritätsprüfsumme** (in `metadata.json` +
+  Anzeige in der Liste) — **Integrität, keine Verschlüsselung/Signatur**.
 - **Kein** Restore/Import, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller

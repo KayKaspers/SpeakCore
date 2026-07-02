@@ -397,6 +397,8 @@ export interface Ts3VolumeBackupRequest {
 export interface VolumeBackupResult {
   status: VolumeBackupStatus;
   backupFileName?: string;
+  /** SHA-256 der erzeugten Datei (kein Secret; Integrität, keine Verschlüsselung). Seit Step 034. */
+  checksumSha256?: string;
   errors?: ValidationError[];
   audit: PlannedAuditAction[];
 }
@@ -468,6 +470,17 @@ export interface VolumeBackupRequest {
   includeAuditExport?: boolean;
 }
 
+/**
+ * SHA-256-**Integritäts**-Prüfsumme eines Backups (NDF Step 034). Reine Integritätsinformation –
+ * **keine Verschlüsselung, keine Signatur/Authentizität**. Kein Secret, kein Pfad.
+ */
+export interface BackupChecksum {
+  algorithm: 'sha256';
+  /** Hex-kodierte SHA-256-Prüfsumme der tar.gz-Datei. */
+  value: string;
+  createdAt: string;
+}
+
 /** Metadaten, die ein späterer echter Backup **mitschreiben** würde. **Enthalten selbst KEINE Secrets.** */
 export interface BackupMetadata {
   backupVersion: number;
@@ -479,6 +492,8 @@ export interface BackupMetadata {
   volumeName: string;
   /** Dateiname des Backups (kein Host-Pfad). Optional – im Blueprint (Step 030) leer. */
   backupFileName?: string;
+  /** SHA-256-Integritätsprüfsumme (seit Step 034; ältere Backups haben keine). */
+  checksum?: BackupChecksum;
   /** Der Backup-Inhalt (TS3-Daten) KANN sensibel sein – daher `unknown`, nie „secret-free". */
   containsSecrets: 'unknown';
   createdBy: string;
