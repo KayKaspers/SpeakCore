@@ -126,8 +126,9 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   **Step 026** das **geteilte Voice-Netzwerk** entfernen (`docker network rm`, **ohne Force**, nur wenn kein
   managed Container mehr existiert, mit Bestätigung) — Container/Volumes/Credentials/ServerInstance bleiben.
   Ab **Step 027** den **Servereintrag archivieren** (rein DB-seitig, kein Docker/Agent, **kein Hard-Delete**,
-  Credential-Löschung nur bei ausdrücklicher Wahl, getippt `ARCHIVE SERVER`).
-- **Noch kein** Archiv-Filter/-Ansicht, keine finale Hard-Delete-Policy, kein Backup-/Export-Konzept, kein
+  Credential-Löschung nur bei ausdrücklicher Wahl, getippt `ARCHIVE SERVER`). Ab **Step 028** sind archivierte
+  Server über die **Serverliste** (Tabs „Aktiv | Archiviert") auffindbar — rein lesend, ohne Lifecycle-Aktionen.
+- **Noch kein** Unarchive, keine finale Hard-Delete-Policy, kein Backup-/Export-Konzept, kein
   Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,

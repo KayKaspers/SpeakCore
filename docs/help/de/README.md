@@ -62,7 +62,10 @@
   **archiviert statt hart gelöscht** (bleibt aus Nachvollziehbarkeitsgründen erhalten) und verschwindet aus der
   aktiven Serverliste. Du triffst dabei eine **bewusste Entscheidung zu den Zugangsdaten** (behalten oder
   löschen) und tippst **`ARCHIVE SERVER`** zur Bestätigung. Zugangsdaten werden **nur** gelöscht, wenn du das
-  ausdrücklich wählst.*
+  ausdrücklich wählst. Ab Step 028 sind archivierte Server über die **Serverliste** wieder auffindbar: Tabs
+  **„Aktiv | Archiviert"**; die archivierte Ansicht zeigt Archiv-Badge, Archivierungsdatum und den
+  Zugangsdaten-Status (behalten/gelöscht). Archivierte Server bieten **keine** Lifecycle-Aktionen und es gibt
+  **kein** Wiederherstellen (Unarchive) oder Hard-Delete.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

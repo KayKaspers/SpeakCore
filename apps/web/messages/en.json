@@ -83,6 +83,15 @@
     "empty": "No servers connected yet.",
     "backToDashboard": "Back to dashboard",
     "backToList": "Back to overview",
+    "archived": {
+      "tabsLabel": "Server view",
+      "tabActive": "Active",
+      "tabArchived": "Archived",
+      "hint": "Archived servers are inactive and offer no lifecycle actions.",
+      "empty": "No archived servers.",
+      "credentialsKept": "Credentials kept",
+      "credentialsRemoved": "Credentials deleted"
+    },
     "new": {
       "title": "Connect existing TS3 server",
       "hint": "Credentials are stored encrypted and never shown in plain text.",

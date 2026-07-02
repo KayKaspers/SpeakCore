@@ -244,6 +244,11 @@ kein Log-Lesen.
 + getippt `ARCHIVE SERVER`. **Credentials werden nur bei ausdrücklicher `remove`-Wahl gelöscht** (sonst
 verschlüsselt behalten). Keine Secrets im Client/Audit/Ergebnis; **kein Hard-Delete**, **keine Audit-Löschung**;
 archivierte Server zeigen keine Lifecycle-Aktionen.
+
+**Archiv-Ansicht (Step 028):** **rein lesende** UI-Ergänzung – `/servers` mit Tabs „Aktiv | Archiviert"
+(`listServers({ view })`). **Keine** neue Schreibaktion, **keine** Docker-/Agent-Imports, keine Secrets im
+Client, **keine Lifecycle-Aktionen bei archivierten Servern**, **kein** Hard-Delete/Unarchive/Credential-
+Änderung/Audit-Löschung. Quell-Scan-Tests erzwingen dies.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

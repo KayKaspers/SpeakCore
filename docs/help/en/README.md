@@ -58,7 +58,10 @@
   ("Complete deprovisioning") – **database-only**, no Docker/agent action. The record is **archived instead of
   hard-deleted** (kept for traceability) and disappears from the active server list. You make a **deliberate
   credential decision** (keep or delete) and type **`ARCHIVE SERVER`** to confirm. Credentials are **only**
-  deleted if you explicitly choose so.*
+  deleted if you explicitly choose so. From Step 028 archived servers are findable again via the **server
+  list**: tabs **“Active | Archived”**; the archived view shows an archive badge, the archiving date and the
+  credential status (kept/deleted). Archived servers offer **no** lifecycle actions and there is **no**
+  un-archive or hard delete.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

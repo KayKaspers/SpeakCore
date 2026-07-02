@@ -83,6 +83,15 @@
     "empty": "Noch keine Server verbunden.",
     "backToDashboard": "Zurück zum Dashboard",
     "backToList": "Zurück zur Übersicht",
+    "archived": {
+      "tabsLabel": "Serveransicht",
+      "tabActive": "Aktiv",
+      "tabArchived": "Archiviert",
+      "hint": "Archivierte Server sind nicht aktiv und bieten keine Lifecycle-Aktionen.",
+      "empty": "Keine archivierten Server.",
+      "credentialsKept": "Zugangsdaten behalten",
+      "credentialsRemoved": "Zugangsdaten gelöscht"
+    },
     "new": {
       "title": "Bestehenden TS3-Server verbinden",
       "hint": "Zugangsdaten werden verschlüsselt gespeichert und nie im Klartext angezeigt.",

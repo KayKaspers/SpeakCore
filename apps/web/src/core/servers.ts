@@ -4,8 +4,10 @@ import { logAudit } from './audit';
 import { connectAndFetchStatus, createSocketTransport } from './ts3/client';
 import type { Ts3ServerStatus } from './ts3/protocol';
 import { statusToServerUpdate } from './servers-status';
+import { serverListWhere, type ServerListView } from './servers-list';
 
 export { statusToServerUpdate };
+export { serverListWhere, normalizeServerListView, type ServerListView } from './servers-list';
 
 export interface CreateExternalServerInput {
   name: string;
@@ -17,10 +19,10 @@ export interface CreateExternalServerInput {
   password: string;
 }
 
-export async function listServers() {
-  // Archivierte Server (Step 027) standardmäßig ausblenden – Audit-Historie bleibt erhalten.
+export async function listServers(opts: { view?: ServerListView } = {}) {
+  // Standard: aktive (nicht archivierte) Server. Archivierte separat (Step 028). Audit bleibt erhalten.
   return prisma.serverInstance.findMany({
-    where: { archivedAt: null },
+    where: serverListWhere(opts.view ?? 'active'),
     orderBy: { createdAt: 'desc' },
   });
 }

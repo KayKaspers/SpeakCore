@@ -278,7 +278,13 @@ speakcore-network-voice`** (**kein `-f`**), **nur wenn kein managed Container** 
 bleibt, Audit erhalten). Nutzt den Step-024-Guard `canArchiveManagedServer`; nur managed + `RESOURCES_PREPARED`;
 mit `confirmServerRecordArchive` + **bewusster Credential-Entscheidung** (`keep`/`remove`) + getippt
 `ARCHIVE SERVER`. Archivierte Server werden ausgeblendet und zeigen keine Lifecycle-Aktionen
-([ADR-0031](DECISIONS.md)). Archiv-Filter/Hard-Delete-Policy/Export folgen als spätere Steps.
+([ADR-0031](DECISIONS.md)).
+
+**Archiv-Ansicht (Step 028):** `/servers` bietet **Tabs „Aktiv | Archiviert"** (`listServers({ view })`,
+reine Filter in `core/servers-list.ts`: `archivedAt: null` vs. `archivedAt != null`). Die archivierte
+Ansicht zeigt Archiv-Badge/-Datum + Credential-Status, **ohne** neue Schreib-/Lifecycle-/Docker-/Agent-
+Aktion (kein Hard-Delete, kein Unarchive). Hard-Delete-Policy/Export/Unarchive folgen — falls überhaupt —
+als eigene, abgesicherte Steps.
 
 ## 7. Verwandte Dokumente
 

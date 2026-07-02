@@ -5,6 +5,34 @@
 
 ## [Unreleased]
 
+### NDF Step 028 – Archiv-Ansicht & Serverlisten-Filter (2026-07-02)
+
+> Kleine, **risikoarme** UI-Ergänzung: archivierte Server (Step 027) auffindbar machen. **Keine** neue
+> Schreib-/Lifecycle-/Docker-/Agent-Aktion, **kein** Hard-Delete, **kein** Unarchive.
+
+#### Added
+- **`listServers({ view })`** (`view: 'active' | 'archived'`, Default `active`) + reine Helfer
+  (`src/core/servers-list.ts`): `normalizeServerListView` (untrusted Query-Param → gültige Ansicht),
+  `serverListWhere` (aktiv = `archivedAt: null`, archiviert = `archivedAt != null`). Aktive Liste bleibt
+  frei von archivierten Servern.
+- **UI (`/servers`):** **Tabs „Aktiv | Archiviert"** (via `?view=`). Archivierte Ansicht zeigt pro Server
+  **Archiv-Badge**, **Archivierungsdatum** und **Credential-Status** (behalten/gelöscht), plus Hinweis
+  „Archivierte Server sind nicht aktiv und bieten keine Lifecycle-Aktionen". Eigener **Empty-State**
+  („Keine archivierten Server"). Aktive Ansicht unverändert.
+- Die **archivierte Detailseite** (Step 027) zeigt weiterhin nur Status/Info – **keine** Lifecycle-/
+  Deprovisioning-/Credential-/Unarchive-Aktion.
+- Tests: `serverListWhere`/`normalizeServerListView` (aktiv/archiviert), Quell-Scan (kein Docker/Agent/
+  `execFile`, **keine Lifecycle-Write-Aktion aus der Liste**, kein Secret). **313 Tests grün.**
+
+#### Security
+- **Rein lesend:** keine neue Schreibaktion, **keine Docker-/Agent-Imports**, keine Secrets im Client,
+  **keine Lifecycle-Aktionen bei archivierten Servern**, **kein Hard-Delete/Unarchive/Credential-Änderung/
+  Audit-Löschung**. Quell-Scan-Tests erzwingen dies.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (313) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 027 – Archive Managed ServerRecord & Credential Decision (2026-07-02)
 
 > Abschließender Deprovisioning-Schritt. **Rein Web-/DB-seitig – keine Docker-/Agent-Aktion.**

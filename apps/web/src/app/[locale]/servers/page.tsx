@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
-import { listServers } from '@/core/servers';
+import { listServers, normalizeServerListView } from '@/core/servers';
 import { BrandMark } from '@/components/BrandMark';
 
 export const dynamic = 'force-dynamic';
@@ -24,17 +24,28 @@ function managedBadgeClass(status: string | null): string {
   return 'bg-sc-surface-raised text-sc-text-secondary';
 }
 
-export default async function ServersPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function ServersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ view?: string }>;
+}) {
   const { locale } = await params;
+  const { view: rawView } = await searchParams;
   if (!(await getCurrentUser())) {
     redirect(`/${locale}/login`);
   }
 
+  const view = normalizeServerListView(rawView);
   const t = await getTranslations('servers');
-  const servers = await listServers();
+  const servers = await listServers({ view });
 
   const statusLabel = (s: string | null) =>
     s === 'reachable' ? t('status.reachable') : s === 'unreachable' ? t('status.unreachable') : t('status.statusUnknown');
+
+  const tabClass = (active: boolean) =>
+    `rounded-sc-md px-3 py-1.5 text-sc-sm ${active ? 'bg-sc-primary text-white' : 'border border-sc-border text-sc-text-secondary'}`;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -62,16 +73,65 @@ export default async function ServersPage({ params }: { params: Promise<{ locale
         </div>
       </header>
 
+      <nav className="mb-4 flex items-center gap-2" aria-label={t('archived.tabsLabel')}>
+        <Link href={`/${locale}/servers?view=active`} className={tabClass(view === 'active')}>
+          {t('archived.tabActive')}
+        </Link>
+        <Link href={`/${locale}/servers?view=archived`} className={tabClass(view === 'archived')}>
+          {t('archived.tabArchived')}
+        </Link>
+      </nav>
+
+      {view === 'archived' && (
+        <p className="mb-4 rounded-sc-md bg-sc-surface-raised px-4 py-3 text-sc-caption text-sc-text-muted">
+          {t('archived.hint')}
+        </p>
+      )}
+
       {servers.length === 0 ? (
         <section className="rounded-sc-lg border border-sc-border bg-sc-surface p-8 text-center">
-          <p className="text-sc-sm text-sc-text-secondary">{t('empty')}</p>
-          <Link
-            href={`/${locale}/servers/new`}
-            className="mt-4 inline-block rounded-sc-md border border-sc-border-strong px-4 py-2 text-sc-sm text-sc-text-primary"
-          >
-            {t('connectButton')}
-          </Link>
+          <p className="text-sc-sm text-sc-text-secondary">
+            {view === 'archived' ? t('archived.empty') : t('empty')}
+          </p>
+          {view === 'active' && (
+            <Link
+              href={`/${locale}/servers/new`}
+              className="mt-4 inline-block rounded-sc-md border border-sc-border-strong px-4 py-2 text-sc-sm text-sc-text-primary"
+            >
+              {t('connectButton')}
+            </Link>
+          )}
         </section>
+      ) : view === 'archived' ? (
+        <ul className="space-y-3">
+          {servers.map((server) => (
+            <li key={server.id}>
+              <Link
+                href={`/${locale}/servers/${server.id}`}
+                className="flex items-center justify-between gap-4 rounded-sc-lg border border-sc-border bg-sc-surface p-4 hover:border-sc-border-strong"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sc-body font-medium text-sc-text-primary">
+                    {server.name}
+                  </span>
+                  <span className="block text-sc-caption text-sc-text-muted">
+                    {t('managed.archive.archivedAt')}:{' '}
+                    {server.archivedAt ? new Date(server.archivedAt).toLocaleString(locale) : '—'}
+                  </span>
+                  <span className="block text-sc-caption text-sc-text-muted">
+                    {t('managed.archive.credentials')}:{' '}
+                    {server.credentialsRemovedAt
+                      ? t('archived.credentialsRemoved')
+                      : t('archived.credentialsKept')}
+                  </span>
+                </span>
+                <span className="inline-flex shrink-0 items-center rounded-sc-sm bg-sc-surface-raised px-3 py-1 text-sc-sm font-medium text-sc-text-secondary">
+                  {t('managed.archive.badge')}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : (
         <ul className="space-y-3">
           {servers.map((server) => (
