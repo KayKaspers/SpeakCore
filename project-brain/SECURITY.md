@@ -185,6 +185,14 @@ Es werden **keine** Roh-Docker-/TS3-Ausgaben und **keine** Secrets gespeichert/a
 geprüft (Cloud-Metadaten/Link-Local/unspezifiziert blockiert; LAN/localhost erlaubt – Self-Hosting).
 OWNER-only (Provisioning + Bearbeiten), rate-limitiert; Audit `managed.queryAddress.set/updated` ohne
 Secrets/technische Dumps. External Server bleiben unverändert.
+
+**Container-Stop (Step 021, [ADR-0025](DECISIONS.md)):** Übergang `RUNNING → CONTAINER_CREATED`
+(+ `runState='stopped'`). Der Agent führt **nur `docker stop --time 3`** aus (nie `rm`/`restart`/`start`),
+hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, **nur** für einen per Label geprüften **managed**
+Container (Name aus `instanceId`). **Keine Löschung** – Container/Volume/Network bleiben bestehen.
+OWNER-only mit UI-Bestätigung, Idempotenz (`alreadyStopped`) + Konfliktschutz (`conflict`) + `notFound`.
+**Kein** `run/create/start/restart/rm/inspect/exec/cp/logs`, **kein** compose, **kein Log-Lesen**, kein
+Socket/Host-Mount. Kein Browser→Agent; keine Secrets im Request/Ergebnis/Audit.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

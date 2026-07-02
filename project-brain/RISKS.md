@@ -137,6 +137,11 @@
   Container, Idempotenz (`running`)/`conflict`/`notFound`, **kein** `run/create/stop/rm`, **kein**
   Log-Lesen; explizite Lizenzzustimmung nötig. Ergebnis/Audit ohne Secrets. Verwaiste/hängende
   Container (Stop/Remove) bleiben eigene, spätere Steps.
+- **Stand Step 021:** **Container-Stop** (`docker stop --time 3`, [ADR-0025](DECISIONS.md)) – gleiche
+  Guards, Managed-Only, Idempotenz (`alreadyStopped`)/`conflict`/`notFound`, **kein** `rm/restart/start`,
+  **keine Löschung** (Volume/Network bleiben), **kein Log-Lesen**. `RUNNING → CONTAINER_CREATED` +
+  `runState='stopped'` (kein neuer Lifecycle-Status). **Remove** (und damit verwaiste Ressourcen) bleibt
+  ein eigener, geprüfter Step.
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

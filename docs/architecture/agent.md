@@ -33,6 +33,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/prepare` | **write** (Flag-gated): managed **Network + Volume** anlegen (kein Container) |
 | POST | `/docker/provision/create-container` | **write** (Flag-gated): managed **Container erstellen** (`docker create`, **kein Start**) |
 | POST | `/docker/provision/start-container` | **write** (Flag-gated): managed **Container starten** (`docker start`, Lizenzzustimmung nötig) |
+| POST | `/docker/provision/stop-container` | **write** (Flag-gated): managed **Container stoppen** (`docker stop`, kein rm/restart) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -161,6 +162,25 @@ Erster **Start** eines bereits erstellten managed Containers ([ADR-0024](../../p
 **Web-Auslösung (Step 018):** OWNER-only Server Action (`/servers/[id]`, **Lizenz-Checkbox** + Button
 „Container starten"); Status `CONTAINER_CREATED → RUNNING`. Ohne Zustimmung `licenseRequired` (kein Start).
 Bei Fehler bleibt der Status `CONTAINER_CREATED` mit generischem Fehlerschlüssel.
+
+## `/docker/provision/stop-container` – Container stoppen (Step 021)
+
+Kontrolliertes **Stoppen** eines laufenden managed Containers ([ADR-0025](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker stop --time 3 speakcore-ts3-<instanceId>`** (nie `rm`/`restart`/`start`); Name aus
+  `instanceId` abgeleitet, **managed-/instanceId-Label** geprüft (sonst `conflict`/`notFound`). Feste,
+  interne Kulanzzeit `--time 3` (SIGTERM, dann SIGKILL) hält den Stop im CLI-Timeout. Vorprüfung nur über
+  managed-gefilterte Listen (`container ls [--all] --filter label=…`).
+- **Token + `AGENT_DOCKER_WRITE_ENABLED`** (`false` ⇒ `writeDisabled`). `execFile`, statische Argumente,
+  keine Shell, kein Socket. **Keine** Secrets im Request/Ergebnis.
+- **Idempotenz:** läuft nicht mehr ⇒ `alreadyStopped` (kein Stop). **Konflikt:** fremder gleichnamiger
+  Container ⇒ `conflict`. Fehlt ⇒ `notFound`. Docker nicht verfügbar ⇒ `unavailable`.
+- **Keine Löschung** (Container/Volume/Network bleiben), **kein** `rm/restart/inspect/exec/cp/logs`, **kein**
+  compose, **kein Log-Lesen**. Quell-Scan-Tests erzwingen die verbotenen Kommandos.
+
+**Web-Auslösung (Step 021):** OWNER-only Server Action (`/servers/[id]`, Stop-Button **mit Bestätigung**);
+Status `RUNNING → CONTAINER_CREATED` + `runState='stopped'`. Bei Fehler bleibt der Status `RUNNING` mit
+generischem Fehlerschlüssel. **Restart/Remove** folgen als eigene Steps.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

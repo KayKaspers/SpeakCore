@@ -6,6 +6,7 @@ import type {
   Ts3ContainerCreateRequest,
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
+  Ts3ContainerStopRequest,
   Ts3ProvisionInput,
 } from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
@@ -14,6 +15,7 @@ import { gatherDockerInventory } from './docker-inventory';
 import { prepareProvision } from './docker-write';
 import { createTs3Container } from './docker-container';
 import { startTs3Container } from './docker-start';
+import { stopTs3Container } from './docker-stop';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -161,6 +163,28 @@ async function handle(
       return;
     }
     const result = await startTs3Container(body as Ts3ContainerStartRequest, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/stop-container') {
+    // Managed Container STOPPEN (nur `docker stop`). Token-Pflicht + Write-Feature-Flag.
+    // Kein rm/restart, kein Log-Lesen, keine Secrets im Ergebnis, keine Löschung.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await stopTs3Container(body as Ts3ContainerStopRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
     });

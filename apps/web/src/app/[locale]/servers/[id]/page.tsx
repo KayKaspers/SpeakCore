@@ -13,6 +13,7 @@ import {
   updateQueryAddressAction,
 } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
+import { StopContainerButton } from '../StopContainerButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -135,7 +136,12 @@ export default async function ServerDetailPage({
             ) : (
               <>
                 {provStatus === 'CONTAINER_CREATED' ? (
-                  <p>• {t('managed.containerCreatedHint')}</p>
+                  <p>
+                    •{' '}
+                    {server.runState === 'stopped'
+                      ? t('managed.containerStoppedHint')
+                      : t('managed.containerCreatedHint')}
+                  </p>
                 ) : (
                   <p>• {t('managed.containerNotCreated')}</p>
                 )}
@@ -298,6 +304,17 @@ export default async function ServerDetailPage({
                 <p>• {t('managed.health.noLogs')}</p>
                 <p>• {t('managed.health.noPortscan')}</p>
                 <p>• {t('managed.health.noRepair')}</p>
+              </div>
+            </div>
+          )}
+
+          {provStatus === 'RUNNING' && (
+            <div className="mt-6 border-t border-sc-border pt-4">
+              <StopContainerButton locale={locale} id={server.id} />
+              <div className="mt-2 space-y-1 text-sc-caption text-sc-text-muted">
+                <p>• {t('managed.stopHintNoDelete')}</p>
+                <p>• {t('managed.stopHintKeepResources')}</p>
+                <p>• {t('managed.stopHintNoLogs')}</p>
               </div>
             </div>
           )}

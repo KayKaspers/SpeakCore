@@ -47,8 +47,10 @@ Healthcheck** (`/docker/provision/container-status`, nur Token, kein Write-Flag)
 den Ist-Zustand (Container läuft? optional TS3 erreichbar?) – **ohne** Lifecycle-Status zu überschreiben.
 In **Step 020** bekommt der managed Server eine **explizite Query-Adresse** (`host`; Env-Default
 `MANAGED_TS3_QUERY_HOST` + UI-Override, **kein Raten**, Step-008-Host-Validierung), sodass der TS3-Check
-echte `reachable`/`unreachable`/`notConfigured` liefert. **Kein Log-Lesen**, kein Inspect, **keine
-Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
+echte `reachable`/`unreachable`/`notConfigured` liefert. In **Step 021** kann der Container **gestoppt**
+werden (`docker stop`, `RUNNING → CONTAINER_CREATED` + `runState='stopped'`) – **ohne Löschung**, ohne
+`rm/restart`. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine Reparatur,
+kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

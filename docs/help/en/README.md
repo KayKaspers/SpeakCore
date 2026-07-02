@@ -35,8 +35,11 @@
   Docker container is running and (if configured) whether the TS3 service is reachable. From Step 020 you
   can set a **query address** (during provisioning or on the server page; pre-filled from
   `MANAGED_TS3_QUERY_HOST`) so the TS3 check returns real states "reachable/unreachable/not configured" –
-  **no port scan, no automatic detection**. **No** log reading, **no** inspect, **no** repair, no
-  stop/remove action. Stop follows in its own step.*
+  **no port scan, no automatic detection**. From Step 021 the container can be **stopped** ("Stop
+  container" with confirmation): via `docker stop`, the status returns to "Container created"
+  (`runState = stopped`). **Nothing is deleted** – volume and network are kept, and a later start is
+  possible again. **No** log reading, **no** inspect, **no** repair, **no** remove action. Remove/restart
+  follow in their own steps.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

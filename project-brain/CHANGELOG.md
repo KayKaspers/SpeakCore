@@ -5,6 +5,45 @@
 
 ## [Unreleased]
 
+### NDF Step 021 – STOP_MANAGED_CONTAINER (2026-07-01)
+
+> Kontrolliertes **Stoppen** eines laufenden managed Containers. `RUNNING → CONTAINER_CREATED`
+> (+ `runState='stopped'`). **Kein** Löschen/Restart, **kein** Log-Lesen, **keine** weitere Docker-Aktion.
+
+#### Added
+- **Agent-Aktion `stopTs3Container`** (`apps/agent/src/docker-stop.ts`) + Endpunkt
+  **`POST /docker/provision/stop-container`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): stoppt via
+  **`docker stop --time 3`** (nie `rm`/`restart`/`start`) **nur** einen bereits vorhandenen, per
+  **managed-/instanceId-Label** geprüften Container (Name aus `instanceId` abgeleitet). `execFile` ohne
+  Shell, statische Argumente. Status `stopped | alreadyStopped | notFound | conflict | error |
+  writeDisabled | invalid | unavailable`; **Idempotenz** (bereits gestoppt ⇒ `alreadyStopped`, kein Stop),
+  **Konfliktschutz** (fremder Name ⇒ `conflict`), fehlt ⇒ `notFound`.
+- **Web-Service** `stopManagedContainerForServer` (`src/core/container-stop.ts`) + reine Helfer
+  (`container-stop-helpers.ts`) + **OWNER-only Server Action** `stopContainerAction` (rate-limitiert).
+  Guard: nur `RUNNING`/`CONTAINER_CREATED`; sonst `invalidState`. Erfolg ⇒ `CONTAINER_CREATED` +
+  `runState='stopped'`. Fehler ⇒ Status bleibt `RUNNING` mit generischem Fehlerschlüssel.
+- **Kein neuer Lifecycle-Status** ([ADR-0025](DECISIONS.md)): der Container existiert weiter, nur
+  gestoppt; ein späterer Start nutzt erneut `CONTAINER_CREATED → RUNNING`.
+- **UI (DE/EN):** managed Detailseite bei `RUNNING` mit **Stop-Button + Bestätigung**
+  („Der TS3-Container wird gestoppt. Daten bleiben erhalten.") + Hinweisen (nichts wird gelöscht,
+  Volume/Network bleiben, keine Logs); bei `CONTAINER_CREATED` nach Stop Hinweis „Container vorhanden,
+  aber nicht laufend" (Start-Button aus Step 018 bleibt nutzbar). **Keine** Remove-Buttons.
+- **Audit:** `docker.containerStop.requested/completed/failed/conflict`,
+  `docker.container.stopped/alreadyStopped` (Target = ServerInstance-ID, **keine Secrets/Roh-Ausgaben**).
+- Tests: Agent (stop-not-rm/restart/start, `docker stop`, idempotent/`alreadyStopped`, conflict, notFound,
+  unavailable, error, Token/Flag-Gate, Quell-Scan) und Web (Guard/Audit/Fehlerschlüssel, kein Secret im
+  Audit, Quell-Scan). **215 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein** `run/create/start/restart/
+  rm/inspect/exec/cp/logs`, kein compose, kein Socket/Host-Mount, **keine Löschung** (Container/Volume/
+  Network bleiben), keine freien Docker-Parameter, keine fremde Ressource verändern. Kein Secret im
+  Client/Audit/Agent-Response, **kein Log-Lesen**. Quell-Scan-Tests erzwingen dies. **[ADR-0025](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (215) · `prisma validate` n. z.
+  (kein Schema-Change – `provisioningStatus`/`runState` wiederverwendet).
+
 ### NDF Step 020 – Managed Query-Adresse & TS3 Read-only Healthcheck aktiviert (2026-07-01)
 
 > Schließt die Step-019-Lücke: managed Server bekommen eine **explizite** Query-Adresse, damit der

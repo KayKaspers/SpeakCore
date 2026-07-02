@@ -78,7 +78,13 @@ Healthcheck-Feldern; **keine** Reparatur, **keine** Stop-/Remove-Aktion.
 **Managed Query-Adresse (Step 020):** Die read-only-Query-Adresse wird **explizit** im `host`-Feld
 gespeichert (Env-Default `MANAGED_TS3_QUERY_HOST` + UI-Override, **kein Raten**, Step-008-Host-Validierung).
 Damit liefert der Healthcheck echte `reachable`/`unreachable`/`notConfigured` – **ohne Portscans/externe
-Checks**. **Stop** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+Checks**.
+
+**Container-Stop (Step 021):** `RUNNING → CONTAINER_CREATED` (+ `runState='stopped'`) – der Adapter
+delegiert an den Agent, der **`docker stop`** (nur bereits vorhandener managed Container) ausführt. **Kein**
+neuer Lifecycle-Status, **keine Löschung** (Volume/Network bleiben), kein `rm/restart`, **kein Log-Lesen**
+([ADR-0025](../../project-brain/DECISIONS.md)). **Restart**, **Remove** und ein optionaler
+**Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

@@ -232,6 +232,13 @@ ist – sonst `notConfigured` (kein Portscan). **Keine** Logs/Inspect/Reparatur.
 Damit liefert der Healthcheck echte `reachable`/`unreachable`/`notConfigured`. Bearbeiten via OWNER-only
 `updateQueryAddressAction`. Audit: `managed.queryAddress.set/updated`.
 
+**Container-Stop (Step 021):** `RUNNING → CONTAINER_CREATED` (+ `runState='stopped'`), **OWNER-only**,
+serverseitig: `core/container-stop` → `lib/agent-client` → Agent `POST /docker/provision/stop-container` →
+**`docker stop --time 3`** (nur bereits vorhandener managed Container). **Kein** neuer Lifecycle-Status
+(Container existiert weiter, nur gestoppt – [ADR-0025](DECISIONS.md)); ein späterer Start nutzt erneut
+`CONTAINER_CREATED → RUNNING`. Idempotent (`alreadyStopped`)/Konfliktschutz (`conflict`)/`notFound`;
+**kein** `rm/restart/start`, **keine Löschung**, **kein Log-Lesen**. Audit: `docker.containerStop.*`.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

@@ -36,8 +36,11 @@
   Docker-Container läuft und (falls konfiguriert) ob der TS3-Dienst erreichbar ist. Ab Step 020 lässt
   sich eine **Query-Adresse** angeben (im Provisioning oder auf der Serverseite; Vorbelegung über
   `MANAGED_TS3_QUERY_HOST`), damit der TS3-Check echte Zustände „erreichbar/nicht erreichbar/nicht
-  konfiguriert" liefert – **kein Portscan, keine automatische Ermittlung**. **Kein** Log-Lesen,
-  **kein** Inspect, **keine** Reparatur, keine Stop-/Remove-Aktion. Stop folgt als eigener Schritt.*
+  konfiguriert" liefert – **kein Portscan, keine automatische Ermittlung**. Ab Step 021 kann der
+  Container **gestoppt** werden („Container stoppen" mit Bestätigung): via `docker stop`, Status wechselt
+  auf „Container erstellt" (`runState = gestoppt`). **Es wird nichts gelöscht** – Volume und Network
+  bleiben, ein späterer Start ist wieder möglich. **Kein** Log-Lesen, **kein** Inspect, **keine**
+  Reparatur, **keine** Remove-Aktion. Remove/Restart folgen als eigene Schritte.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

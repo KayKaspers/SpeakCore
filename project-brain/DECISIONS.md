@@ -315,6 +315,24 @@
   **Healthcheck** und **TS3-ServerQuery-Connect** zum managed Server folgen als eigene Steps (in 018
   bewusst nicht). Perspektivisch sinnvoll: Lizenzzustimmung bereits **vor** dem Create einholen.
 
+## ADR-0025 – Container-Stop ohne neuen Lifecycle-Status (zurück auf CONTAINER_CREATED)
+
+- **Status:** accepted (Step 021)
+- **Kontext:** Ein laufender managed Container (`RUNNING`) soll kontrolliert **gestoppt** werden können,
+  ohne ihn zu löschen. Frage: eigener `STOPPED`-Lifecycle-Status oder Rückfall auf `CONTAINER_CREATED`?
+- **Entscheidung:** Neue Agent-Aktion **`STOP_MANAGED_CONTAINER`** (`POST /docker/provision/stop-container`)
+  führt **ausschließlich `docker stop --time 3 <managed-name>`** aus (nie `rm`/`restart`/`start`), hinter
+  **Token + `AGENT_DOCKER_WRITE_ENABLED`**, nur für einen per Label geprüften **managed** Container.
+  Nach Erfolg **kein neuer Lifecycle-Status**, sondern zurück auf **`CONTAINER_CREATED`** mit
+  **`runState = 'stopped'`**. Idempotenz (`alreadyStopped`)/Konfliktschutz (`conflict`)/`notFound`.
+- **Begründung:** Der Container **existiert weiter** (nur gestoppt); ein späterer Start nutzt erneut
+  `CONTAINER_CREATED → RUNNING` (Step 018). Weniger Status-Komplexität in 0.1; die feste Kulanzzeit
+  `--time 3` hält den Stop innerhalb des Agent-CLI-Timeouts (SIGTERM, dann SIGKILL). Kein Löschen von
+  Container/Volume/Network, **kein Log-Lesen**, keine Secrets im Ergebnis.
+- **Konsequenzen:** Der Ist-Zustand „gestoppt" ist an `runState`/Healthcheck ablesbar, nicht am
+  Lifecycle-Status. **Restart** und **Remove** sind eigene, spätere Steps; eine Log-Ansicht käme nur mit
+  Redaction-Konzept.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

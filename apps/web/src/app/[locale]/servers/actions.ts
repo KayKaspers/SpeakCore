@@ -16,6 +16,7 @@ import {
 import { prepareManagedContainer } from '@/core/container-prepare';
 import { createManagedContainerForServer } from '@/core/container-create';
 import { startManagedContainerForServer } from '@/core/container-start';
+import { stopManagedContainerForServer } from '@/core/container-stop';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -228,6 +229,36 @@ export async function startContainerAction(formData: FormData): Promise<void> {
   }
   // licenseRequired | invalidState | invalidPlan | writeDisabled
   //   | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Stoppt den managed TS3-Container (RUNNING → CONTAINER_CREATED, runState='stopped'). OWNER-only,
+ * rate-limitiert. **Kein** Löschen/Restart/Log-Lesen; Volume/Network bleiben bestehen.
+ */
+export async function stopContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:stop:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await stopManagedContainerForServer(id, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'stopped' || result.status === 'alreadyStopped') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // invalidState | invalidPlan | writeDisabled | unavailable | unreachable | conflict | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

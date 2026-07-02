@@ -271,3 +271,28 @@ export interface ContainerStatusResult {
   status: ContainerRuntimeStatus;
   containerName?: string;
 }
+
+// --- Managed Container Stop (NDF Step 021: `docker stop`, KEIN rm/restart) -----
+
+export type ContainerStopStatus =
+  | 'stopped'
+  | 'alreadyStopped'
+  | 'notFound'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/** Agent-Request zum **Stoppen** eines managed Containers. Nur `instanceId` (Name intern abgeleitet). */
+export interface Ts3ContainerStopRequest {
+  instanceId: string;
+}
+
+/** Ergebnis von `docker stop` (managed). Enthält NIE Secrets/ENV-Werte/Roh-Docker-Ausgabe. */
+export interface ContainerStopResult {
+  status: ContainerStopStatus;
+  containerName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}

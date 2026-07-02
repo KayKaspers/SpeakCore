@@ -3,12 +3,14 @@ import type {
   ContainerCreateResult,
   ContainerStartResult,
   ContainerStatusResult,
+  ContainerStopResult,
   DockerInventory,
   ProvisionPrepareResult,
   SystemInfo,
   Ts3ContainerCreateRequest,
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
+  Ts3ContainerStopRequest,
   Ts3ProvisionInput,
 } from '@speakcore/types';
 
@@ -160,6 +162,37 @@ export async function startManagedContainer(
     });
     if (!res.ok) return null;
     return (await res.json()) as ContainerStartResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent das **Stoppen** des managed TS3-Containers aus – **serverseitig**.
+ * Übergibt nur `instanceId` (keine Secrets). `null`, wenn der Agent nicht erreichbar ist.
+ * Die Antwort enthält **kein** Secret. Kein `rm`/`restart`, kein Log-Lesen, keine Löschung.
+ */
+export async function stopManagedContainer(
+  request: Ts3ContainerStopRequest,
+  timeoutMs = 15000,
+): Promise<ContainerStopResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/stop-container`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as ContainerStopResult;
   } catch {
     return null;
   } finally {
