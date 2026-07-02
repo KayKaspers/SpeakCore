@@ -32,7 +32,7 @@
 - Tests (shared): Volume blockiert bei vorhandenem Container/ohne Datenverlust-/Backup-Bestätigung/für
   fremdes Volume; Network blockiert bei Container/nicht-managed/in-use; fremde Ressourcen nie ausführbar;
   `executable===false`; kein Secret im Plan; **Quell-Scan (kein `docker volume rm`/`network rm`/`prisma`)**.
-  **251 Tests grün.**
+  **257 Tests grün.**
 
 #### Security
 - **Keine echte Löschung, keine neuen Docker-Kommandos, kein Socket/Logs/Inspect, keine Secrets.**
@@ -40,7 +40,7 @@
   UI-Button suggeriert echte Löschung. **[ADR-0028](DECISIONS.md).**
 
 #### Verifiziert
-- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (251) · `prisma validate` n. z.
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (257) · `prisma validate` n. z.
   (kein Schema-Change).
 
 ### NDF Step 023 – Managed Restart Flow ohne `docker restart` (2026-07-01)
