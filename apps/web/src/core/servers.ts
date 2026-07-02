@@ -18,7 +18,11 @@ export interface CreateExternalServerInput {
 }
 
 export async function listServers() {
-  return prisma.serverInstance.findMany({ orderBy: { createdAt: 'desc' } });
+  // Archivierte Server (Step 027) standardmäßig ausblenden – Audit-Historie bleibt erhalten.
+  return prisma.serverInstance.findMany({
+    where: { archivedAt: null },
+    orderBy: { createdAt: 'desc' },
+  });
 }
 
 export async function getServer(id: string) {

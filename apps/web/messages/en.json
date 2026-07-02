@@ -237,6 +237,28 @@
         "networkDeleteCancel": "Cancel",
         "laterSteps": "Server-record archiving follows in its own step."
       },
+      "archive": {
+        "title": "Complete deprovisioning",
+        "badge": "Archived",
+        "intro": "Archive the server record (DB-only, no Docker action).",
+        "archiveButton": "Archive server record",
+        "hintArchived": "The server record is archived.",
+        "hintNoDocker": "This does not start, stop or delete any Docker resources.",
+        "hintVisible": "Archived records are kept for traceability.",
+        "hintCredentials": "Credentials are only deleted if you explicitly choose so.",
+        "confirmArchiveLabel": "I confirm archiving the server record.",
+        "credentialLegend": "Credential decision (required):",
+        "credentialKeep": "Keep credentials (stored encrypted)",
+        "credentialRemove": "Delete credentials",
+        "typedLabel": "Type to confirm: ARCHIVE SERVER",
+        "archiveConfirmYes": "Archive server record",
+        "archiveCancel": "Cancel",
+        "archivedAt": "Archived at",
+        "credentials": "Credentials",
+        "credentialsRemoved": "Deleted",
+        "credentialsKept": "Kept (encrypted)",
+        "noActions": "Archived – no further lifecycle actions available."
+      },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
         "notActive": "Removing volume/network is not enabled yet.",
@@ -310,10 +332,12 @@
         "startFailed": "Restart incomplete: the container was stopped but not started again.",
         "dataLossRequired": "Please explicitly confirm the data loss.",
         "backupRequired": "Please confirm the backup note.",
-        "typedMismatch": "Please type exactly “DELETE VOLUME”.",
+        "typedMismatch": "Please type the confirmation phrase exactly.",
         "volumeRemoveFailed": "The volume could not be removed.",
         "confirmationRequired": "Please tick the confirmation.",
-        "inUseByManagedContainers": "Managed containers still exist – the network is not removed."
+        "inUseByManagedContainers": "Managed containers still exist – the network is not removed.",
+        "archiveConfirmRequired": "Please confirm the archiving.",
+        "credentialDecisionRequired": "Please make a credential decision."
       },
       "status": {
         "DRAFT": "Draft",

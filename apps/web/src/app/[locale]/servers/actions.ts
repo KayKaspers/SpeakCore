@@ -21,6 +21,7 @@ import { removeManagedContainerForServer } from '@/core/container-remove';
 import { restartManagedContainerForServer } from '@/core/container-restart';
 import { removeManagedVolumeForServer } from '@/core/volume-remove';
 import { removeManagedNetworkForServer } from '@/core/network-remove';
+import { archiveManagedServer, type CredentialDecision } from '@/core/server-archive';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -392,6 +393,45 @@ export async function removeNetworkAction(formData: FormData): Promise<void> {
     redirect(`/${locale}/servers/${id}`);
   }
   // confirmationRequired | inUseByManagedContainers | conflict | writeDisabled | unavailable | unreachable | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Archiviert einen managed ServerRecord (abschließendes Deprovisioning). **Rein DB-seitig – kein Docker/
+ * Agent.** OWNER-only, rate-limitiert. Credentials werden nur bei ausdrücklicher Entscheidung gelöscht.
+ * **Kein Hard-Delete** der ServerInstance, keine Audit-Löschung.
+ */
+export async function archiveServerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const rawDecision = String(formData.get('credentialDecision') ?? '');
+  const credentialDecision: CredentialDecision | undefined =
+    rawDecision === 'keep' || rawDecision === 'remove' ? rawDecision : undefined;
+  const confirmations = {
+    confirmServerRecordArchive: formData.get('confirmServerRecordArchive') === 'on',
+    credentialDecision,
+    typedConfirmation: String(formData.get('typedConfirmation') ?? ''),
+  };
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `server:archive:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await archiveManagedServer(id, user.email, confirmations);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'archived' || result.status === 'alreadyArchived') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // notManaged | invalidState | archiveConfirmRequired | credentialDecisionRequired | typedMismatch
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

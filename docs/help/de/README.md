@@ -57,7 +57,12 @@
   Ab Step 026 kann das **Voice-Netzwerk** entfernt werden (`docker network rm`, **ohne Force**) – aber
   **nur, wenn keine managed Container mehr existieren** (gemeinsam genutzte Ressource) und nach
   ausdrücklicher Bestätigung. Container, Volumes, Servereinträge und Zugangsdaten bleiben dabei erhalten;
-  das Netzwerk kann später wieder erstellt werden. Servereintrag-Archivierung folgt als eigener Schritt.*
+  das Netzwerk kann später wieder erstellt werden. Ab Step 027 kann der **Servereintrag archiviert** werden
+  („Deprovisioning abschließen") – **rein datenbankseitig**, ohne Docker-/Agent-Aktion. Der Eintrag wird
+  **archiviert statt hart gelöscht** (bleibt aus Nachvollziehbarkeitsgründen erhalten) und verschwindet aus der
+  aktiven Serverliste. Du triffst dabei eine **bewusste Entscheidung zu den Zugangsdaten** (behalten oder
+  löschen) und tippst **`ARCHIVE SERVER`** zur Bestätigung. Zugangsdaten werden **nur** gelöscht, wenn du das
+  ausdrücklich wählst.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

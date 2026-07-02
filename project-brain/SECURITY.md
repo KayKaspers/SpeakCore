@@ -236,6 +236,14 @@ instanceId. Web erzwingt **`confirmNetworkUnused`** (Step-024-Guard). Fehlt das 
 fremdes ⇒ `conflict`. **Container, Volumes, Credentials und ServerInstance bleiben erhalten** (Option A: kein
 Statusfeld; Audit-Target = auslösende ServerInstance-ID). Kein Browser→Agent; keine Secrets/Roh-Ausgaben;
 kein Log-Lesen.
+
+**ServerRecord-Archivierung (Step 027, [ADR-0031](DECISIONS.md)):** abschließender Deprovisioning-Schritt,
+**rein Web-/DB-seitig – keine Docker-/Agent-Aktion**. **Archivieren statt hart löschen** (`archivedAt` gesetzt,
+`ServerInstance` bleibt, **Audit-Historie unangetastet**). OWNER-only, nur managed + `RESOURCES_PREPARED`
+(external abgelehnt), mit `confirmServerRecordArchive` + **bewusster Credential-Entscheidung** (`keep`/`remove`)
++ getippt `ARCHIVE SERVER`. **Credentials werden nur bei ausdrücklicher `remove`-Wahl gelöscht** (sonst
+verschlüsselt behalten). Keine Secrets im Client/Audit/Ergebnis; **kein Hard-Delete**, **keine Audit-Löschung**;
+archivierte Server zeigen keine Lifecycle-Aktionen.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

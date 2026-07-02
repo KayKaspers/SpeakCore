@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 027 – Archive Managed ServerRecord & Credential Decision (2026-07-02)
+
+> Abschließender Deprovisioning-Schritt. **Rein Web-/DB-seitig – keine Docker-/Agent-Aktion.**
+> **Archivieren statt hart löschen**; Credential-Löschung nur bei ausdrücklicher Entscheidung.
+
+#### Added
+- **Web-Service** `archiveManagedServer` (`src/core/server-archive.ts`) + reine Helfer
+  (`server-archive-helpers.ts`) + **OWNER-only Server Action** `archiveServerAction` (rate-limitiert).
+  **Kein Docker/Agent.** Nutzt den **Step-024-Guard** `canArchiveManagedServer`; nur `RESOURCES_PREPARED`,
+  managed (external abgelehnt), mit `confirmServerRecordArchive` + Credential-Entscheidung + getippt
+  **`ARCHIVE SERVER`**.
+- **Archivieren statt löschen** ([ADR-0031](DECISIONS.md)): `archivedAt`/`archiveReasonKey='deprovisioned'`
+  gesetzt, **`ServerInstance` bleibt** (kein Hard-Delete), **Audit-Historie unangetastet**. Idempotent
+  (`alreadyArchived`).
+- **Bewusste Credential-Entscheidung:** `keep` ⇒ Credential bleibt verschlüsselt; `remove` ⇒
+  `ServerCredential` gelöscht + `credentialsRemovedAt` gesetzt. **Keine automatische Löschung** ohne Wahl.
+- **Prisma:** `archivedAt`/`archiveReasonKey`/`credentialsRemovedAt` (Migration `20260702140000_add_server_archive`).
+  `/servers` blendet archivierte Server aus (`listServers` filtert `archivedAt: null`).
+- **UI (DE/EN):** Abschnitt „Deprovisioning abschließen" (Gefahrenzone, `RESOURCES_PREPARED`) mit Checkbox +
+  **Credential-Radio (keep/remove, kein Default)** + getippter Bestätigung. Archivierte Detailseite zeigt
+  Archiv-Status + Credential-Info und **keine** Lifecycle-Aktionen.
+- **Audit:** `deprovision.serverArchive.requested/confirmed/blocked/completed/failed`,
+  `deprovision.credentials.keepConfirmed/removeConfirmed/removed`, `deprovision.server.archived`
+  (Target = ServerInstance-ID, **keine Secrets**).
+- Tests: Guard (nur RESOURCES_PREPARED, fehlende Archiv-/Credential-Bestätigung, typedMismatch), Audit
+  (keep/remove/blocked, keine Secrets), **Quell-Scan (kein Docker/Agent/`execFile`)**. **308 Tests grün.**
+  DB-Smoke: keep behält Credential, remove löscht Credential + `credentialsRemovedAt`, **kein Hard-Delete**,
+  RUNNING⇒invalidState, external⇒notManaged, Audit erhalten.
+
+#### Security
+- OWNER-only; **keine Docker-Aktion, kein Agent-Aufruf**, keine Secrets im Client/Audit/Ergebnis.
+  **Keine Credential-Löschung ohne ausdrückliche Entscheidung**, **kein Hard-Delete** der ServerInstance,
+  **keine Audit-Löschung**, **kein** versehentliches Archivieren von External-Servern. Archivierte Server
+  bieten **keine** Lifecycle-Aktionen mehr. Quell-Scan-Test schützt vor Docker-/Agent-Import. **[ADR-0031](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (308) · `prisma validate` ✅.
+
 ### NDF Step 026 – REMOVE_MANAGED_NETWORK mit Shared-Network-Schutz (2026-07-02)
 
 > Kontrolliertes Entfernen des **geteilten** managed Voice-Networks. **Kein Force**; nur wenn **kein

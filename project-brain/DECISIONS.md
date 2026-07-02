@@ -436,6 +436,26 @@
   ist bei erneutem Provisioning wieder anlegbar. **ServerRecord-Archive/Delete** (inkl. Credential-Entscheidung)
   bleibt der letzte, eigene Deprovisioning-Step.
 
+## ADR-0031 – ServerRecord archivieren statt hart löschen; bewusste Credential-Entscheidung
+
+- **Status:** accepted (Step 027)
+- **Kontext:** Abschließender Deprovisioning-Schritt für managed Server. Ein harter `ServerInstance`-Delete
+  würde Audit-/Nachvollziehbarkeit zerstören; Credentials dürfen nicht unbemerkt verschwinden.
+- **Entscheidung:** **Rein Web-/DB-seitig – keine Docker-/Agent-Aktion.** Standard ist **Archivieren statt
+  Löschen**: `archivedAt`/`archiveReasonKey` werden gesetzt, die `ServerInstance` **bleibt** bestehen
+  (kein Hard-Delete), die **Audit-Historie bleibt unangetastet**. Archivierung nur, wenn der Step-024-Guard
+  `canArchiveManagedServer` erlaubt (managed, Container entfernt/RESOURCES_PREPARED) **und** der Nutzer
+  bestätigt: `confirmServerRecordArchive` + **bewusste Credential-Entscheidung** (`keep`|`remove`) + getippt
+  **`ARCHIVE SERVER`**. **Credentials werden nur bei `remove` gelöscht** (`ServerCredential` weg,
+  `credentialsRemovedAt` gesetzt) – sonst verschlüsselt behalten. **External Server werden abgelehnt.**
+  Archivierte Server werden in `/servers` ausgeblendet und zeigen **keine** Lifecycle-Aktionen mehr.
+- **Begründung:** Nachvollziehbarkeit + Sicherheit gegen versehentlichen Datenverlust; Credential-Löschung
+  ist irreversibel und daher an eine ausdrückliche Wahl gebunden. `RESOURCES_PREPARED` als erwarteter Zustand
+  (RUNNING/CONTAINER_CREATED/CONTAINER_PENDING/DRAFT abgelehnt; external abgelehnt).
+- **Konsequenzen:** Prisma-Zusatz `archivedAt`/`archiveReasonKey`/`credentialsRemovedAt` (Migration
+  `20260702140000`). **Kein Hard-Delete/keine Audit-Löschung** in 0.1. **Offen:** Archiv-Filter/-Ansicht,
+  finale Hard-Delete-Policy, Backup-/Export-Konzept – jeweils spätere Steps.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

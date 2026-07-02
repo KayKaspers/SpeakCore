@@ -58,8 +58,10 @@ Orchestrierung** (`RUNNING → Stop → Start → RUNNING`), **ohne** `docker re
 rm`, **kein `-f`**, nur ohne Container, mit Doppelbestätigung + getippt `DELETE VOLUME`) – Credentials/Network/
 ServerInstance bleiben erhalten; in **Step 026** das **geteilte** Voice-Network (`docker network rm`, **kein
 `-f`**, nur wenn kein managed Container mehr existiert, mit `confirmNetworkUnused`) – Container/Volumes/
-Credentials/ServerInstance bleiben erhalten. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen
-IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
+Credentials/ServerInstance bleiben erhalten. **Step 027** schließt das Deprovisioning ab: managed **ServerRecord
+archivieren** (rein DB-seitig, **kein Docker/Agent**, **kein Hard-Delete**, Credential-Löschung nur bei
+ausdrücklicher Wahl). **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine Reparatur,
+kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

@@ -18,6 +18,7 @@ import { RemoveContainerButton } from '../RemoveContainerButton';
 import { RestartContainerButton } from '../RestartContainerButton';
 import { RemoveVolumeButton } from '../RemoveVolumeButton';
 import { RemoveNetworkButton } from '../RemoveNetworkButton';
+import { ArchiveServerButton } from '../ArchiveServerButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,54 @@ export default async function ServerDetailPage({
 
   const t = await getTranslations('servers');
   const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleString(locale) : t('status.never'));
+
+  // Archivierter managed Server (Step 027): nur Status/Info, KEINE Lifecycle-Aktionen.
+  if (server.mode === 'managed' && server.archivedAt) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-4 py-8">
+        <header className="mb-6 flex items-center gap-2">
+          <BrandMark className="h-7 w-7" />
+          <div>
+            <h1 className="text-sc-h1 font-semibold text-sc-text-primary">{server.name}</h1>
+            <p className="font-mono text-sc-caption text-sc-text-secondary">{t('managed.label')}</p>
+          </div>
+        </header>
+        <section className="rounded-sc-lg border border-sc-border bg-sc-surface p-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2 className="text-sc-h2 font-medium text-sc-text-primary">{t('managed.archive.title')}</h2>
+            <span className="rounded-sc-sm bg-sc-surface-raised px-3 py-1 text-sc-sm font-medium text-sc-text-secondary">
+              {t('managed.archive.badge')}
+            </span>
+          </div>
+          <dl className="space-y-2 text-sc-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-sc-text-secondary">{t('managed.archive.archivedAt')}</dt>
+              <dd className="text-sc-text-primary">{fmtDate(server.archivedAt)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-sc-text-secondary">{t('managed.archive.credentials')}</dt>
+              <dd className="text-sc-text-primary">
+                {server.credentialsRemovedAt
+                  ? t('managed.archive.credentialsRemoved')
+                  : t('managed.archive.credentialsKept')}
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-4 border-t border-sc-border pt-4 text-sc-caption text-sc-text-muted">
+            {t('managed.archive.noActions')}
+          </p>
+        </section>
+        <footer className="mt-6">
+          <Link
+            href={`/${locale}/servers`}
+            className="rounded-sc-md border border-sc-border-strong px-3 py-2 text-sc-sm text-sc-text-secondary"
+          >
+            {t('backToList')}
+          </Link>
+        </footer>
+      </main>
+    );
+  }
 
   // Managed-Ansicht: vorbereitete Ressourcen, KEIN Container/Start, keine Aktionen.
   if (server.mode === 'managed') {
@@ -124,6 +173,8 @@ export default async function ServerDetailPage({
               'typedMismatch',
               'confirmationRequired',
               'inUseByManagedContainers',
+              'archiveConfirmRequired',
+              'credentialDecisionRequired',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -271,9 +322,10 @@ export default async function ServerDetailPage({
                 </p>
                 <RemoveNetworkButton locale={locale} id={server.id} />
               </div>
-              <p className="mt-2 text-sc-caption text-sc-text-muted">
-                {t('managed.dangerZone.laterSteps')}
-              </p>
+              <div className="mt-3 space-y-2 border-t border-sc-border pt-3">
+                <p className="text-sc-caption text-sc-text-muted">{t('managed.archive.intro')}</p>
+                <ArchiveServerButton locale={locale} id={server.id} />
+              </div>
             </div>
           )}
 

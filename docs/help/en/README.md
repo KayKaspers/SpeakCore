@@ -54,7 +54,11 @@
   (back up first!). **Network, server record and credentials are kept.** From Step 026 the **voice network**
   can be removed (`docker network rm`, **without force**) – but **only when no managed containers exist
   anymore** (shared resource) and after an explicit confirmation. Containers, volumes, server records and
-  credentials are kept; the network can be re-created later. Server-record archiving follows in its own step.*
+  credentials are kept; the network can be re-created later. From Step 027 the **server record can be archived**
+  ("Complete deprovisioning") – **database-only**, no Docker/agent action. The record is **archived instead of
+  hard-deleted** (kept for traceability) and disappears from the active server list. You make a **deliberate
+  credential decision** (keep or delete) and type **`ARCHIVE SERVER`** to confirm. Credentials are **only**
+  deleted if you explicitly choose so.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

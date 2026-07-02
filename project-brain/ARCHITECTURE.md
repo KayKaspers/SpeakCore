@@ -271,8 +271,14 @@ die Bestätigungen (`confirmVolumeDataLoss` + `confirmBackupRecommended` + getip
 speakcore-network-voice`** (**kein `-f`**), **nur wenn kein managed Container** mehr existiert
 (`inUseByManagedContainers` sonst). Web erzwingt `confirmNetworkUnused` (Step-024-Guard).
 **Option A:** kein ServerInstance-Statusfeld (globale Ressource; Ist-Zustand via Inventory/Agent + Audit).
-**Container/Volumes/Credentials/ServerInstance bleiben erhalten** ([ADR-0030](DECISIONS.md)). ServerRecord-
-Archive folgt als eigener Step.
+**Container/Volumes/Credentials/ServerInstance bleiben erhalten** ([ADR-0030](DECISIONS.md)).
+
+**ServerRecord-Archivierung (Step 027):** abschließender Deprovisioning-Schritt, **rein Web-/DB-seitig
+(kein Docker/Agent)** – `core/server-archive`. **Archivieren statt hart löschen** (`archivedAt`, ServerInstance
+bleibt, Audit erhalten). Nutzt den Step-024-Guard `canArchiveManagedServer`; nur managed + `RESOURCES_PREPARED`;
+mit `confirmServerRecordArchive` + **bewusster Credential-Entscheidung** (`keep`/`remove`) + getippt
+`ARCHIVE SERVER`. Archivierte Server werden ausgeblendet und zeigen keine Lifecycle-Aktionen
+([ADR-0031](DECISIONS.md)). Archiv-Filter/Hard-Delete-Policy/Export folgen als spätere Steps.
 
 ## 7. Verwandte Dokumente
 

@@ -108,8 +108,13 @@ erhalten**, `managedVolumeState='removed'` ([ADR-0029](../../project-brain/DECIS
 der **`docker network rm`** (**kein `-f`**) **nur ausführt, wenn kein managed Container** mehr existiert
 (`inUseByManagedContainers` sonst). Web erzwingt `confirmNetworkUnused`. **Option A:** kein Statusfeld
 (globale Ressource). **Container/Volumes/Credentials/ServerInstance bleiben erhalten**
-([ADR-0030](../../project-brain/DECISIONS.md)). **ServerRecord-Archive** und ein optionaler
-**Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+([ADR-0030](../../project-brain/DECISIONS.md)).
+
+**ServerRecord-Archivierung (Step 027):** abschließender Deprovisioning-Schritt, **rein Web-/DB-seitig – kein
+Docker/Agent**. **Archivieren statt hart löschen** (`archivedAt`, ServerInstance bleibt, Audit erhalten); nutzt
+den Step-024-Guard `canArchiveManagedServer`; nur managed + `RESOURCES_PREPARED`; Credential-Löschung nur bei
+ausdrücklicher `remove`-Wahl ([ADR-0031](../../project-brain/DECISIONS.md)). Archiv-Filter/Hard-Delete-Policy/
+Export und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

@@ -162,8 +162,12 @@
 - **Stand Step 026:** **Network-Remove** ([ADR-0030](DECISIONS.md)) – entfernt das **geteilte** Voice-Network
   (`docker network rm`, **kein `-f`**) **nur wenn kein managed Container** mehr existiert
   (`inUseByManagedContainers`), Managed-Only (fremdes ⇒ `conflict`), mit Bestätigung `confirmNetworkUnused`.
-  **Container/Volumes/Credentials/ServerInstance bleiben erhalten** (Option A: kein Statusfeld). **Offen:**
-  ServerRecord-Archive/Delete (inkl. bewusster Credential-Entscheidung) als abschließender Deprovisioning-Step.
+  **Container/Volumes/Credentials/ServerInstance bleiben erhalten** (Option A: kein Statusfeld).
+- **Stand Step 027:** **ServerRecord-Archivierung** ([ADR-0031](DECISIONS.md)) – **rein Web-/DB-seitig, kein
+  Docker/Agent**. **Archivieren statt hart löschen** (`archivedAt`, ServerInstance bleibt, **Audit erhalten**);
+  Credential-Löschung **nur** bei ausdrücklicher `remove`-Wahl; external abgelehnt. **Offen:** Archiv-Filter/
+  -Ansicht, finale Hard-Delete-Policy, Backup-/Export-Konzept. Restrisiko: Credential-`remove` ist irreversibel
+  (an ausdrückliche Wahl + getippte Bestätigung gebunden).
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

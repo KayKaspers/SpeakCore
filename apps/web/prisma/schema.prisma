@@ -93,6 +93,10 @@ model ServerInstance {
   lastProvisioningErrorKey String?
   resourcesPreparedAt      DateTime?
   managedVolumeState       String? // null = vorhanden/unbekannt | "removed" (Datenvolume entfernt, Step 025)
+  // Deprovisioning-Abschluss (Step 027): archivieren statt hart löschen. KEINE Audit-Löschung.
+  archivedAt               DateTime?
+  archiveReasonKey         String?
+  credentialsRemovedAt     DateTime?
   // Persistierter read-only Status-Snapshot (Step 009). KEINE Secrets, keine Roh-Antworten.
   lastStatus          String?   // "reachable" | "unreachable"
   lastStatusCheckedAt DateTime?

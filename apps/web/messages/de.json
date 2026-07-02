@@ -237,6 +237,28 @@
         "networkDeleteCancel": "Abbrechen",
         "laterSteps": "Die Servereintrag-Archivierung folgt als eigener Schritt."
       },
+      "archive": {
+        "title": "Deprovisioning abschließen",
+        "badge": "Archiviert",
+        "intro": "Servereintrag archivieren (rein DB-seitig, keine Docker-Aktion).",
+        "archiveButton": "Servereintrag archivieren",
+        "hintArchived": "Der Servereintrag wird archiviert.",
+        "hintNoDocker": "Dies startet, stoppt oder löscht keine Docker-Ressourcen.",
+        "hintVisible": "Archivierte Einträge bleiben aus Nachvollziehbarkeitsgründen erhalten.",
+        "hintCredentials": "Zugangsdaten werden nur gelöscht, wenn du das ausdrücklich auswählst.",
+        "confirmArchiveLabel": "Ich bestätige die Archivierung des Servereintrags.",
+        "credentialLegend": "Zugangsdaten-Entscheidung (erforderlich):",
+        "credentialKeep": "Zugangsdaten behalten (verschlüsselt gespeichert)",
+        "credentialRemove": "Zugangsdaten löschen",
+        "typedLabel": "Tippe zur Bestätigung: ARCHIVE SERVER",
+        "archiveConfirmYes": "Servereintrag archivieren",
+        "archiveCancel": "Abbrechen",
+        "archivedAt": "Archiviert am",
+        "credentials": "Zugangsdaten",
+        "credentialsRemoved": "Gelöscht",
+        "credentialsKept": "Behalten (verschlüsselt)",
+        "noActions": "Archiviert – keine weiteren Lifecycle-Aktionen verfügbar."
+      },
       "deprovision": {
         "title": "Deprovisioning (noch nicht aktiv)",
         "notActive": "Das Entfernen von Volume/Network ist noch nicht aktiviert.",
@@ -310,10 +332,12 @@
         "startFailed": "Neustart unvollständig: Der Container wurde gestoppt, aber nicht wieder gestartet.",
         "dataLossRequired": "Bitte den Datenverlust ausdrücklich bestätigen.",
         "backupRequired": "Bitte den Backup-Hinweis bestätigen.",
-        "typedMismatch": "Bitte exakt „DELETE VOLUME“ eingeben.",
+        "typedMismatch": "Bitte die getippte Bestätigung exakt eingeben.",
         "volumeRemoveFailed": "Volume konnte nicht entfernt werden.",
         "confirmationRequired": "Bitte die Bestätigung setzen.",
-        "inUseByManagedContainers": "Es existieren noch managed Container – Netzwerk wird nicht entfernt."
+        "inUseByManagedContainers": "Es existieren noch managed Container – Netzwerk wird nicht entfernt.",
+        "archiveConfirmRequired": "Bitte die Archivierung bestätigen.",
+        "credentialDecisionRequired": "Bitte eine Zugangsdaten-Entscheidung treffen."
       },
       "status": {
         "DRAFT": "Entwurf",
