@@ -321,3 +321,71 @@ export interface ContainerRemoveResult {
   errors?: ValidationError[];
   audit: PlannedAuditAction[];
 }
+
+// --- Deprovisioning Safety Blueprint (NDF Step 024: reine Planung, KEINE Ausführung) ---------
+
+/** Umfang einer (späteren) Deprovisioning-Aktion. */
+export type DeprovisionScope = 'containerOnly' | 'volume' | 'network' | 'credentials' | 'serverRecord';
+
+/** Ist-Zustand der managed Ressourcen (vom Aufrufer ermittelt; die Guards sind rein/DB-frei). */
+export interface DeprovisionResourceState {
+  instanceId: string;
+  provisioningStatus: string | null;
+  runState: string | null;
+  container: { exists: boolean; running: boolean };
+  /** `managed` = trägt SpeakCore-Labels (`speakcore.managed=true` + Projekt/instanceId). */
+  volume: { exists: boolean; managed: boolean };
+  network: { exists: boolean; managed: boolean; inUseByOthers: boolean };
+}
+
+/** Explizite Sicherheitsbestätigungen (kein Vorab-Default; Volume-Löschung erfordert mehrere). */
+export interface DeprovisionConfirmations {
+  confirmContainerRemoved?: boolean;
+  confirmVolumeDataLoss?: boolean;
+  confirmBackupRecommended?: boolean;
+  confirmNetworkUnused?: boolean;
+  confirmCredentialRemoval?: boolean;
+  confirmServerRecordArchive?: boolean;
+  /** Optionale getippte Bestätigung, z. B. `DELETE VOLUME`. Wenn gesetzt, muss sie exakt passen. */
+  typedConfirmation?: string;
+}
+
+export interface DeprovisionRequest {
+  scope: DeprovisionScope;
+  state: DeprovisionResourceState;
+  confirmations: DeprovisionConfirmations;
+}
+
+/** Deklarative geplante Aktion – **wird in 0.1 NICHT ausgeführt**. */
+export interface DeprovisionPlannedAction {
+  action:
+    | 'REMOVE_MANAGED_CONTAINER'
+    | 'REMOVE_MANAGED_VOLUME'
+    | 'REMOVE_MANAGED_NETWORK'
+    | 'ARCHIVE_SERVER_RECORD';
+  targetKind: 'container' | 'volume' | 'network' | 'serverRecord';
+  /** Nur der intern abgeleitete managed Name (kein freier Nutzer-Input). */
+  managedName?: string;
+  dataLoss: boolean;
+}
+
+/** Ergebnis der reinen Guard-/Planungslogik. Enthält KEINE Secrets/Roh-Docker-Ausgaben. */
+export interface DeprovisionEvaluation {
+  scope: DeprovisionScope;
+  decision: 'allowed' | 'blocked';
+  /** i18n-Schlüssel der Blockgründe (kein Detail/Secret). */
+  blockedReasons: string[];
+  /** noch offene, erforderliche Bestätigungen (i18n-Schlüssel). */
+  requiredConfirmations: string[];
+  warnings: string[];
+  dataLossRisk: boolean;
+  plannedActions: DeprovisionPlannedAction[];
+  /** deklarative Rollback-Grenzen (z. B. „Volume-Löschung ist irreversibel"). */
+  rollbackLimitations: string[];
+  /** geplante Audit-Events (Konzept für spätere Steps). */
+  auditEvents: string[];
+  /** deklarativer nächster sicherer Zustand (kein persistierter Status in 0.1). */
+  nextSafeState: string | null;
+  /** In 0.1 IMMER `false` – reines Konzept, keine echte Löschung. */
+  executable: false;
+}

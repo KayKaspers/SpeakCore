@@ -47,7 +47,11 @@
   gestartet** werden („Container neu starten" mit Bestätigung + erneuter Lizenz-Checkbox): der Container
   wird **zuerst gestoppt und dann wieder gestartet** – **kein** `docker restart`, **keine** Löschung,
   **kein** Log-Lesen. Danach empfiehlt sich ein Healthcheck. **Kein** Log-Lesen, **kein** Inspect,
-  **keine** Reparatur. Volume-/Network-Löschung (vollständiges Deprovisioning) folgt als eigener Schritt.*
+  **keine** Reparatur. Volume-/Network-Löschung (vollständiges Deprovisioning) folgt als eigener Schritt.
+  Ab Step 024 gibt es dafür ein **Sicherheitskonzept** (Info-Karte „Deprovisioning noch nicht aktiv"): Es
+  erklärt die Stufen (Container → Volume → Network → Server-Eintrag) und das **Datenverlust-Risiko** beim
+  Löschen des Volumes. Es wird **noch nichts gelöscht** – echte Löschungen kommen später mit zusätzlicher
+  Bestätigung.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

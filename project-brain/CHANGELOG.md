@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 024 – Deprovisioning Safety Blueprint (2026-07-01)
+
+> **Reines Sicherheits-/Planungsfundament – es wird NICHTS gelöscht.** Kein `docker volume rm`/`network
+> rm`, kein neues Docker-Write-Kommando, kein Löschen von ServerInstance/Credentials, keine Migration.
+
+#### Added
+- **Reine, testbare Guard-/Planungslogik** (`packages/shared/src/provisioning/deprovision.ts`,
+  über `@speakcore/shared`): `canRemoveManagedContainer`, `canRemoveManagedVolume`,
+  `canRemoveManagedNetwork`, `canArchiveManagedServer`, `validateDeprovisioningRequest`,
+  `buildDeprovisioningPlan`. Ergebnis (`DeprovisionEvaluation`) ist **immer `executable: false`**.
+- **Stufenmodell** ([ADR-0028](DECISIONS.md)): (1) Container entfernen (live seit Step 022) → (2) Volume
+  entfernen (**Datenverlust!**) → (3) Network entfernen → (4) ServerInstance archivieren. Jede Stufe mit
+  klaren Guards, `dataLossRisk`, `warnings`, `rollbackLimitations`, geplanten `plannedActions`/`auditEvents`
+  und deklarativem `nextSafeState`.
+- **Bestätigungsmodell** (kein Vorab-Default): Volume-Löschung erfordert `confirmVolumeDataLoss` **und**
+  `confirmBackupRecommended`; optionale getippte Bestätigung `DELETE VOLUME` (falls angegeben, muss sie
+  passen). Network: `confirmNetworkUnused`. Archive: `confirmServerRecordArchive` + getroffene
+  `confirmCredentialRemoval`-Entscheidung.
+- **Managed-Only-Guards:** **fremde (nicht-managed) Ressourcen werden nie als löschbar geplant**
+  (`volumeNotManaged`/`networkNotManaged` ⇒ `blocked`); geplante Namen stammen ausschließlich aus der
+  `instanceId` (kein freier Nutzer-Input). Vordefinierte Audit-Events `deprovision.*` (keine Secrets).
+- **UI (DE/EN):** nicht-ausführende **Info-Karte** auf der managed Detailseite (`RESOURCES_PREPARED`):
+  „Deprovisioning noch nicht aktiv", Hinweis auf **Datenverlust** bei Volume-Löschung, echte Löschung
+  folgt später. **Keine** Volume-/Network-/ServerInstance-Lösch-Buttons.
+- Tests (shared): Volume blockiert bei vorhandenem Container/ohne Datenverlust-/Backup-Bestätigung/für
+  fremdes Volume; Network blockiert bei Container/nicht-managed/in-use; fremde Ressourcen nie ausführbar;
+  `executable===false`; kein Secret im Plan; **Quell-Scan (kein `docker volume rm`/`network rm`/`prisma`)**.
+  **251 Tests grün.**
+
+#### Security
+- **Keine echte Löschung, keine neuen Docker-Kommandos, kein Socket/Logs/Inspect, keine Secrets.**
+  Datenverlust-Risiko (Volume) explizit modelliert und in der UI benannt. Guards sind rein/testbar; kein
+  UI-Button suggeriert echte Löschung. **[ADR-0028](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (251) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 023 – Managed Restart Flow ohne `docker restart` (2026-07-01)
 
 > Sicherer **Neustart** managed Container als **Stop→Start-Orchestrierung** (`RUNNING → Stop → Start →

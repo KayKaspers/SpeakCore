@@ -245,6 +245,19 @@ export default async function ServerDetailPage({
             </div>
           )}
 
+          {provStatus === 'RESOURCES_PREPARED' && (
+            <div className="mt-4 rounded-sc-md border border-sc-border bg-sc-surface-raised p-3">
+              <h3 className="text-sc-sm font-medium text-sc-text-primary">
+                {t('managed.deprovision.title')}
+              </h3>
+              <ul className="mt-2 space-y-1 text-sc-caption text-sc-text-muted">
+                <li>• {t('managed.deprovision.notActive')}</li>
+                <li>• {t('managed.deprovision.dataLoss')}</li>
+                <li>• {t('managed.deprovision.later')}</li>
+              </ul>
+            </div>
+          )}
+
           {provStatus === 'RUNNING' && (
             <div className="mt-6 border-t border-sc-border pt-4">
               <div className="mb-3 flex items-center justify-between gap-4">

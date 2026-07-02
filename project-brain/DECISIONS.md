@@ -372,6 +372,29 @@
   (`restartStartFailed`). **Kein Reparaturverhalten** bei DB-/Ist-Inkonsistenz (nur `RUNNING` erlaubt;
   Healthcheck bleibt Quelle des Ist-Zustands). Restart-Audit: `docker.containerRestart.*`.
 
+## ADR-0028 – Deprovisioning: Stufenmodell + Guard-Blueprint (keine Löschung in 0.1)
+
+- **Status:** accepted (Step 024)
+- **Kontext:** Das Entfernen von Volume/Network/ServerRecord ist deutlich gefährlicher als das
+  Container-Remove (irreversibler **Datenverlust** beim Volume). Bevor echte Lösch-Steps gebaut werden,
+  braucht es ein getestetes Sicherheits-/Ablaufkonzept.
+- **Entscheidung:** Ein **reines, testbares Planungs-/Guard-Fundament** (`packages/shared/…/deprovision.ts`,
+  `executable: false`) ohne jede Ausführung: **kein** `docker volume rm`/`network rm`, **kein** neues
+  Docker-Write-Kommando, **kein** DB-Schreiben, **kein** Löschen von ServerInstance/Credentials.
+  **Stufenmodell:** (1) Container entfernen (live, Step 022, kein Datenverlust) → (2) Volume entfernen
+  (**Datenverlust!** nur ohne Container, `RESOURCES_PREPARED`, mit `confirmVolumeDataLoss` +
+  `confirmBackupRecommended`, optional getippt `DELETE VOLUME`) → (3) Network entfernen (nur wenn kein
+  managed Container mehr gebunden) → (4) ServerInstance archivieren (nur nach Container-Entfernung +
+  getroffener Credential-Entscheidung). **Managed-Only-Guards:** fremde (nicht-managed) Ressourcen werden
+  **nie** als löschbar geplant; spätere echte Aktionen dürfen nur bei passenden Labels
+  (`speakcore.managed=true`/`project`/`instanceId`/`service`) und **ohne** `-f`/Wildcard/freie Namen laufen.
+- **Begründung:** „Erst Vertrauen aufbauen": Bestätigungs-, Guard- und Audit-Modell werden getestet,
+  bevor irreversible Löschungen möglich sind. Kein neuer persistierter Status/Migration in 0.1 (nur
+  deklarative `nextSafeState`-Konzepte wie `RESOURCES_REMOVED`/`ARCHIVED`).
+- **Konsequenzen:** Echte **Volume-Remove**, **Network-Remove** und **ServerRecord-Archive/Delete** sind
+  je eigene, dedizierte Steps mit zusätzlicher Bestätigung/Backup-Konzept; Volume-Löschung besonders
+  abzusichern (irreversibler Datenverlust). Audit-Events (`deprovision.*`) sind vordefiniert.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

@@ -211,6 +211,14 @@ Endpunkte `/docker/provision/stop-container` (Step 021) und `/docker/provision/s
 Damit gelten deren Sicherheitsgrenzen (Token + `AGENT_DOCKER_WRITE_ENABLED`, Managed-Only) automatisch.
 Details: [ADR-0027](../../project-brain/DECISIONS.md).
 
+## Deprovisioning (Step 024) – **kein** Agent-Endpunkt, keine Löschung
+
+Der **Deprovisioning-Blueprint** ist **reine Guard-/Planungslogik** in `@speakcore/shared`
+(`deprovision.ts`, `executable: false`) und führt **nichts** aus: **kein** `docker volume rm`/`network rm`,
+**kein** neuer Agent-Endpunkt, keine echte Löschung. Spätere echte Remove-Aktionen dürfen nur über
+**Managed-Only-Guards** laufen (Labels `speakcore.managed=true`/`project`/`instanceId`/`service`, **kein**
+`-f`, kein Wildcard, keine freien Namen). Details: [ADR-0028](../../project-brain/DECISIONS.md).
+
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 
 **Read-only** Healthcheck-Baustein (nur Token-Gate, **kein** Write-Flag):

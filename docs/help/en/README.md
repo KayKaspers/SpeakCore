@@ -46,7 +46,9 @@
   a fresh license checkbox): the container is **stopped first and then started again** – **no** `docker
   restart`, **no** deletion, **no** log reading. A health check afterwards is recommended. **No** log
   reading, **no** inspect, **no** repair. Volume/network deletion (full deprovisioning) follows in its own
-  step.*
+  step. From Step 024 there is a **safety concept** for it (info card "Deprovisioning not active yet"):
+  it explains the stages (container → volume → network → server record) and the **data-loss risk** when
+  deleting the volume. **Nothing is deleted yet** – real deletions come later with additional confirmation.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

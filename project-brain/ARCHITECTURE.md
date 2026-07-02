@@ -253,6 +253,13 @@ Stop-Fehler (`restartStopFailed`, bleibt `RUNNING`); kein `RUNNING` bei Start-Fe
 (`restartStartFailed`, `CONTAINER_CREATED`/`runState='stopped'`). Kein Reparaturverhalten bei Inkonsistenz.
 Audit: `docker.containerRestart.*` ([ADR-0027](DECISIONS.md)).
 
+**Deprovisioning-Blueprint (Step 024):** **reine, getestete Guard-/Planungslogik** in `@speakcore/shared`
+(`deprovision.ts`, `executable: false`) – **noch keine Löschung**. Stufenmodell Container→Volume→Network→
+Archive mit `dataLossRisk`, Bestätigungsmodell (Volume = `confirmVolumeDataLoss` + `confirmBackupRecommended`),
+Managed-Only-Guards (fremde Ressourcen nie löschbar) und vordefinierten `deprovision.*`-Audit-Events. UI:
+nicht-ausführende Info-Karte. Details: [ADR-0028](DECISIONS.md). Echte Volume-/Network-Remove +
+ServerRecord-Archive folgen als eigene, abgesicherte Steps.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

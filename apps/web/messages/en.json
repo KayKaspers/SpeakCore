@@ -211,6 +211,12 @@
       "stopHintKeepResources": "Volume and network are kept.",
       "stopHintNoLogs": "Logs are not read.",
       "resourcesNoContainer": "Resources prepared, container not present.",
+      "deprovision": {
+        "title": "Deprovisioning (not active yet)",
+        "notActive": "Removing volume/network is not enabled yet.",
+        "dataLoss": "Deleting the volume later means irreversible data loss – back up first.",
+        "later": "Actual deletion follows in a later step with additional confirmation."
+      },
       "removeButton": "Remove container",
       "removeHintKeep": "Container present or prepared, but not running.",
       "removeConfirm1": "Only the container is removed.",

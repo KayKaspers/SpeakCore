@@ -53,8 +53,10 @@ werden (`docker stop`, `RUNNING → CONTAINER_CREATED` + `runState='stopped'`) �
 `-f`/`-v`, `CONTAINER_CREATED → RESOURCES_PREPARED`) – **Volume, Network, Credentials und ServerInstance
 bleiben erhalten**. In **Step 023** kann der Container **neu gestartet** werden – als **Stop→Start-
 Orchestrierung** (`RUNNING → Stop → Start → RUNNING`), **ohne** `docker restart`, mit erneuter Lizenzbestätigung.
-**Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in
-Logs. Details:
+**Step 024** ergänzt ein **Deprovisioning-Sicherheitskonzept** (reine Guard-/Planungslogik, **keine Löschung**,
+`executable: false`): Stufenmodell mit Datenverlust-/Bestätigungs-/Managed-Only-Guards für spätere Volume-/
+Network-Remove-Steps. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine
+Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

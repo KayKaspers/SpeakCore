@@ -93,8 +93,13 @@ Container noch ⇒ `stillRunning` ([ADR-0026](../../project-brain/DECISIONS.md))
 **Container-Restart (Step 023):** `RUNNING → Stop → Start → RUNNING` – **kein `docker restart`** und **keine**
 neue Agent-Aktion: der Web-Orchestrator ruft die bestehenden Stop-/Start-Flows nacheinander auf (erneute
 Lizenz-Checkbox). Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler
-([ADR-0027](../../project-brain/DECISIONS.md)). **Volume-/Network-Remove** (Deprovisioning) und ein
-optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+([ADR-0027](../../project-brain/DECISIONS.md)).
+
+**Deprovisioning-Blueprint (Step 024):** **reine Guard-/Planungslogik** (`@speakcore/shared` `deprovision.ts`,
+`executable: false`) – **noch keine Löschung**. Stufenmodell Container→Volume→Network→Archive mit
+Datenverlust-/Bestätigungs-/Managed-Only-Modell ([ADR-0028](../../project-brain/DECISIONS.md)). Echte
+**Volume-/Network-Remove**, **ServerRecord-Archive** und ein optionaler **Agent-vermittelter Query-Proxy**
+folgen als eigene, abgesicherte Steps.
 
 ## Datenfluss
 

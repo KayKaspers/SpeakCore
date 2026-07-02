@@ -209,6 +209,15 @@ Agent-Schreibaktion – der Restart orchestriert web-seitig die bestehenden **St
 Managed-Only, OWNER-only, keine Löschung, kein Log-Lesen) automatisch gelten. **Erneute Lizenzbestätigung**
 per Checkbox. Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler. Kein Browser→Agent; keine Secrets
 im Client/Audit.
+
+**Deprovisioning-Blueprint (Step 024, [ADR-0028](DECISIONS.md)):** **reine Planungs-/Guard-Logik, es wird
+NICHTS gelöscht** (`executable: false`). **Kein** `docker volume rm`/`network rm`, **kein** neues
+Docker-Write-Kommando, **kein** Socket/Logs/Inspect, **kein** Löschen von ServerInstance/Credentials, keine
+Migration. Stufenmodell mit **Managed-Only-Guards** (fremde Ressourcen nie löschbar; Namen nur aus
+`instanceId`) und **Bestätigungsmodell**: Volume-Löschung erfordert `confirmVolumeDataLoss` +
+`confirmBackupRecommended` (optional getippt `DELETE VOLUME`); Network `confirmNetworkUnused`; Archive
+`confirmServerRecordArchive` + Credential-Entscheidung. Datenverlust-Risiko (Volume) ist explizit
+modelliert und in der UI benannt; kein Button suggeriert echte Löschung.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

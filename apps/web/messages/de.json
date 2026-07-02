@@ -211,6 +211,12 @@
       "stopHintKeepResources": "Volume und Network bleiben bestehen.",
       "stopHintNoLogs": "Logs werden nicht gelesen.",
       "resourcesNoContainer": "Ressourcen vorbereitet, Container nicht vorhanden.",
+      "deprovision": {
+        "title": "Deprovisioning (noch nicht aktiv)",
+        "notActive": "Das Entfernen von Volume/Network ist noch nicht aktiviert.",
+        "dataLoss": "Das spätere Löschen des Volumes bedeutet unwiderruflichen Datenverlust – vorher sichern.",
+        "later": "Echte Löschung folgt in einem späteren Schritt mit zusätzlicher Bestätigung."
+      },
       "removeButton": "Container entfernen",
       "removeHintKeep": "Container vorhanden oder vorbereitet, aber nicht laufend.",
       "removeConfirm1": "Nur der Container wird entfernt.",

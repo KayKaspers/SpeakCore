@@ -150,6 +150,11 @@
   reine Web-Orchestrierung der Stop-/Start-Flows (`RUNNING → Stop → Start → RUNNING`) mit erneuter
   Lizenzbestätigung. Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler; kein Reparaturverhalten
   bei DB-/Ist-Inkonsistenz (Healthcheck bleibt Ist-Quelle).
+- **Stand Step 024:** **Deprovisioning-Blueprint** ([ADR-0028](DECISIONS.md)) – **reine Guard-/Planungslogik,
+  keine Löschung** (`executable: false`). Adressiert das **Datenverlust-Risiko** der späteren Volume-Löschung
+  (mehrstufige Bestätigung + Backup-Hinweis) und den Schutz **fremder Ressourcen** (Managed-Only-Guards, nie
+  löschbar). **Offen:** echte Volume-/Network-Remove + ServerRecord-Archive als eigene, abgesicherte Steps
+  (Volume-Löschung = irreversibler Datenverlust).
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur
