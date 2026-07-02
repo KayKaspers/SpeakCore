@@ -104,7 +104,7 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **TS3 (Step 008–009):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
   Basisstatus ansehen, **aktualisieren** und Server wieder **entfernen** (Credentials werden gelöscht);
   Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
-- **Agent-Docker (Step 010–025):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
+- **Agent-Docker (Step 010–026):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
   Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
   Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`), Container-Vorbereitung
   (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret, **echte Container-Erstellung**
@@ -122,8 +122,10 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **Deprovisioning-Blueprint (Step 024):** getestetes Sicherheits-/Planungsfundament (Stufen Container →
   Volume → Network → Archiv, Datenverlust-/Bestätigungs-/Managed-Only-Guards). Ab **Step 025** ist die erste
   echte Stufe aktiv: **Datenvolume löschen** (`docker volume rm`, **ohne Force**, nur ohne Container, mit
-  Doppelbestätigung + getippt `DELETE VOLUME`) — Credentials/Network/ServerInstance bleiben erhalten.
-- **Noch kein** echtes Network-Remove/ServerRecord-Archive, kein Agent-vermittelter Query-Proxy.
+  Doppelbestätigung + getippt `DELETE VOLUME`) — Credentials/Network/ServerInstance bleiben erhalten. Ab
+  **Step 026** das **geteilte Voice-Netzwerk** entfernen (`docker network rm`, **ohne Force**, nur wenn kein
+  managed Container mehr existiert, mit Bestätigung) — Container/Volumes/Credentials/ServerInstance bleiben.
+- **Noch kein** ServerRecord-Archive/Delete, kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.

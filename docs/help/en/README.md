@@ -51,8 +51,10 @@
   deleting the volume. From Step 025 the **data volume** can actually be deleted in the **danger zone**
   (`docker volume rm`, **without force**) – only when the container is already removed and only after a
   **double confirmation** (data loss + backup) and typing **`DELETE VOLUME`**. This is **irreversible**
-  (back up first!). **Network, server record and credentials are kept.** Network deletion and server-record
-  archiving follow in their own steps.*
+  (back up first!). **Network, server record and credentials are kept.** From Step 026 the **voice network**
+  can be removed (`docker network rm`, **without force**) – but **only when no managed containers exist
+  anymore** (shared resource) and after an explicit confirmation. Containers, volumes, server records and
+  credentials are kept; the network can be re-created later. Server-record archiving follows in its own step.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

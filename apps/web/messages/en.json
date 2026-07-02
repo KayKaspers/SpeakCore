@@ -226,7 +226,16 @@
         "volumeDeleteConfirmYes": "Delete volume permanently",
         "volumeDeleteCancel": "Cancel",
         "volumeRemovedHint": "Volume removed. Network, server record and credentials are kept.",
-        "laterSteps": "Network deletion and server-record archiving follow in their own steps."
+        "networkIntro": "Remove the voice network (shared resource).",
+        "networkDeleteButton": "Remove voice network",
+        "networkShared": "This network may be used by multiple SpeakCore servers.",
+        "networkOnlyIfUnused": "Only remove it when no managed containers exist anymore.",
+        "networkOthersKept": "Containers, volumes, server records and credentials are not deleted.",
+        "networkRecreatable": "If a server is prepared again later, the network can be re-created.",
+        "confirmNetworkUnusedLabel": "I confirm that no SpeakCore-managed containers use this network anymore.",
+        "networkDeleteConfirmYes": "Remove voice network",
+        "networkDeleteCancel": "Cancel",
+        "laterSteps": "Server-record archiving follows in its own step."
       },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
@@ -302,7 +311,9 @@
         "dataLossRequired": "Please explicitly confirm the data loss.",
         "backupRequired": "Please confirm the backup note.",
         "typedMismatch": "Please type exactly “DELETE VOLUME”.",
-        "volumeRemoveFailed": "The volume could not be removed."
+        "volumeRemoveFailed": "The volume could not be removed.",
+        "confirmationRequired": "Please tick the confirmation.",
+        "inUseByManagedContainers": "Managed containers still exist – the network is not removed."
       },
       "status": {
         "DRAFT": "Draft",

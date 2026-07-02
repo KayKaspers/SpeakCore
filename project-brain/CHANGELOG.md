@@ -5,6 +5,46 @@
 
 ## [Unreleased]
 
+### NDF Step 026 – REMOVE_MANAGED_NETWORK mit Shared-Network-Schutz (2026-07-02)
+
+> Kontrolliertes Entfernen des **geteilten** managed Voice-Networks. **Kein Force**; nur wenn **kein
+> einziger** managed Container mehr existiert; mit bewusster Bestätigung.
+
+#### Added
+- **Agent-Aktion `removeTs3Network`** (`apps/agent/src/docker-network-remove.ts`) + Endpunkt
+  **`POST /docker/provision/remove-network`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): **`docker network
+  rm speakcore-network-voice`** (nie `-f`, nie `volume`/`container` rm), **fester** Network-Name (keine freien
+  Namen). **Shared-Guard:** solange **irgendein** managed Container existiert ⇒ `inUseByManagedContainers`.
+  Fehlt das Network ⇒ `alreadyRemoved`; fremdes Network ⇒ `conflict`. Status `removed | alreadyRemoved |
+  inUseByManagedContainers | conflict | error | writeDisabled | unavailable`.
+- **Web-Service** `removeManagedNetworkForServer` (`src/core/network-remove.ts`) + reine Helfer
+  (`network-remove-helpers.ts`) + **OWNER-only Server Action** `removeNetworkAction` (rate-limitiert).
+  Bestätigungs-Vorprüfung über den **Step-024-Guard** `canRemoveManagedNetwork` (`confirmNetworkUnused`);
+  der Agent re-verifiziert real „kein managed Container".
+- **Option A ([ADR-0030](DECISIONS.md)):** **kein** ServerInstance-Statusfeld für das Network (globale
+  Ressource) – nur Audit + UI-Hinweis; der Web-Service ändert **keinen** ServerInstance-Status (per Test).
+  **Container, Volumes, Credentials und ServerInstance bleiben unangetastet.**
+- **UI (DE/EN):** Abschnitt „Voice-Netzwerk entfernen" in der **Gefahrenzone** (`RESOURCES_PREPARED`) mit
+  **Shared-Ressource-Warnung** + Bestätigungs-Checkbox; deutlicher Hinweis, dass Container/Volumes/
+  Servereinträge/Zugangsdaten **nicht** gelöscht werden und das Netzwerk erneut erstellbar ist.
+- **Audit:** `deprovision.networkRemove.requested/confirmed/blocked/completed/failed/conflict/inUse`,
+  `deprovision.network.removed/alreadyRemoved` (Target = **auslösende** ServerInstance-ID, dokumentiert;
+  Network ist global). **Keine Secrets/Roh-Ausgaben.**
+- Tests: Agent (network rm **ohne `-f`**, kein volume/container rm, `inUseByManagedContainers`, alreadyRemoved,
+  conflict, unavailable, error, Token/Flag-Gate, Quell-Scan) und Web (Bestätigungs-Guard, Audit, **Option-A-
+  Nachweis: kein `serverInstance.update`**, Quell-Scan). **298 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein Force**, **keine Löschung solange
+  managed Container existieren**, **keine Volume-/Container-/Credential-/ServerInstance-Löschung**, kein
+  `run/create/start/stop/restart/inspect/exec/cp/logs`, kein compose, kein Socket, keine fremde Ressource
+  (fremdes Network ⇒ `conflict`). Kein Secret im Client/Audit/Response, **kein Log-Lesen**. Quell-Scan-Tests
+  erzwingen die Verbote. **[ADR-0030](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (298) · `prisma validate` n. z.
+  (kein Schema-Change – Option A).
+
 ### NDF Step 025 – REMOVE_MANAGED_VOLUME mit Datenverlust-Schutz (2026-07-02)
 
 > Erste **echte, irreversible** Löschung eines managed TS3-Datenvolumes. **Datenverlust!** Streng

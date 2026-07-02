@@ -415,6 +415,27 @@
 - **Konsequenzen:** Minimaler Schema-Zusatz `managedVolumeState` (Migration `20260702100000`). **Network-Remove**
   und **ServerRecord-Archive** bleiben eigene, spätere Steps.
 
+## ADR-0030 – Network-Remove: `docker network rm` (kein Force), nur wenn kein managed Container existiert
+
+- **Status:** accepted (Step 026)
+- **Kontext:** Das Voice-Network (`speakcore-network-voice`) ist eine **geteilte, globale** Ressource, die
+  perspektivisch von mehreren managed Servern genutzt wird.
+- **Entscheidung:** Agent-Aktion **`REMOVE_MANAGED_NETWORK`** (`POST /docker/provision/remove-network`) führt
+  **ausschließlich `docker network rm speakcore-network-voice`** aus – **kein `-f`/`--force`**, nie `volume`/
+  `container` rm. Hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, **fester** Network-Name (keine freien Namen
+  vom Client). **Shared-Guard:** blockiert (`inUseByManagedContainers`), solange **irgendein** SpeakCore-managed
+  Container existiert (Prüfung über `container ls --filter label=speakcore.managed=true`, ungefiltert nach
+  instanceId). Fehlt das Network ⇒ `alreadyRemoved`; fremdes/nicht-managed Network ⇒ `conflict`. Web-seitig
+  erzwingt der Step-024-Guard `canRemoveManagedNetwork` die Bestätigung **`confirmNetworkUnused`**.
+  **Option A (Statuslogik):** **kein** ServerInstance-Statusfeld für das Network – globale Ressource; Ist-Zustand
+  via Inventory/Agent + Audit. **Audit-Target = auslösende ServerInstance-ID** (dokumentiert; das Network ist global).
+- **Begründung:** Das geteilte Network darf nie entfernt werden, solange es genutzt werden könnte → harter
+  „kein managed Container"-Guard statt per-Instanz-Betrachtung. Kein `-f`, damit „in use" hart fehlschlägt.
+  Ein per-Server-Statusfeld wäre bei shared Ressourcen irreführend.
+- **Konsequenzen:** **Container, Volumes, Credentials und ServerInstance bleiben unangetastet.** Das Network
+  ist bei erneutem Provisioning wieder anlegbar. **ServerRecord-Archive/Delete** (inkl. Credential-Entscheidung)
+  bleibt der letzte, eigene Deprovisioning-Step.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

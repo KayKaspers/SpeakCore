@@ -347,6 +347,24 @@ export interface VolumeRemoveResult {
   audit: PlannedAuditAction[];
 }
 
+// --- Managed Network Remove (NDF Step 026: `docker network rm`, KEIN -f; shared voice-network) ---
+
+export type NetworkRemoveStatus =
+  | 'removed'
+  | 'alreadyRemoved'
+  | 'inUseByManagedContainers'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'unavailable';
+
+/** Ergebnis von `docker network rm` (managed voice-network). Enthält NIE Secrets/Roh-Docker-Ausgabe. */
+export interface NetworkRemoveResult {
+  status: NetworkRemoveStatus;
+  networkName?: string;
+  audit: PlannedAuditAction[];
+}
+
 // --- Deprovisioning Safety Blueprint (NDF Step 024: reine Planung, KEINE Ausführung) ---------
 
 /** Umfang einer (späteren) Deprovisioning-Aktion. */

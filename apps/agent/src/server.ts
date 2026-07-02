@@ -20,6 +20,7 @@ import { startTs3Container } from './docker-start';
 import { stopTs3Container } from './docker-stop';
 import { removeTs3Container } from './docker-remove';
 import { removeTs3Volume } from './docker-volume-remove';
+import { removeTs3Network } from './docker-network-remove';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -167,6 +168,28 @@ async function handle(
       return;
     }
     const result = await startTs3Container(body as Ts3ContainerStartRequest, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/remove-network') {
+    // Managed VOICE-NETWORK entfernen (nur `docker network rm`, kein Force). Token + Write-Feature-Flag.
+    // Global/shared: nur wenn KEIN managed Container mehr existiert. Keine Volume-/Container-/Record-Löschung.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    // Body wird nicht benötigt (fester Network-Name), aber sauber konsumieren.
+    try {
+      await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const result = await removeTs3Network({
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
     });

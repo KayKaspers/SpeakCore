@@ -36,6 +36,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/stop-container` | **write** (Flag-gated): managed **Container stoppen** (`docker stop`, kein rm/restart) |
 | POST | `/docker/provision/remove-container` | **write** (Flag-gated): managed **Container entfernen** (`docker rm`, kein -f/-v, nur gestoppt) |
 | POST | `/docker/provision/remove-volume` | **write** (Flag-gated): managed **Datenvolume entfernen** (`docker volume rm`, kein -f, nur ohne Container) |
+| POST | `/docker/provision/remove-network` | **write** (Flag-gated): managed **Voice-Network entfernen** (`docker network rm`, kein -f, nur wenn kein managed Container) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -235,7 +236,24 @@ Erste **echte, irreversible** Löschung ([ADR-0029](../../project-brain/DECISION
 
 **Web-Auslösung (Step 025):** OWNER-only Server Action (`/servers/[id]`, **Gefahrenzone** mit
 Doppelbestätigung); `provisioningStatus` bleibt `RESOURCES_PREPARED`, `managedVolumeState='removed'`.
-**Network-Remove** und **ServerRecord-Archive** folgen als eigene Steps.
+
+## `/docker/provision/remove-network` – Voice-Network entfernen (Step 026)
+
+Entfernt das **geteilte** managed Voice-Network ([ADR-0030](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker network rm speakcore-network-voice`** (**kein `-f`**, nie `volume`/`container` rm); **fester**
+  Name (keine freien Namen vom Client). Vorprüfung nur über managed-gefilterte Listen (`container ls`,
+  `network ls --filter label=…service=voice-network`).
+- **Token + `AGENT_DOCKER_WRITE_ENABLED`** (`false` ⇒ `writeDisabled`). **Nur wenn kein managed Container**
+  (irgendeiner) mehr existiert (`inUseByManagedContainers` sonst). Fehlt das Network ⇒ `alreadyRemoved`;
+  fremdes gleichnamiges Network ⇒ `conflict`; Docker nicht verfügbar ⇒ `unavailable`.
+- **Keine** Volume-/Container-/Credential-/ServerInstance-Löschung, **kein** `inspect/exec/cp/logs`, **kein**
+  Log-Lesen. Web erzwingt zusätzlich **`confirmNetworkUnused`** (Step-024-Guard). Quell-Scan-Tests erzwingen
+  die verbotenen Kommandos.
+
+**Web-Auslösung (Step 026):** OWNER-only Server Action (`/servers/[id]`, **Gefahrenzone** mit Shared-Ressource-
+Warnung + Bestätigung); **Option A** – **kein** ServerInstance-Statusfeld, nur Audit (Target = auslösende
+ServerInstance-ID). **ServerRecord-Archive** folgt als eigener Step.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

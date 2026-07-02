@@ -264,8 +264,15 @@ nicht-ausführende Info-Karte. Details: [ADR-0028](DECISIONS.md).
 **nur** managed Volume, **nur ohne Container**. Web-seitig erzwingt der Step-024-Guard `canRemoveManagedVolume`
 die Bestätigungen (`confirmVolumeDataLoss` + `confirmBackupRecommended` + getippt `DELETE VOLUME`).
 `provisioningStatus` bleibt `RESOURCES_PREPARED`; `managedVolumeState='removed'` markiert den Ist-Zustand.
-**Credentials/Network/ServerInstance bleiben erhalten** ([ADR-0029](DECISIONS.md)). Network-Remove +
-ServerRecord-Archive folgen als eigene Steps.
+**Credentials/Network/ServerInstance bleiben erhalten** ([ADR-0029](DECISIONS.md)).
+
+**Network-Remove (Step 026):** entfernt das **geteilte** Voice-Network – `core/network-remove` →
+`lib/agent-client` → Agent `POST /docker/provision/remove-network` → **`docker network rm
+speakcore-network-voice`** (**kein `-f`**), **nur wenn kein managed Container** mehr existiert
+(`inUseByManagedContainers` sonst). Web erzwingt `confirmNetworkUnused` (Step-024-Guard).
+**Option A:** kein ServerInstance-Statusfeld (globale Ressource; Ist-Zustand via Inventory/Agent + Audit).
+**Container/Volumes/Credentials/ServerInstance bleiben erhalten** ([ADR-0030](DECISIONS.md)). ServerRecord-
+Archive folgt als eigener Step.
 
 ## 7. Verwandte Dokumente
 

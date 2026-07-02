@@ -6,6 +6,7 @@ import type {
   ContainerStatusResult,
   ContainerStopResult,
   DockerInventory,
+  NetworkRemoveResult,
   ProvisionPrepareResult,
   SystemInfo,
   Ts3ContainerCreateRequest,
@@ -197,6 +198,34 @@ export async function removeManagedContainer(
     });
     if (!res.ok) return null;
     return (await res.json()) as ContainerRemoveResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent das **Entfernen des managed Voice-Networks** aus – **serverseitig**. Global/shared:
+ * der Agent entfernt nur, wenn kein managed Container mehr existiert. `null`, wenn der Agent nicht
+ * erreichbar ist. Kein Force, keine Volume-/Container-/Credential-Löschung; Antwort ohne Secret/Roh-Ausgabe.
+ */
+export async function removeManagedNetwork(timeoutMs = 10000): Promise<NetworkRemoveResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/remove-network`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: '{}',
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as NetworkRemoveResult;
   } catch {
     return null;
   } finally {

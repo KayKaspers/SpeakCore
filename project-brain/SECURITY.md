@@ -227,6 +227,15 @@ managed Container** mehr existiert (`containerStillExists` sonst). Web erzwingt 
 Vorab-Default). **Credentials, Network und ServerInstance bleiben erhalten**; nur `managedVolumeState='removed'`.
 Fehlt das Volume ⇒ idempotent `alreadyRemoved`; fremdes Volume ⇒ `conflict`. Kein Browser→Agent; keine
 Secrets/Roh-Docker-Ausgaben; kein Log-Lesen.
+
+**Network-Remove (Step 026, [ADR-0030](DECISIONS.md)):** entfernt das **geteilte** Voice-Network. Der Agent
+führt **nur `docker network rm speakcore-network-voice`** aus (**kein `-f`**, nie `volume`/`container` rm),
+hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, mit **festem** Namen (keine freien Namen). **Nur wenn kein
+managed Container** mehr existiert (`inUseByManagedContainers` sonst) – über `container ls` ungefiltert nach
+instanceId. Web erzwingt **`confirmNetworkUnused`** (Step-024-Guard). Fehlt das Network ⇒ `alreadyRemoved`;
+fremdes ⇒ `conflict`. **Container, Volumes, Credentials und ServerInstance bleiben erhalten** (Option A: kein
+Statusfeld; Audit-Target = auslösende ServerInstance-ID). Kein Browser→Agent; keine Secrets/Roh-Ausgaben;
+kein Log-Lesen.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

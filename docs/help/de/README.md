@@ -54,7 +54,10 @@
   werden (`docker volume rm`, **ohne Force**) – nur bei bereits entferntem Container und nur nach
   **Doppelbestätigung** (Datenverlust + Backup) und getippter Eingabe **`DELETE VOLUME`**. Das ist
   **unwiderruflich** (vorher Backup!). **Network, Servereintrag und Zugangsdaten bleiben erhalten.**
-  Network-Löschung und Servereintrag-Archivierung folgen als eigene Schritte.*
+  Ab Step 026 kann das **Voice-Netzwerk** entfernt werden (`docker network rm`, **ohne Force**) – aber
+  **nur, wenn keine managed Container mehr existieren** (gemeinsam genutzte Ressource) und nach
+  ausdrücklicher Bestätigung. Container, Volumes, Servereinträge und Zugangsdaten bleiben dabei erhalten;
+  das Netzwerk kann später wieder erstellt werden. Servereintrag-Archivierung folgt als eigener Schritt.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

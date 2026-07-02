@@ -102,8 +102,14 @@ Datenverlust-/Bestätigungs-/Managed-Only-Modell ([ADR-0028](../../project-brain
 **Volume-Remove (Step 025):** erste **echte** Deprovisioning-Stufe – der Adapter delegiert an den Agent, der
 **`docker volume rm`** (**kein `-f`**) eines **managed** Volumes **nur ohne Container** ausführt. Web erzwingt
 Doppelbestätigung + getippt `DELETE VOLUME` (Step-024-Guard). **Credentials/Network/ServerInstance bleiben
-erhalten**, `managedVolumeState='removed'` ([ADR-0029](../../project-brain/DECISIONS.md)). **Network-Remove**,
-**ServerRecord-Archive** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+erhalten**, `managedVolumeState='removed'` ([ADR-0029](../../project-brain/DECISIONS.md)).
+
+**Network-Remove (Step 026):** entfernt das **geteilte** Voice-Network – der Adapter delegiert an den Agent,
+der **`docker network rm`** (**kein `-f`**) **nur ausführt, wenn kein managed Container** mehr existiert
+(`inUseByManagedContainers` sonst). Web erzwingt `confirmNetworkUnused`. **Option A:** kein Statusfeld
+(globale Ressource). **Container/Volumes/Credentials/ServerInstance bleiben erhalten**
+([ADR-0030](../../project-brain/DECISIONS.md)). **ServerRecord-Archive** und ein optionaler
+**Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

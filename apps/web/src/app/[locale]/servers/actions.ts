@@ -20,6 +20,7 @@ import { stopManagedContainerForServer } from '@/core/container-stop';
 import { removeManagedContainerForServer } from '@/core/container-remove';
 import { restartManagedContainerForServer } from '@/core/container-restart';
 import { removeManagedVolumeForServer } from '@/core/volume-remove';
+import { removeManagedNetworkForServer } from '@/core/network-remove';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -359,6 +360,38 @@ export async function removeVolumeAction(formData: FormData): Promise<void> {
   }
   // dataLossRequired | backupRequired | typedMismatch | invalidState | invalidPlan
   //   | containerStillExists | conflict | writeDisabled | unavailable | unreachable | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Entfernt das **geteilte Voice-Network** (global). OWNER-only, rate-limitiert, nur mit Bestätigung
+ * `confirmNetworkUnused`. **Kein Force**; nur wenn kein managed Container mehr existiert. Keine Volume-/
+ * Container-/Credential-/ServerInstance-Löschung.
+ */
+export async function removeNetworkAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const confirmations = { confirmNetworkUnused: formData.get('confirmNetworkUnused') === 'on' };
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:network-remove:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await removeManagedNetworkForServer(id, user.email, confirmations);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'removed' || result.status === 'alreadyRemoved') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // confirmationRequired | inUseByManagedContainers | conflict | writeDisabled | unavailable | unreachable | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

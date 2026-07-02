@@ -157,8 +157,13 @@
 - **Stand Step 025:** **Volume-Remove** ([ADR-0029](DECISIONS.md)) – erste **echte, irreversible** Löschung
   (`docker volume rm`, **kein `-f`**). Datenverlust-Risiko durch **Doppelbestätigung + getippt `DELETE VOLUME`**,
   **Container-Guard** (nur ohne Container) und **Managed-Only** (fremdes Volume ⇒ `conflict`) minimiert.
-  **Credentials/Network/ServerInstance bleiben erhalten.** **Offen:** Network-Remove + ServerRecord-Archive.
-  Restrisiko: fehlt ein aktuelles Backup, ist der Datenverlust endgültig (UI-Backup-Hinweis).
+  **Credentials/Network/ServerInstance bleiben erhalten.** Restrisiko: fehlt ein aktuelles Backup, ist der
+  Datenverlust endgültig (UI-Backup-Hinweis).
+- **Stand Step 026:** **Network-Remove** ([ADR-0030](DECISIONS.md)) – entfernt das **geteilte** Voice-Network
+  (`docker network rm`, **kein `-f`**) **nur wenn kein managed Container** mehr existiert
+  (`inUseByManagedContainers`), Managed-Only (fremdes ⇒ `conflict`), mit Bestätigung `confirmNetworkUnused`.
+  **Container/Volumes/Credentials/ServerInstance bleiben erhalten** (Option A: kein Statusfeld). **Offen:**
+  ServerRecord-Archive/Delete (inkl. bewusster Credential-Entscheidung) als abschließender Deprovisioning-Step.
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

@@ -17,6 +17,7 @@ import { StopContainerButton } from '../StopContainerButton';
 import { RemoveContainerButton } from '../RemoveContainerButton';
 import { RestartContainerButton } from '../RestartContainerButton';
 import { RemoveVolumeButton } from '../RemoveVolumeButton';
+import { RemoveNetworkButton } from '../RemoveNetworkButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +122,8 @@ export default async function ServerDetailPage({
               'dataLossRequired',
               'backupRequired',
               'typedMismatch',
+              'confirmationRequired',
+              'inUseByManagedContainers',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -262,6 +265,12 @@ export default async function ServerDetailPage({
                   <RemoveVolumeButton locale={locale} id={server.id} />
                 </div>
               )}
+              <div className="mt-3 space-y-2 border-t border-sc-border pt-3">
+                <p className="text-sc-caption text-sc-text-muted">
+                  {t('managed.dangerZone.networkIntro')}
+                </p>
+                <RemoveNetworkButton locale={locale} id={server.id} />
+              </div>
               <p className="mt-2 text-sc-caption text-sc-text-muted">
                 {t('managed.dangerZone.laterSteps')}
               </p>
