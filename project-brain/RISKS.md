@@ -70,10 +70,16 @@
   beim Nutzer.** Offen: Zustimmung künftig bereits vor dem Create einholen; rechtliche Gesamtprüfung.
 
 ## R-06 – Datenverlust bei Backup/Restore
-- **E:** mittel · **A:** hoch · **Risiko:** hoch
-- **Beschreibung:** Fehlerhafte Restores können Serverdaten zerstören.
-- **Gegenmaßnahmen:** Restore niemals destruktiv ohne Bestätigung; Integritätsprüfung der Backups;
+- **E:** mittel · **A:** hoch · **Risiko:** hoch *(durch Step 032 teilweise reduziert)*
+- **Beschreibung:** Fehlerhafte Restores können Serverdaten zerstören; fehlende Backups verhindern
+  Wiederherstellung nach Fehlern/Deprovisionierung.
+- **Gegenmaßnahmen:** **Echtes Volume-Backup seit Step 032** ([ADR-0034](DECISIONS.md)): read-only
+  Quelle, serverseitiges Ziel/Image, konservativ nur ohne Container, mehrfache Bestätigung, Audit.
+  Restore niemals destruktiv ohne Bestätigung; Integritätsprüfung der Backups;
   „dry-run"/Vorschau; Audit-Log; Tests als Teil der Definition of Done.
+- **Rest:** **Restore/Import fehlen weiterhin** (bewusst, eigenes Security-Design); keine
+  Integritätsprüfung/Rotation der Backup-Dateien; Aufbewahrung liegt beim Betreiber
+  (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen
 - **E:** hoch · **A:** mittel · **Risiko:** mittel
@@ -257,9 +263,9 @@ Status je Risiko für die **interne 0.1 Alpha**: **offen** · **mitigiert** · *
 | R-14 Secrets in Docker-Logs | **mitigiert (Step 017)** | Query-Passwort per ENV, kein Log-Lesen. |
 | R-13 SSRF (TS3-Host) | **akzeptiert (0.1)** | LAN/localhost erlaubt (Self-Hosting); Metadaten/Link-Local/unspez. blockiert; strengere Egress später. |
 | R-05 TS3-Lizenz | **akzeptiert (0.1)** | explizite Nutzerbestätigung beim Start; Verantwortung beim Betreiber. |
-| R-06 Backup/Restore | **offen** | **echtes Backup fehlt** (nur Blueprint Step 030); Restore/Import bewusst nicht enthalten. |
+| R-06 Backup/Restore | **teilweise mitigiert (Step 032)** | echtes read-only Volume-Backup vorhanden; **Restore/Import fehlen bewusst**; Aufbewahrung beim Betreiber. |
 | Hard-Delete / Unarchive | **bewusst nicht enthalten** | erst nach Backup-/Export-Konzept; Export ≠ TS3-Datenbackup. |
 | R-08 WebUI-Sicherheit | **mitigiert** | Auth-Härtung, Rate-Limit, Security-Header/CSP (R-11 offen: `'unsafe-inline'`). |
 
 **Blockierend für eine interne Alpha:** keine (bei den dokumentierten Grenzen). **Blockierend für
-öffentliche/exponierte Produktion:** fehlendes echtes Backup (R-06), SSRF-Restrisiko (R-13), R-11.
+öffentliche/exponierte Produktion:** fehlender Restore (R-06-Rest), SSRF-Restrisiko (R-13), R-11.

@@ -3,7 +3,7 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – interne Alpha / NDF Step 031 (Release-Readiness)` — Details:
+**Status:** `0.1 – interne Alpha / NDF Step 032 (echtes Volume-Backup)` — Details:
 [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
@@ -136,14 +136,16 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   Ab **Step 029** lässt sich ein managed Server als **JSON exportieren** (nicht-geheime Metadaten + optional
   Audit-Historie, **ohne Secrets/Credentials**, kein Docker/Agent, kein Restore). Ab **Step 030** ein
   getestetes **Volume-Backup-Konzept** (reine Guard-/Planungslogik, `executable: false`, Backup-Dateien
-  gelten als sensibel) — **noch kein echtes Backup**.
-- **Noch kein** echtes Volume-Backup, kein Import/Restore, kein Unarchive, keine finale Hard-Delete-Policy,
+  gelten als sensibel). Ab **Step 032** das erste **echte Volume-Backup**: read-only Quelle
+  (`-v <volume>:/data:ro`), **serverseitiges** Ziel (`AGENT_BACKUP_DIR`) und festes allowlisted Image
+  (`alpine:3.20`), nur ohne Container (`RESOURCES_PREPARED`), OWNER-only mit 3 Bestätigungen + getippt
+  `CREATE BACKUP` — Backup-Dateien sind **sensibel**, **kein** Browser-Download.
+- **Kein** Restore/Import, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.
-- **Noch nicht:** read-only Healthcheck/TS3-ServerQuery-Connect zum managed Server, Stop/Remove,
-  Backup/Restore, Plugin-/Community-Module.
+- **Noch nicht:** Restore/Import, Backup-Download/-Rotation, Plugin-/Community-Module.
 
 ## Mitwirken
 

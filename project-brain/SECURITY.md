@@ -265,6 +265,19 @@ Verarbeitung, **keine** Secrets. Guard: nur managed + gültige instanceId + mana
 `removed`) + **Container nicht laufend** + Bestätigungen (sensibel/Storage/gestoppt, optional getippt
 `CREATE BACKUP`). Fremde Ressourcen nie sicherbar. **Backup-Dateien gelten als potenziell sensibel** (nie
 „secret-free"); Metadaten selbst ohne Secrets. Unterschied: **Metadaten-Export ≠ Volume-Backup**.
+
+**Echtes Volume-Backup (Step 032, [ADR-0034](DECISIONS.md)):** `POST /docker/provision/backup-volume`
+(Token + Write-Flag). Einziges erlaubtes Muster: kurzlebiger, gelabelter Hilfscontainer
+(`docker run --rm … -v <volume>:/data:ro -v <AGENT_BACKUP_DIR>:/backup alpine:3.20 tar -czf …`),
+ausschließlich **statische `execFile`-Args**, keine Shell, kein Socket. **Serverseitig festgelegt:**
+Backup-Ziel (`AGENT_BACKUP_DIR`) und Image (allowlisted `alpine:3.20`, Existenz vorab geprüft, kein
+unkontrollierter Pull) – der Client liefert **keinen** Pfad, **kein** Image, **keine** Docker-Args
+(Dateiname intern generiert ⇒ keine Pfad-Traversal). Quelle strikt **read-only**. **Konservativ:**
+blockiert, wenn irgendein managed Container der `instanceId` existiert (realer Pfad: Stop → Remove →
+Backup bei `RESOURCES_PREPARED`). OWNER-only, 3 Bestätigungen + getippt `CREATE BACKUP` (Web **und**
+Agent via Step-030-Guard, Defense-in-Depth). `metadata.json` ohne Secrets (`containsSecrets: "unknown"`);
+Ergebnis nur mit Dateiname (kein Host-Pfad), keine Roh-Docker-Ausgabe. **Kein** Restore/Import/
+Browser-Download; Aufbewahrung/Schutz der serverseitigen Dateien liegt beim Betreiber.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).
@@ -303,8 +316,11 @@ Verarbeitung, **keine** Secrets. Guard: nur managed + gültige instanceId + mana
 
 ## 9. Backup/Restore-Sicherheit
 
+- **Backups (seit Step 032):** read-only Quelle, serverseitiges Ziel/Image, mehrfache Bestätigung,
+  Dateien gelten als **sensibel** (Betreiber-Verantwortung für Aufbewahrung/Zugriffsschutz).
 - Restore ist niemals still-destruktiv; Bestätigung + Vorschau erforderlich (siehe [RISKS.md](RISKS.md) R-06).
-- Integritätsprüfung der Backups.
+  **Restore/Import sind in 0.1 nicht implementiert** (eigenes Security-Design, späterer Step).
+- Integritätsprüfung der Backups (geplant; 0.1 erzeugt tar.gz + metadata.json ohne Prüfsumme).
 
 ## 10. Verantwortungsvolle Offenlegung (Responsible Disclosure)
 

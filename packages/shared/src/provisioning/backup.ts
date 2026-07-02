@@ -107,6 +107,7 @@ export function buildBackupMetadata(input: {
   instanceId: string;
   serverDisplayName: string;
   volumeName: string;
+  backupFileName?: string;
   createdBy?: string;
   createdAt?: string;
   notes?: string[];
@@ -119,6 +120,7 @@ export function buildBackupMetadata(input: {
     instanceId: input.instanceId,
     serverDisplayName: input.serverDisplayName,
     volumeName: input.volumeName,
+    ...(input.backupFileName ? { backupFileName: input.backupFileName } : {}),
     containsSecrets: 'unknown',
     createdBy: input.createdBy ?? 'owner',
     notes: input.notes ?? [],

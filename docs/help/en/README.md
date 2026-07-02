@@ -64,12 +64,15 @@
   un-archive or hard delete. From Step 029 a managed server (active or archived) can be **exported as JSON**
   ("Download export", optionally with audit history): it contains **only non-secret metadata** – **no
   credentials, no secrets**. The export is **not a backup/restore of the TS3 data** (volume contents),
-  DB-only (no Docker/agent), and there is **no import**. From Step 030 there is also a **backup concept**
-  (info card "Backup concept prepared"): it explains that real TS3 volume backups are **not active yet**, can
-  contain **sensitive data**, and that the first real backup step recommends **a stopped container**. Nothing
-  is backed up yet – no download, no restore.*
+  DB-only (no Docker/agent), and there is **no import**. From Step 032 you can create a **real volume
+  backup** for a managed server in status "Resources prepared" (container removed, not archived):
+  3 checkboxes (sensitive data / storage responsibility / container stopped) + typing **`CREATE BACKUP`**.
+  The backup is stored **server-side** in the agent backup directory (`.tar.gz` + `.metadata.json`) –
+  **no browser download, no restore, no import**. The file can contain **sensitive TS3 data**: store it
+  securely and restrict access.*
 - Reading logs
-- Backup & Restore
+- Backup & Restore — *from Step 032: backups exist (server-side, read-only source); **restore follows
+  later as its own hardened step**.*
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials
   (`SECRET_ENCRYPTION_KEY`) can be rotated. This is an **operator/CLI-only** task
   (`pnpm --filter @speakcore/web rotate-secrets`, with `--dry-run` for a safe preview) – **no

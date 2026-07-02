@@ -60,8 +60,12 @@ ServerInstance bleiben erhalten; in **Step 026** das **geteilte** Voice-Network 
 `-f`**, nur wenn kein managed Container mehr existiert, mit `confirmNetworkUnused`) – Container/Volumes/
 Credentials/ServerInstance bleiben erhalten. **Step 027** schließt das Deprovisioning ab: managed **ServerRecord
 archivieren** (rein DB-seitig, **kein Docker/Agent**, **kein Hard-Delete**, Credential-Löschung nur bei
-ausdrücklicher Wahl). **Step 030** ergänzt ein **Volume-Backup-Konzept** (reine Guard-/Planungslogik, **kein
-echtes Backup**, `executable: false`; Backup-Dateien gelten als sensibel). **Kein Log-Lesen**, kein Inspect,
+ausdrücklicher Wahl). **Step 030** ergänzt ein **Volume-Backup-Konzept** (reine Guard-/Planungslogik,
+`executable: false`; Backup-Dateien gelten als sensibel); **Step 032** setzt darauf das erste **echte
+Volume-Backup** um: read-only Quelle (`:/data:ro`), **serverseitiges** Ziel (`AGENT_BACKUP_DIR`) und
+**festes allowlisted Image** (`alpine:3.20`), statische `execFile`-Args ohne Shell/Socket, konservativ
+**nur ohne Container** der `instanceId`, OWNER-only mit 3 Bestätigungen + getippt `CREATE BACKUP` –
+**kein** Restore/Import/Browser-Download. **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
@@ -80,7 +84,9 @@ echtes Backup**, `executable: false`; Backup-Dateien gelten als sensibel). **Kei
 - **Reverse Proxy muss `X-Forwarded-For`/`X-Real-IP` korrekt setzen**, sonst greift das
   IP-basierte Rate-Limiting nur eingeschränkt (Identifier-Limit bleibt aktiv).
 - Firewall: nur benötigte Ports öffnen (TS3-Ports, WebUI-Port). Agent-Port **nicht** öffentlich.
-- Regelmäßige Backups und getestete Restores (siehe Installationsanleitungen).
+- Regelmäßige Backups und getestete Restores (siehe Installationsanleitungen). **Volume-Backups aus
+  SpeakCore (Step 032) liegen serverseitig in `AGENT_BACKUP_DIR` und sind sensibel** – Zugriff
+  einschränken, sichere Aufbewahrung liegt beim Betreiber; Restore ist in 0.1 nicht enthalten.
 - Audit-Log regelmäßig prüfen (u. a. `login.failure`, `login.rate_limited`).
 
 ## Verantwortungsvolle Offenlegung

@@ -15,7 +15,9 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3ProvisionInput,
+  Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
+  VolumeBackupResult,
   VolumeRemoveResult,
 } from '@speakcore/types';
 
@@ -198,6 +200,38 @@ export async function removeManagedContainer(
     });
     if (!res.ok) return null;
     return (await res.json()) as ContainerRemoveResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent ein **echtes read-only Volume-Backup** aus – **serverseitig**. Backup-Datei ist
+ * potenziell sensibel und landet im serverseitigen Agent-Backup-Verzeichnis. Übergibt nur `instanceId`
+ * + Bestätigungen + Anzeigename (keine Secrets, kein Pfad/Image). `null`, wenn der Agent nicht erreichbar
+ * ist. Antwort enthält nur den Dateinamen (kein Host-Pfad), keine Roh-Docker-Ausgabe.
+ */
+export async function backupManagedVolume(
+  request: Ts3VolumeBackupRequest,
+  timeoutMs = 305000,
+): Promise<VolumeBackupResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/backup-volume`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as VolumeBackupResult;
   } catch {
     return null;
   } finally {

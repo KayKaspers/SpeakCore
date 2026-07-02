@@ -496,6 +496,29 @@
   Security-Design) und die **Hard-Delete-Policy** (ganz zuletzt) sind je eigene, spätere Steps. Der
   **Metadaten-Export** (Step 029) bleibt strikt getrennt vom **Volume-Backup** (dieses kann sensible Inhalte haben).
 
+## ADR-0034 – Echtes Volume-Backup: read-only Quelle, serverseitiges Ziel/Image, konservativ nur ohne Container
+
+- **Status:** accepted (Step 032)
+- **Kontext:** Nach dem Blueprint (ADR-0033) soll das erste **echte** Backup eines managed TS3-Volumes
+  entstehen – ohne neue Angriffsfläche durch freie Pfade, Images oder Docker-Argumente.
+- **Entscheidung:** Neue Agent-Aktion `BACKUP_MANAGED_VOLUME` (`POST /docker/provision/backup-volume`,
+  Token + `AGENT_DOCKER_WRITE_ENABLED`). Ein kurzlebiger, gelabelter Hilfscontainer archiviert die Quelle
+  **read-only** (`-v <volume>:/data:ro`) in ein **serverseitig** festgelegtes Verzeichnis
+  (`AGENT_BACKUP_DIR`, Default `/var/lib/speakcore/backups`) mit **festem allowlisted Image**
+  (`alpine:3.20`, ohne unkontrollierten Pull – Image-Existenz wird vorab geprüft). Ausschließlich
+  **statische `execFile`-Argumente** (kein Shell-Aufruf, kein Socket); Dateiname wird **intern** erzeugt
+  (`speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` + separate `.metadata.json`, keine Secrets).
+  **Konservativ:** blockiert (`containerStillExists`), wenn **irgendein** managed Container der
+  `instanceId` existiert – der reale Pfad ist Stop → Container-Remove → Backup (`RESOURCES_PREPARED`).
+  Web: OWNER-only, drei Checkboxen + getippt `CREATE BACKUP` (Step-030-Guard), Agent prüft erneut
+  (Defense-in-Depth). Ergebnis enthält **nur den Dateinamen**, keinen Host-Pfad, keine Roh-Docker-Ausgabe.
+- **Begründung:** Maximal konservativer erster echter Backup-Pfad: keine Client-Parameter, read-only
+  Quelle (kein Schreiben ins Volume möglich), kein unklarer Zustand bei existierendem Container,
+  Backup-Dateien konsequent als **sensibel** eingestuft.
+- **Konsequenzen:** **Kein** Restore/Import/Download in 0.1 (je eigenes Security-Design, spätere Steps);
+  Aufbewahrung/Rotation der serverseitigen Backup-Dateien liegt beim Betreiber. Erster legitimer Einsatz
+  von `docker run` im Agent – Source-Scan-Tests erlauben ihn **nur** im Backup-Modul.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

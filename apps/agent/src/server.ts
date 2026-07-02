@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
@@ -9,6 +10,7 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3ProvisionInput,
+  Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
 } from '@speakcore/types';
 import { extractBearerToken, isValidToken } from './auth';
@@ -21,6 +23,7 @@ import { stopTs3Container } from './docker-stop';
 import { removeTs3Container } from './docker-remove';
 import { removeTs3Volume } from './docker-volume-remove';
 import { removeTs3Network } from './docker-network-remove';
+import { backupTs3Volume, DEFAULT_BACKUP_IMAGE } from './docker-backup';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -170,6 +173,48 @@ async function handle(
     const result = await startTs3Container(body as Ts3ContainerStartRequest, {
       writeEnabled: config.dockerWriteEnabled === true,
       exec: dockerExec,
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/backup-volume') {
+    // Echtes Volume-Backup (read-only Quelle) in ein SERVERSEITIGES Verzeichnis. Token + Write-Flag.
+    // Backup-Dir/Image serverseitig; kein freier Pfad/Image/Arg vom Client. Keine Secrets im Ergebnis.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const backupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const backupImage = process.env.AGENT_BACKUP_IMAGE ?? DEFAULT_BACKUP_IMAGE;
+    const result = await backupTs3Volume(body as Ts3VolumeBackupRequest, {
+      writeEnabled: config.dockerWriteEnabled === true,
+      exec: dockerExec,
+      backupDir,
+      backupImage,
+      ensureDir: async (d) => {
+        try {
+          await mkdir(d, { recursive: true });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      writeMetadata: async (p, c) => {
+        try {
+          await writeFile(p, c, 'utf8');
+          return true;
+        } catch {
+          return false;
+        }
+      },
     });
     sendJson(res, 200, result);
     return;

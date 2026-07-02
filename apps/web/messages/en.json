@@ -277,11 +277,24 @@
         "downloadWithAudit": "Export with audit history"
       },
       "backup": {
-        "title": "Backup concept (prepared)",
+        "title": "Volume backup",
         "notActive": "Real backups are not active yet.",
+        "prereq": "A real volume backup is possible once the container has been removed (status \"Resources prepared\").",
         "sensitive": "TS3 backups can contain sensitive data.",
-        "stoppedRecommended": "For the first real backup step a stopped container is recommended.",
-        "notDownload": "This is not a download or restore of the TS3 data."
+        "stoppedRecommended": "A backup requires the container to be stopped/removed.",
+        "notDownload": "This is not a download or restore of the TS3 data.",
+        "dangerIntro": "Creates a real, read-only backup of the managed volume – stored server-side, not downloadable.",
+        "createButton": "Create volume backup …",
+        "hintDataBackup": "Backs up the managed volume read-only as an archive on the server.",
+        "hintSensitive": "The backup file can contain sensitive TS3 data and is treated as confidential.",
+        "hintNoRestore": "No restore, no import and no download via the browser.",
+        "hintServerSide": "Target directory and image are defined server-side (no free path/image).",
+        "confirmSensitiveLabel": "I understand the backup may contain sensitive TS3 data.",
+        "confirmStorageLabel": "I am responsible for storing the backup securely.",
+        "confirmStoppedLabel": "The container is stopped or removed.",
+        "typedLabel": "Type \"CREATE BACKUP\" to confirm.",
+        "createConfirmYes": "Create backup now",
+        "createCancel": "Cancel"
       },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
@@ -361,7 +374,17 @@
         "confirmationRequired": "Please tick the confirmation.",
         "inUseByManagedContainers": "Managed containers still exist – the network is not removed.",
         "archiveConfirmRequired": "Please confirm the archiving.",
-        "credentialDecisionRequired": "Please make a credential decision."
+        "credentialDecisionRequired": "Please make a credential decision.",
+        "backupCreated": "Volume backup was created server-side (not downloadable).",
+        "sensitiveDataRequired": "Please confirm the backup may contain sensitive data.",
+        "storageRequired": "Please confirm responsibility for secure storage.",
+        "containerStoppedRequired": "Please confirm the container is stopped/removed.",
+        "containerStillExists": "A container for this instance still exists – backup aborted.",
+        "volumeNotFound": "The managed volume could not be found.",
+        "volumeNotManaged": "The volume is not marked as managed – backup aborted.",
+        "backupDirUnavailable": "The server-side backup directory is unavailable.",
+        "imageUnavailable": "The backup image is unavailable.",
+        "archived": "Backups are not available for archived servers."
       },
       "status": {
         "DRAFT": "Draft",

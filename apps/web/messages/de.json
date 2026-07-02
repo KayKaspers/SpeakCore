@@ -277,11 +277,24 @@
         "downloadWithAudit": "Export mit Audit-Historie"
       },
       "backup": {
-        "title": "Backup-Konzept (vorbereitet)",
+        "title": "Volume-Backup",
         "notActive": "Echte Backups sind noch nicht aktiv.",
+        "prereq": "Ein echtes Volume-Backup ist möglich, sobald der Container entfernt wurde (Status „Ressourcen vorbereitet\").",
         "sensitive": "TS3-Backups können sensible Daten enthalten.",
-        "stoppedRecommended": "Für den ersten echten Backup-Step wird ein gestoppter Container empfohlen.",
-        "notDownload": "Dies ist kein Download und kein Restore der TS3-Daten."
+        "stoppedRecommended": "Für ein Backup muss der Container gestoppt/entfernt sein.",
+        "notDownload": "Dies ist kein Download und kein Restore der TS3-Daten.",
+        "dangerIntro": "Erstellt ein echtes, schreibgeschütztes Backup des verwalteten Volumes – serverseitig abgelegt, nicht herunterladbar.",
+        "createButton": "Volume-Backup erstellen …",
+        "hintDataBackup": "Sichert das verwaltete Volume read-only als Archiv auf dem Server.",
+        "hintSensitive": "Die Backup-Datei kann sensible TS3-Daten enthalten und wird als vertraulich behandelt.",
+        "hintNoRestore": "Kein Restore, kein Import und kein Download über den Browser.",
+        "hintServerSide": "Ziel-Verzeichnis und Image sind serverseitig festgelegt (kein freier Pfad/Image).",
+        "confirmSensitiveLabel": "Mir ist bewusst, dass das Backup sensible TS3-Daten enthalten kann.",
+        "confirmStorageLabel": "Ich bin für die sichere Aufbewahrung des Backups verantwortlich.",
+        "confirmStoppedLabel": "Der Container ist gestoppt bzw. entfernt.",
+        "typedLabel": "Zum Bestätigen „CREATE BACKUP\" eingeben.",
+        "createConfirmYes": "Backup jetzt erstellen",
+        "createCancel": "Abbrechen"
       },
       "deprovision": {
         "title": "Deprovisioning (noch nicht aktiv)",
@@ -361,7 +374,17 @@
         "confirmationRequired": "Bitte die Bestätigung setzen.",
         "inUseByManagedContainers": "Es existieren noch managed Container – Netzwerk wird nicht entfernt.",
         "archiveConfirmRequired": "Bitte die Archivierung bestätigen.",
-        "credentialDecisionRequired": "Bitte eine Zugangsdaten-Entscheidung treffen."
+        "credentialDecisionRequired": "Bitte eine Zugangsdaten-Entscheidung treffen.",
+        "backupCreated": "Volume-Backup wurde serverseitig erstellt (nicht herunterladbar).",
+        "sensitiveDataRequired": "Bitte bestätigen, dass das Backup sensible Daten enthalten kann.",
+        "storageRequired": "Bitte die Verantwortung für die sichere Aufbewahrung bestätigen.",
+        "containerStoppedRequired": "Bitte bestätigen, dass der Container gestoppt/entfernt ist.",
+        "containerStillExists": "Es existiert noch ein Container mit dieser Instanz – Backup abgebrochen.",
+        "volumeNotFound": "Das verwaltete Volume wurde nicht gefunden.",
+        "volumeNotManaged": "Das Volume ist nicht als verwaltet markiert – Backup abgebrochen.",
+        "backupDirUnavailable": "Das serverseitige Backup-Verzeichnis ist nicht verfügbar.",
+        "imageUnavailable": "Das Backup-Image ist nicht verfügbar.",
+        "archived": "Für archivierte Server ist kein Backup möglich."
       },
       "status": {
         "DRAFT": "Entwurf",

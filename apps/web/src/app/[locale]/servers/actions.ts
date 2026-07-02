@@ -21,6 +21,7 @@ import { removeManagedContainerForServer } from '@/core/container-remove';
 import { restartManagedContainerForServer } from '@/core/container-restart';
 import { removeManagedVolumeForServer } from '@/core/volume-remove';
 import { removeManagedNetworkForServer } from '@/core/network-remove';
+import { backupManagedVolumeForServer } from '@/core/volume-backup';
 import { archiveManagedServer, type CredentialDecision } from '@/core/server-archive';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
@@ -361,6 +362,44 @@ export async function removeVolumeAction(formData: FormData): Promise<void> {
   }
   // dataLossRequired | backupRequired | typedMismatch | invalidState | invalidPlan
   //   | containerStillExists | conflict | writeDisabled | unavailable | unreachable | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Erstellt ein **echtes read-only Volume-Backup** (serverseitig). OWNER-only, rate-limitiert. Backup-Datei
+ * ist potenziell sensibel. **Kein** Restore/Download; kein freier Pfad/Image vom Client.
+ */
+export async function backupVolumeAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const confirmations = {
+    confirmBackupMayContainSensitiveData: formData.get('confirmBackupMayContainSensitiveData') === 'on',
+    confirmBackupStorageResponsibility: formData.get('confirmBackupStorageResponsibility') === 'on',
+    confirmContainerShouldBeStopped: formData.get('confirmContainerShouldBeStopped') === 'on',
+    typedConfirmation: String(formData.get('typedConfirmation') ?? ''),
+  };
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `volume:backup:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await backupManagedVolumeForServer(id, user.email, confirmations);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'created') {
+    redirect(`/${locale}/servers/${id}?notice=backupCreated`);
+  }
+  // archived | invalidState | sensitiveDataRequired | storageRequired | containerStoppedRequired
+  //   | typedMismatch | containerStillExists | volumeNotFound | volumeNotManaged | backupDirUnavailable
+  //   | imageUnavailable | writeDisabled | unavailable | unreachable | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

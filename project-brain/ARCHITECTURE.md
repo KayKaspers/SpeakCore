@@ -296,9 +296,20 @@ Defense-in-Depth). OWNER-only; aktive + archivierte managed Server; **kein Resto
 (`backup.ts`, `executable: false`) – **noch kein echtes Backup**. Guard (managed + gültige instanceId +
 managed Volume vorhanden/nicht `removed` + Container **nicht laufend**), Bestätigungsmodell, Datei-/Metadaten-
 Vorlage (`containsSecrets: "unknown"`, read-only Quelle) und `backup.managedVolume.*`-Audit-Konzept. UI:
-nicht-ausführende Info-Karte ([ADR-0033](DECISIONS.md)). Echter Backup-Step, Download/Storage, **Restore/Import**
-und die **Hard-Delete-Policy** folgen als eigene, abgesicherte Steps. **Metadaten-Export ≠ Volume-Backup**
+nicht-ausführende Info-Karte ([ADR-0033](DECISIONS.md)). **Metadaten-Export ≠ Volume-Backup**
 (letzteres kann sensible TS3-Daten enthalten).
+
+**Echtes Volume-Backup (Step 032):** Agent-Aktion `BACKUP_MANAGED_VOLUME`
+(`POST /docker/provision/backup-volume`, Token + Write-Flag, [ADR-0034](DECISIONS.md)): kurzlebiger,
+gelabelter Hilfscontainer sichert das managed Volume **read-only** (`-v <volume>:/data:ro`) in ein
+**serverseitiges** Verzeichnis (`AGENT_BACKUP_DIR`) mit **festem allowlisted Image** (`alpine:3.20`,
+Existenz vorab geprüft) – statische `execFile`-Args, keine Shell, kein Client-Pfad/-Image/-Arg,
+Dateiname intern (`speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` + `.metadata.json` ohne
+Secrets). **Konservativ:** nur wenn **kein** managed Container der `instanceId` existiert
+(`RESOURCES_PREPARED`, nicht archiviert, Volume nicht `removed`). Web: OWNER-only, 3 Checkboxen +
+getippt `CREATE BACKUP` (Step-030-Guard, Web **und** Agent), Audit `backup.managedVolume.*`,
+**keine DB-Schreiboperation außer Audit**. Download/Storage-Konzept, **Restore/Import** und die
+**Hard-Delete-Policy** folgen als eigene, abgesicherte Steps.
 
 ## 7. Verwandte Dokumente
 

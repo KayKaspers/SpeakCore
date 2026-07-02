@@ -5,6 +5,46 @@
 
 ## [Unreleased]
 
+### NDF Step 032 – BACKUP_MANAGED_VOLUME: erstes echtes Volume-Backup (2026-07-02)
+
+> Erster **echter** Backup-Step (auf Basis des Step-030-Blueprints). **Backup-Dateien sind sensibel.**
+> Kein Restore, kein Import, kein Browser-Download, kein Hard-Delete, kein Unarchive.
+
+#### Added
+- **Agent `BACKUP_MANAGED_VOLUME`** (`POST /docker/provision/backup-volume`, Token + Write-Flag,
+  `apps/agent/src/docker-backup.ts`): archiviert das managed TS3-Volume **read-only**
+  (`-v <volume>:/data:ro`) über einen kurzlebigen, gelabelten Hilfscontainer in ein **serverseitiges**
+  Verzeichnis (`AGENT_BACKUP_DIR`, Default `/var/lib/speakcore/backups`) mit **festem allowlisted Image**
+  (`alpine:3.20`, Existenz vorab geprüft, kein unkontrollierter Pull). Nur **statische `execFile`-Args**,
+  keine Shell, kein Socket, **kein** freier Pfad/Image/Arg vom Client. Dateiname intern:
+  `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` + separate `.metadata.json` (keine Secrets).
+  **Konservativ:** blockiert (`containerStillExists`), wenn irgendein managed Container der `instanceId`
+  existiert. Status: `created/blocked/containerStillExists/volumeNotFound/volumeNotManaged/`
+  `backupDirUnavailable/imageUnavailable/error/writeDisabled/invalid/unavailable`.
+- **Web-Service** `apps/web/src/core/volume-backup.ts` (+ reine Helfer `volume-backup-helpers.ts`):
+  nur managed + nicht archiviert + `RESOURCES_PREPARED` + Volume nicht `removed`; Bestätigungen via
+  Step-030-Guard `canBackupManagedVolume`; **keine DB-Schreiboperation außer Audit**.
+- **OWNER-only UI** (`BackupVolumeButton.tsx`, Danger-Zone bei `RESOURCES_PREPARED`): 3 Checkboxen
+  (sensible Daten / Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**;
+  Erfolg zeigt den Dateinamen + Hinweis „serverseitig abgelegt, nicht herunterladbar".
+- **Audit:** `backup.managedVolume.requested/confirmed/blocked/started/completed/failed`
+  (keine Secrets, kein Backup-Inhalt, kein Host-Pfad).
+- **Env:** `AGENT_BACKUP_DIR` (+ optional `AGENT_BACKUP_IMAGE`) in `apps/agent/.env.example`
+  mit Sensibilitäts-Warnung.
+- **Infra:** `dockerExec` akzeptiert optionales per-Call-Timeout (Backup-tar: 300 s statt 5 s).
+- **Tests:** `apps/agent/test/docker-backup.test.ts` (16) + `apps/web/test/volume-backup.test.ts` (12):
+  Guards, statische `run`-Args, `:/data:ro`, serverseitiges Ziel/Image, Token/Flag-Gate, keine Secrets;
+  Source-Scan erlaubt `run`/`tar` **nur** im Backup-Modul, verbietet weiterhin Remove/Inspect/Logs/
+  Exec/Force/Socket.
+
+#### Nicht enthalten (bewusst)
+- Kein Restore, kein Import, kein Backup-Download aus dem Browser, keine Backup-Rotation/-Verwaltung,
+  kein Hard-Delete, kein Unarchive. Aufbewahrung der serverseitigen Dateien liegt beim Betreiber.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (358) · `prisma validate` n. z.
+  (kein Schema-Change). Siehe **ADR-0034**.
+
 ### NDF Step 031 – 0.1 Alpha Release-Readiness & Hardening Review (2026-07-02)
 
 > **Keine neue Produktfunktion** – Stabilisierungs-/Dokumentationsrunde vor gefährlicheren Fähigkeiten.

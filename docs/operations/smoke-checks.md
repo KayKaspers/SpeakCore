@@ -70,13 +70,18 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Audit-Historie optional. **Kein** Restore/Import.
 - **Managed Detail:** Status/Healthcheck/Deprovisioning-Gefahrenzone/Backup-Info-Karte prüfen –
   Bestätigungen greifen, **kein** Button suggeriert nicht vorhandene Fähigkeiten.
+- **Volume-Backup (Step 032, hier nur Formular-Check, kein echtes Backup):** In der Gefahrenzone
+  (`RESOURCES_PREPARED`) das Backup-Formular öffnen – ohne alle 3 Checkboxen bzw. ohne getipptes
+  `CREATE BACKUP` blockt die Aktion mit klarem Hinweis. Ein **echtes** Backup wird in dieser
+  nicht-destruktiven Smoke-Runde **nicht** ausgelöst (benötigt Write-Flag + vorhandenes Volume);
+  wer es bewusst testet: Datei landet serverseitig in `AGENT_BACKUP_DIR` und ist **sensibel**.
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 332 Tests |
+| lint/typecheck/test/build | ☐ | 358 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

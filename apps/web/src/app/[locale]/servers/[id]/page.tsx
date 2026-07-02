@@ -17,6 +17,7 @@ import { StopContainerButton } from '../StopContainerButton';
 import { RemoveContainerButton } from '../RemoveContainerButton';
 import { RestartContainerButton } from '../RestartContainerButton';
 import { RemoveVolumeButton } from '../RemoveVolumeButton';
+import { BackupVolumeButton } from '../BackupVolumeButton';
 import { RemoveNetworkButton } from '../RemoveNetworkButton';
 import { ArchiveServerButton } from '../ArchiveServerButton';
 
@@ -82,7 +83,7 @@ export default async function ServerDetailPage({
     <section className="mt-6 rounded-sc-lg border border-sc-border bg-sc-surface-raised p-4">
       <h2 className="text-sc-sm font-medium text-sc-text-primary">{t('managed.backup.title')}</h2>
       <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
-        <li>• {t('managed.backup.notActive')}</li>
+        <li>• {t('managed.backup.prereq')}</li>
         <li>• {t('managed.backup.sensitive')}</li>
         <li>• {t('managed.backup.stoppedRecommended')}</li>
         <li>• {t('managed.backup.notDownload')}</li>
@@ -188,6 +189,11 @@ export default async function ServerDetailPage({
             </p>
           )}
 
+          {notice === 'backupCreated' && (
+            <p className="mb-4 rounded-sc-sm bg-sc-success/15 px-3 py-2 text-sc-sm text-sc-success">
+              {t('managed.notice.backupCreated')}
+            </p>
+          )}
           {notice &&
             [
               'encryptionMissing',
@@ -215,6 +221,15 @@ export default async function ServerDetailPage({
               'inUseByManagedContainers',
               'archiveConfirmRequired',
               'credentialDecisionRequired',
+              'sensitiveDataRequired',
+              'storageRequired',
+              'containerStoppedRequired',
+              'containerStillExists',
+              'volumeNotFound',
+              'volumeNotManaged',
+              'backupDirUnavailable',
+              'imageUnavailable',
+              'archived',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -346,6 +361,12 @@ export default async function ServerDetailPage({
           {provStatus === 'RESOURCES_PREPARED' && (
             <div className="mt-6 rounded-sc-md border border-sc-error/30 bg-sc-surface-raised p-3">
               <h3 className="text-sc-sm font-medium text-sc-error">{t('managed.dangerZone.title')}</h3>
+              {server.managedVolumeState !== 'removed' && (
+                <div className="mt-2 space-y-2 border-b border-sc-border pb-3">
+                  <p className="text-sc-caption text-sc-text-muted">{t('managed.backup.dangerIntro')}</p>
+                  <BackupVolumeButton locale={locale} id={server.id} />
+                </div>
+              )}
               {server.managedVolumeState === 'removed' ? (
                 <p className="mt-2 text-sc-caption text-sc-text-muted">
                   • {t('managed.dangerZone.volumeRemovedHint')}
@@ -467,7 +488,7 @@ export default async function ServerDetailPage({
           )}
         </section>
 
-        {server.managedVolumeState !== 'removed' && backupInfoCard}
+        {provStatus !== 'RESOURCES_PREPARED' && server.managedVolumeState !== 'removed' && backupInfoCard}
         {exportCard}
 
         <footer className="mt-6">

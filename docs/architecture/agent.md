@@ -12,7 +12,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 
 - TS3-Server als Docker-Container provisionieren, starten, stoppen, neustarten.
 - Logs einsammeln und an die API liefern.
-- Backup-/Restore-Operationen auf Dateisystemebene.
+- **Volume-Backups** in ein serverseitiges Verzeichnis (seit Step 032; **kein** Restore/Import in 0.1).
 - Systemcheck-Sonden, die Hostzugriff erfordern (Docker-Status, Ports, Firewall, Speicher,
   Netzwerk/DNS, IPv4/IPv6) für den Preflight & Capacity Advisor.
 
@@ -37,6 +37,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/remove-container` | **write** (Flag-gated): managed **Container entfernen** (`docker rm`, kein -f/-v, nur gestoppt) |
 | POST | `/docker/provision/remove-volume` | **write** (Flag-gated): managed **Datenvolume entfernen** (`docker volume rm`, kein -f, nur ohne Container) |
 | POST | `/docker/provision/remove-network` | **write** (Flag-gated): managed **Voice-Network entfernen** (`docker network rm`, kein -f, nur wenn kein managed Container) |
+| POST | `/docker/provision/backup-volume` | **write** (Flag-gated): managed **Volume-Backup** (read-only Quelle → serverseitiges `AGENT_BACKUP_DIR`, festes Image, nur ohne Container) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -254,6 +255,33 @@ Entfernt das **geteilte** managed Voice-Network ([ADR-0030](../../project-brain/
 **Web-Auslösung (Step 026):** OWNER-only Server Action (`/servers/[id]`, **Gefahrenzone** mit Shared-Ressource-
 Warnung + Bestätigung); **Option A** – **kein** ServerInstance-Statusfeld, nur Audit (Target = auslösende
 ServerInstance-ID). **ServerRecord-Archive** folgt als eigener Step.
+
+## `/docker/provision/backup-volume` – echtes Volume-Backup (Step 032)
+
+Erstes **echtes** Backup eines managed TS3-Datenvolumes ([ADR-0034](../../project-brain/DECISIONS.md)).
+**Backup-Dateien sind potenziell sensibel.**
+
+- **Erlaubtes Muster (einziges Write-Kommando dieses Endpunkts):** kurzlebiger, gelabelter Hilfscontainer
+  `docker run --rm --name … --label speakcore.managed=true … -v <volume>:/data:ro -v <AGENT_BACKUP_DIR>:/backup
+  alpine:3.20 tar -czf /backup/<datei> -C /data .` – ausschließlich **statische `execFile`-Argumente**,
+  keine Shell, kein Socket. Quelle strikt **read-only** (`:ro`).
+- **Serverseitig festgelegt:** Ziel (`AGENT_BACKUP_DIR`, Default `/var/lib/speakcore/backups`) und Image
+  (`AGENT_BACKUP_IMAGE`, Default `alpine:3.20`, Existenz vorab per `image ls` geprüft – **kein**
+  unkontrollierter Pull). Der Client liefert **nur** `instanceId` + Bestätigungen – **kein** Pfad, **kein**
+  Image, **keine** Docker-Args (keine Pfad-Traversal-Möglichkeit; Dateiname wird intern generiert:
+  `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` + `.metadata.json` ohne Secrets).
+- **Token + `AGENT_DOCKER_WRITE_ENABLED`** (`false` ⇒ `writeDisabled`). **Konservativ:** blockiert
+  (`containerStillExists`), wenn **irgendein** managed Container der `instanceId` existiert – realer Pfad:
+  Stop → Container-Remove → Backup. Volume muss existieren **und** managed sein (`volumeNotFound`/
+  `volumeNotManaged`), Verzeichnis verfügbar (`backupDirUnavailable`), Image vorhanden (`imageUnavailable`).
+  Step-030-Guard `canBackupManagedVolume` wird agent-seitig erneut geprüft (`blocked`).
+- **Kein** Restore/Import/Download, **keine** Remove-Kommandos, **kein** `inspect`/`exec`/`logs`.
+  Ergebnis enthält **nur den Dateinamen** (kein Host-Pfad), keine Roh-Docker-Ausgabe, keine Secrets.
+
+**Web-Auslösung (Step 032):** OWNER-only Server Action (`/servers/[id]`, Gefahrenzone bei
+`RESOURCES_PREPARED`, nicht archiviert, Volume nicht `removed`): 3 Checkboxen (sensible Daten /
+Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. Audit:
+`backup.managedVolume.requested/confirmed/blocked/started/completed/failed`.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

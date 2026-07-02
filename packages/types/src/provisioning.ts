@@ -365,6 +365,42 @@ export interface NetworkRemoveResult {
   audit: PlannedAuditAction[];
 }
 
+// --- Managed Volume Backup (NDF Step 032: echter `docker run --rm ... tar`, read-only Quelle) -
+
+export type VolumeBackupStatus =
+  | 'created'
+  | 'blocked'
+  | 'containerStillExists'
+  | 'volumeNotFound'
+  | 'volumeNotManaged'
+  | 'backupDirUnavailable'
+  | 'imageUnavailable'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/**
+ * Agent-Request für ein echtes Volume-Backup. Enthält nur `instanceId` + Bestätigungen (kein Pfad,
+ * kein Image, keine freien Docker-Args vom Client). `serverDisplayName` nur für die Metadaten.
+ */
+export interface Ts3VolumeBackupRequest {
+  instanceId: string;
+  serverDisplayName?: string;
+  confirmBackupMayContainSensitiveData?: boolean;
+  confirmBackupStorageResponsibility?: boolean;
+  confirmContainerShouldBeStopped?: boolean;
+  typedConfirmation?: string;
+}
+
+/** Ergebnis des Backups. Enthält **nur** den Dateinamen (kein Host-Pfad), keine Secrets/Roh-Ausgabe. */
+export interface VolumeBackupResult {
+  status: VolumeBackupStatus;
+  backupFileName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}
+
 // --- Managed Volume Backup Blueprint (NDF Step 030: reine Planung, KEINE Ausführung) ---------
 
 /** Zieltyp eines (späteren) Backups – rein konzeptionell, wird NIE zu einem echten Kommando. */
@@ -409,6 +445,8 @@ export interface BackupMetadata {
   instanceId: string;
   serverDisplayName: string;
   volumeName: string;
+  /** Dateiname des Backups (kein Host-Pfad). Optional – im Blueprint (Step 030) leer. */
+  backupFileName?: string;
   /** Der Backup-Inhalt (TS3-Daten) KANN sensibel sein – daher `unknown`, nie „secret-free". */
   containsSecrets: 'unknown';
   createdBy: string;

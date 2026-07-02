@@ -10,16 +10,16 @@ export interface DockerExecResult {
   stdout: string;
 }
 
-export type DockerExec = (args: string[]) => Promise<DockerExecResult>;
+export type DockerExec = (args: string[], timeoutMs?: number) => Promise<DockerExecResult>;
 
 const CLI_TIMEOUT_MS = 5000;
 
-export const dockerExec: DockerExec = (args) =>
+export const dockerExec: DockerExec = (args, timeoutMs = CLI_TIMEOUT_MS) =>
   new Promise((resolve) => {
     execFile(
       'docker',
       args,
-      { timeout: CLI_TIMEOUT_MS, windowsHide: true, shell: false },
+      { timeout: timeoutMs, windowsHide: true, shell: false, maxBuffer: 1024 * 1024 },
       (error, stdout) => {
         resolve({ ok: !error, stdout: stdout?.toString() ?? '' });
       },

@@ -69,12 +69,15 @@
   archiviert) als **JSON exportiert** werden („Export herunterladen", optional mit Audit-Historie): enthält
   **nur nicht-geheime Metadaten** – **keine Zugangsdaten, keine Secrets**. Der Export ist **kein Backup/Restore
   der TS3-Daten** (Volume-Inhalte), rein DB-seitig (kein Docker/Agent), und es gibt **keinen Import**. Ab
-  Step 030 gibt es zusätzlich ein **Backup-Konzept** (Info-Karte „Backup-Konzept vorbereitet"): Es erklärt,
-  dass echte TS3-Volume-Backups **noch nicht aktiv** sind, **sensible Daten** enthalten können und der erste
-  echte Backup-Step **einen gestoppten Container** empfiehlt. Es wird **noch nichts gesichert** – kein
-  Download, kein Restore.*
+  Step 032 kannst du für einen managed Server im Status „Ressourcen vorbereitet" (Container entfernt,
+  nicht archiviert) ein **echtes Volume-Backup** erstellen: 3 Checkboxen (sensible Daten /
+  Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. Das Backup wird
+  **serverseitig** im Agent-Backup-Verzeichnis abgelegt (`.tar.gz` + `.metadata.json`) – **kein Download
+  aus dem Browser, kein Restore, kein Import**. Die Datei kann **sensible TS3-Daten** enthalten: sicher
+  aufbewahren, Zugriff einschränken.*
 - Logs lesen
-- Backup & Restore
+- Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); **Restore folgt
+  später als eigener, abgesicherter Schritt**.*
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte
   Zugangsdaten (`SECRET_ENCRYPTION_KEY`) kann rotiert werden. Reiner **Operator-/CLI-Vorgang**
   (`pnpm --filter @speakcore/web rotate-secrets`, mit `--dry-run` zum gefahrlosen Prüfen) – **keine
