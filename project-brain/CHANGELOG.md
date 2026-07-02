@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 029 – Read-only Managed Server Export ohne Secrets (2026-07-02)
+
+> Erster read-only **JSON-Export** managed Server (nicht-geheime Metadaten + optional Audit-Historie).
+> **Keine Secrets/Credentials, kein Docker/Agent, kein Restore/Import.**
+
+#### Added
+- **Reine Mapping-/Redaction-Helfer** (`src/core/server-export-helpers.ts`): `buildManagedServerExport`
+  (versioniertes Format `exportVersion=1`/`product`/`kind`/`server`/`auditEvents`, **explizites Feld-Mapping**,
+  Datumsfelder als ISO), `redactAuditEventForExport` (nur `action/actor/target/result/createdAt`, **keine
+  Payloads**), `assertExportContainsNoSecrets` (rekursiver Guard gegen verbotene Schlüssel + Verschlüsselungs-
+  format). **Keine Roh-Prisma-Objekte.**
+- **Service** `exportManagedServer` (`src/core/server-export.ts`, **kein Docker/Agent**): lädt den Server
+  **ohne** Credential-Felder, leitet nur `credentialStatus` (`kept`/`removed`/`none`) ab, optional redigierte
+  Audit-Historie (`?audit=1`, bis 1000 Events). **Keine DB-Schreiboperation außer dem Export-Audit.**
+- **OWNER-only Download-Route** `GET /servers/[id]/export` (+ `?audit=1`): JSON-Datei
+  `speakcore-server-<instanceId>-export.json` (Content-Disposition attachment). External ⇒ 400, fehlend ⇒ 404,
+  nicht OWNER ⇒ 401. Aktive **und** archivierte managed Server exportierbar.
+- **UI (DE/EN):** Export-Karte auf der managed Detailseite (normal **und** archiviert) mit „Export
+  herunterladen" / „Export mit Audit-Historie" + Hinweisen (keine Zugangsdaten/Secrets, Audit optional,
+  **kein** TS3-Datenbackup/Restore).
+- **Audit:** `export.managedServer.requested/completed/failed` (Target = ServerInstance-ID, **ohne
+  Exportinhalt/Payload**).
+- Tests: versioniertes Format, **kein** `encryptedPassword`/`password`/`token`/`secret`-Key, Audit-Redaction,
+  `assertExportContainsNoSecrets` (Pass für sauberen Export inkl. Aktion `…secretCreated`, Throw bei Leak),
+  stabile JSON-Serialisierung, Quell-Scan (kein Docker/Agent/`execFile`, keine direkte DB-Schreiboperation).
+  **320 Tests grün.** DB-Smoke: managed aktiv/archiviert exportierbar, external abgelehnt, `credentialStatus`
+  korrekt, **keine Secrets**, Export-Audit ohne Payload.
+
+#### Security
+- OWNER-only (Route); **kein Docker/Agent-Import**, keine Secrets/Credentials/verschlüsselten Werte,
+  keine Roh-Dumps, keine Sessions/Tokens/Env-Werte im Export, **keine Audit-Payloads mit Exportinhalt**,
+  **keine DB-Schreiboperation außer Export-Audit**. Kein Import/Restore/Unarchive/Hard-Delete. Secret-Leak-
+  Tests + Defense-in-Depth-Guard. **[ADR-0032](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (320) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 028 – Archiv-Ansicht & Serverlisten-Filter (2026-07-02)
 
 > Kleine, **risikoarme** UI-Ergänzung: archivierte Server (Step 027) auffindbar machen. **Keine** neue

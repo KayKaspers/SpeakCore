@@ -165,9 +165,14 @@
   **Container/Volumes/Credentials/ServerInstance bleiben erhalten** (Option A: kein Statusfeld).
 - **Stand Step 027:** **ServerRecord-Archivierung** ([ADR-0031](DECISIONS.md)) – **rein Web-/DB-seitig, kein
   Docker/Agent**. **Archivieren statt hart löschen** (`archivedAt`, ServerInstance bleibt, **Audit erhalten**);
-  Credential-Löschung **nur** bei ausdrücklicher `remove`-Wahl; external abgelehnt. **Offen:** Archiv-Filter/
-  -Ansicht, finale Hard-Delete-Policy, Backup-/Export-Konzept. Restrisiko: Credential-`remove` ist irreversibel
-  (an ausdrückliche Wahl + getippte Bestätigung gebunden).
+  Credential-Löschung **nur** bei ausdrücklicher `remove`-Wahl; external abgelehnt. Restrisiko: Credential-
+  `remove` ist irreversibel (an ausdrückliche Wahl + getippte Bestätigung gebunden).
+- **Stand Step 029:** **Read-only Server-Export** ([ADR-0032](DECISIONS.md)) – nicht-geheime Metadaten +
+  optional redigierte Audit-Historie als versioniertes JSON, **kein Docker/Agent**, **keine Secrets/Credentials**
+  (`assertExportContainsNoSecrets` + Leak-Tests), Export-Audit ohne Payload. **Kein** Restore/Import/Unarchive/
+  Hard-Delete. **Offen:** echtes Volume-Backup-Konzept, erweiterter Audit-Export, Import/Restore mit eigenem
+  Sicherheitskonzept, finale Hard-Delete-Policy (erst nach Export-/Backup-Konzept). Restrisiko: der Export ist
+  **kein** TS3-Datenbackup (Volume-Inhalte fehlen) – klar dokumentiert.
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

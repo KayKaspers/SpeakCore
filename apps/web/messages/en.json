@@ -268,6 +268,14 @@
         "credentialsKept": "Kept (encrypted)",
         "noActions": "Archived – no further lifecycle actions available."
       },
+      "export": {
+        "title": "Export (read-only)",
+        "hintNoSecrets": "The export contains no credentials or secrets.",
+        "hintAuditMaybe": "The audit history can optionally be included.",
+        "hintNoRestore": "This export is not a restore/backup of the TS3 data.",
+        "downloadButton": "Download export",
+        "downloadWithAudit": "Export with audit history"
+      },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
         "notActive": "Removing volume/network is not enabled yet.",

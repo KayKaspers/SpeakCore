@@ -65,7 +65,10 @@
   ausdrücklich wählst. Ab Step 028 sind archivierte Server über die **Serverliste** wieder auffindbar: Tabs
   **„Aktiv | Archiviert"**; die archivierte Ansicht zeigt Archiv-Badge, Archivierungsdatum und den
   Zugangsdaten-Status (behalten/gelöscht). Archivierte Server bieten **keine** Lifecycle-Aktionen und es gibt
-  **kein** Wiederherstellen (Unarchive) oder Hard-Delete.*
+  **kein** Wiederherstellen (Unarchive) oder Hard-Delete. Ab Step 029 kann ein managed Server (aktiv oder
+  archiviert) als **JSON exportiert** werden („Export herunterladen", optional mit Audit-Historie): enthält
+  **nur nicht-geheime Metadaten** – **keine Zugangsdaten, keine Secrets**. Der Export ist **kein Backup/Restore
+  der TS3-Daten** (Volume-Inhalte), rein DB-seitig (kein Docker/Agent), und es gibt **keinen Import**.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

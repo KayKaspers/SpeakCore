@@ -61,7 +61,10 @@
   deleted if you explicitly choose so. From Step 028 archived servers are findable again via the **server
   list**: tabs **“Active | Archived”**; the archived view shows an archive badge, the archiving date and the
   credential status (kept/deleted). Archived servers offer **no** lifecycle actions and there is **no**
-  un-archive or hard delete.*
+  un-archive or hard delete. From Step 029 a managed server (active or archived) can be **exported as JSON**
+  ("Download export", optionally with audit history): it contains **only non-secret metadata** – **no
+  credentials, no secrets**. The export is **not a backup/restore of the TS3 data** (volume contents),
+  DB-only (no Docker/agent), and there is **no import**.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

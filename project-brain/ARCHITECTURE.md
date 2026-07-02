@@ -283,8 +283,14 @@ mit `confirmServerRecordArchive` + **bewusster Credential-Entscheidung** (`keep`
 **Archiv-Ansicht (Step 028):** `/servers` bietet **Tabs „Aktiv | Archiviert"** (`listServers({ view })`,
 reine Filter in `core/servers-list.ts`: `archivedAt: null` vs. `archivedAt != null`). Die archivierte
 Ansicht zeigt Archiv-Badge/-Datum + Credential-Status, **ohne** neue Schreib-/Lifecycle-/Docker-/Agent-
-Aktion (kein Hard-Delete, kein Unarchive). Hard-Delete-Policy/Export/Unarchive folgen — falls überhaupt —
-als eigene, abgesicherte Steps.
+Aktion (kein Hard-Delete, kein Unarchive).
+
+**Server-Export (Step 029):** read-only **JSON-Export** managed Server – `core/server-export` + GET-Route
+`/servers/[id]/export` (`?audit=1`), **kein Docker/Agent**, **keine DB-Schreiboperation außer Export-Audit**.
+Versioniertes Format mit **explizitem Feld-Mapping** (nur nicht-geheime Metadaten + `credentialStatus`,
+optional redigierte Audit-Historie). **Keine Secrets/Credentials** (`assertExportContainsNoSecrets` als
+Defense-in-Depth). OWNER-only; aktive + archivierte managed Server; **kein Restore/Import/Unarchive**
+([ADR-0032](DECISIONS.md)). Volume-Backup/Import/Hard-Delete-Policy folgen als spätere, eigene Steps.
 
 ## 7. Verwandte Dokumente
 

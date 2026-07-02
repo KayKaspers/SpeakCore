@@ -249,6 +249,14 @@ archivierte Server zeigen keine Lifecycle-Aktionen.
 (`listServers({ view })`). **Keine** neue Schreibaktion, **keine** Docker-/Agent-Imports, keine Secrets im
 Client, **keine Lifecycle-Aktionen bei archivierten Servern**, **kein** Hard-Delete/Unarchive/Credential-
 Änderung/Audit-Löschung. Quell-Scan-Tests erzwingen dies.
+
+**Server-Export (Step 029, [ADR-0032](DECISIONS.md)):** OWNER-only read-only **JSON-Export** managed Server
+(GET `/servers/[id]/export`, optional `?audit=1`). **Rein Web-/DB-seitig – kein Docker/Agent.** **Keine
+Secrets/Credentials/verschlüsselten Werte** (Credentials komplett ausgeschlossen; nur `credentialStatus`),
+**keine Roh-Prisma-Objekte/Roh-Dumps**, keine Sessions/Tokens/Env-Werte. Optionale Audit-Historie **redigiert**
+(nur `action/actor/target/result/createdAt`, keine Payloads). **Keine DB-Schreiboperation außer dem Export-Audit**
+(ohne Exportinhalt). `assertExportContainsNoSecrets` als Defense-in-Depth; Secret-Leak-Tests. **Kein Import/
+Restore/Unarchive/Hard-Delete.**
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

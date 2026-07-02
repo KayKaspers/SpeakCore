@@ -51,6 +51,32 @@ export default async function ServerDetailPage({
   const t = await getTranslations('servers');
   const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleString(locale) : t('status.never'));
 
+  // Read-only Export (Step 029): nicht-geheime Metadaten + optional Audit-Historie, ohne Secrets.
+  const exportCard = (
+    <section className="mt-6 rounded-sc-lg border border-sc-border bg-sc-surface p-4">
+      <h2 className="text-sc-sm font-medium text-sc-text-primary">{t('managed.export.title')}</h2>
+      <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
+        <li>• {t('managed.export.hintNoSecrets')}</li>
+        <li>• {t('managed.export.hintAuditMaybe')}</li>
+        <li>• {t('managed.export.hintNoRestore')}</li>
+      </ul>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          href={`/${locale}/servers/${server.id}/export`}
+          className="rounded-sc-md border border-sc-border-strong px-3 py-2 text-sc-sm text-sc-text-secondary"
+        >
+          {t('managed.export.downloadButton')}
+        </a>
+        <a
+          href={`/${locale}/servers/${server.id}/export?audit=1`}
+          className="rounded-sc-md border border-sc-border-strong px-3 py-2 text-sc-sm text-sc-text-secondary"
+        >
+          {t('managed.export.downloadWithAudit')}
+        </a>
+      </div>
+    </section>
+  );
+
   // Archivierter managed Server (Step 027): nur Status/Info, KEINE Lifecycle-Aktionen.
   if (server.mode === 'managed' && server.archivedAt) {
     return (
@@ -87,6 +113,7 @@ export default async function ServerDetailPage({
             {t('managed.archive.noActions')}
           </p>
         </section>
+        {exportCard}
         <footer className="mt-6">
           <Link
             href={`/${locale}/servers`}
@@ -426,6 +453,8 @@ export default async function ServerDetailPage({
             </div>
           )}
         </section>
+
+        {exportCard}
 
         <footer className="mt-6">
           <Link

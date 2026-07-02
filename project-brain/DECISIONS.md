@@ -456,6 +456,26 @@
   `20260702140000`). **Kein Hard-Delete/keine Audit-Löschung** in 0.1. **Offen:** Archiv-Filter/-Ansicht,
   finale Hard-Delete-Policy, Backup-/Export-Konzept – jeweils spätere Steps.
 
+## ADR-0032 – Read-only Server-Export: nur nicht-geheime Metadaten, versioniert, ohne Restore
+
+- **Status:** accepted (Step 029)
+- **Kontext:** Vor einer späteren Hard-Delete-Policy soll ein überprüfbarer Export der Server-Metadaten
+  möglich sein (Nachvollziehbarkeit/Portabilität) – **ohne** jemals Secrets zu exportieren.
+- **Entscheidung:** **Rein Web-/DB-seitiger** Export (`core/server-export`, GET-Route
+  `/servers/[id]/export`), **kein Docker/Agent**. **Explizites Feld-Mapping** (`buildManagedServerExport`)
+  in ein **versioniertes** Format (`exportVersion`, `product`, `kind`, `server`, `auditEvents`) – **keine
+  Roh-Prisma-Objekte**. **Credentials werden komplett ausgeschlossen**; nur ein `credentialStatus`
+  (`kept`/`removed`/`none`/`unknown`) + `credentialsRemovedAt` werden exportiert. Optionale **Audit-Historie**
+  wird redigiert (`redactAuditEventForExport`: nur `action/actor/target/result/createdAt`, keine Payloads).
+  Eine reine Guard-Funktion `assertExportContainsNoSecrets` prüft rekursiv gegen verbotene Schlüssel und
+  das Verschlüsselungsformat (Defense-in-Depth). OWNER-only, nur **managed** (external abgelehnt), aktive
+  **und** archivierte Server. **Kein Import/Restore/Unarchive/Hard-Delete.**
+- **Begründung:** Portabilität/Prüfbarkeit ohne Secret-Risiko; versioniert für zukünftige Kompatibilität.
+  Der Export ist **kein** Backup der TS3-Daten (Volume-Inhalte) – das bleibt ein separates Konzept.
+- **Konsequenzen:** Der Export wird auditiert (`export.managedServer.requested/completed/failed`) **ohne
+  Exportinhalt**. Kein Schema-Change. **Offen:** echtes Volume-Backup-Konzept, erweiterter Audit-Export,
+  Import/Restore (nur mit eigenem Sicherheitskonzept), Hard-Delete-Policy erst nach Export-/Backup-Konzept.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)
