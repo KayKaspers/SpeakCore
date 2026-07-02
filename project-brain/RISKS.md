@@ -241,3 +241,25 @@
 | R-16 | Secret-Key-Rotation | niedrig-mittel |
 | R-10 | i18n-Drift | niedrig |
 | R-12 | Agent-Snapshot ohne Token | niedrig |
+
+## 0.1-Alpha-Risiko-Einordnung (Step 031)
+
+Status je Risiko für die **interne 0.1 Alpha**: **offen** · **mitigiert** · **akzeptiert (0.1)** · **blockierend**.
+
+| ID / Thema | Status 0.1 | Begründung |
+|---|---|---|
+| R-01 Agent-Privilegien | **mitigiert** | Managed-Only, Allowlist, `execFile`/keine Shell, kein Socket im Web-Container, Token + `AGENT_DOCKER_WRITE_ENABLED` (Default false). |
+| Docker-Write-Flag | **mitigiert/akzeptiert** | Standardmäßig aus (`writeDisabled`); nur bewusst pro Host aktivieren. |
+| R-02 Secret-Speicherung | **mitigiert** | AES-256-GCM, nie im Client/Log/Audit; Rotation vorhanden (R-16). |
+| R-16 Secret-Rotation | **mitigiert** | transaktional/idempotent, Dry-Run, Operator/CLI; **Backup vor Rotation** empfohlen. |
+| Volume-Löschung/Datenverlust | **akzeptiert (0.1)** | irreversibel, aber Doppelbestätigung + `DELETE VOLUME` + „kein Container"; Backup-Hinweis. |
+| Network shared race | **akzeptiert (0.1)** | Remove nur ohne managed Container; kein `-f` → Docker verweigert Nutzung hart. |
+| R-14 Secrets in Docker-Logs | **mitigiert (Step 017)** | Query-Passwort per ENV, kein Log-Lesen. |
+| R-13 SSRF (TS3-Host) | **akzeptiert (0.1)** | LAN/localhost erlaubt (Self-Hosting); Metadaten/Link-Local/unspez. blockiert; strengere Egress später. |
+| R-05 TS3-Lizenz | **akzeptiert (0.1)** | explizite Nutzerbestätigung beim Start; Verantwortung beim Betreiber. |
+| R-06 Backup/Restore | **offen** | **echtes Backup fehlt** (nur Blueprint Step 030); Restore/Import bewusst nicht enthalten. |
+| Hard-Delete / Unarchive | **bewusst nicht enthalten** | erst nach Backup-/Export-Konzept; Export ≠ TS3-Datenbackup. |
+| R-08 WebUI-Sicherheit | **mitigiert** | Auth-Härtung, Rate-Limit, Security-Header/CSP (R-11 offen: `'unsafe-inline'`). |
+
+**Blockierend für eine interne Alpha:** keine (bei den dokumentierten Grenzen). **Blockierend für
+öffentliche/exponierte Produktion:** fehlendes echtes Backup (R-06), SSRF-Restrisiko (R-13), R-11.

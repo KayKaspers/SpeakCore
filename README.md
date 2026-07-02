@@ -3,7 +3,8 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – Pre-Alpha / NDF Step 001 (Projektinitialisierung)`
+**Status:** `0.1 – interne Alpha / NDF Step 031 (Release-Readiness)` — Details:
+[RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
 ---
@@ -86,6 +87,10 @@ pnpm dev                                     # web (:3000 → /de) + agent (:400
 # Qualitäts-Checks
 pnpm lint && pnpm typecheck && pnpm build && pnpm test
 ```
+
+**Release-Readiness & Smoke-Checks:** [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md) (Feature-/
+Sicherheitsmatrix, Env, Blocker) und [docs/operations/smoke-checks.md](docs/operations/smoke-checks.md)
+(+ nicht-destruktives `scripts/smoke-check.ps1`). Agent-Env: [apps/agent/.env.example](apps/agent/.env.example).
 
 Beim ersten Aufruf öffnet sich der **Setup-Wizard**: Systemmodus wählen und den **Owner-Account**
 anlegen (Passwort Argon2id-gehasht). Danach Login/Dashboard. `SESSION_SECRET` ist Pflicht

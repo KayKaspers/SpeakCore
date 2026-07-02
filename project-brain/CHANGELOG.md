@@ -5,6 +5,30 @@
 
 ## [Unreleased]
 
+### NDF Step 031 – 0.1 Alpha Release-Readiness & Hardening Review (2026-07-02)
+
+> **Keine neue Produktfunktion** – Stabilisierungs-/Dokumentationsrunde vor gefährlicheren Fähigkeiten.
+> Keine neue Docker-Write-/Agent-/Lifecycle-Aktion, kein Backup/Restore/Hard-Delete/Unarchive.
+
+#### Added / Changed
+- **`project-brain/RELEASE_READINESS.md`** (neu): Alpha-Status, **Feature-Matrix** (enthalten / bewusst nicht),
+  **Sicherheitsmatrix** (Aktion × Agent/Docker-Write/Kommando/Flag/Token/OWNER/Datenverlust/Bestätigung/Audit),
+  Env-Übersicht, Migrationsstatus, Teststatus, Release-Blocker-Einordnung, nächste Schritte.
+- **`docs/operations/smoke-checks.md`** (neu) + **`scripts/smoke-check.ps1`** (neu, **nicht-destruktiv**):
+  install/validate/migrate/lint/typecheck/test/build + optionale **read-only** Agent-GETs (`/health`,
+  `/version`, Snapshot, Inventar). **Keine** Docker-Writes, kein Provisioning, kein rm/start/stop/run.
+- **Env-Konsolidierung:** `apps/web/.env.example` um `AGENT_URL` + `AGENT_BOOTSTRAP_TOKEN` ergänzt (Web→Agent,
+  nur serverseitig); `apps/agent/.env.example` mit **aktueller Warnung** zu `AGENT_DOCKER_WRITE_ENABLED`
+  (gilt für **alle** Write-Aktionen inkl. `docker rm`/`volume rm`/`network rm`, Default false).
+- **Risiko-Review:** `RISKS.md` um **0.1-Alpha-Einordnung** (offen/mitigiert/akzeptiert/blockierend) erweitert.
+- **Doku-/ADR-Konsistenz** geprüft: ADR-Nummern **0001–0033 lückenlos**; Steps 015–030 durchgängig erwähnt;
+  keine Aussage, dass Backups funktionieren, TS3 „gesund" ist (nur `docker start` erfolgreich) oder Logs
+  gelesen werden.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (332) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 030 – Managed TS3 Volume Backup Blueprint (2026-07-02)
 
 > **Reines Sicherheits-/Planungsfundament – es wird NICHTS gesichert.** Kein Docker/Agent, kein Archivfile,
