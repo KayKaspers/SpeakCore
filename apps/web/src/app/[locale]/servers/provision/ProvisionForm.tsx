@@ -16,7 +16,13 @@ function outcomeClass(outcome: string): string {
     : 'bg-sc-error/15 text-sc-error';
 }
 
-export function ProvisionForm({ locale }: { locale: string }) {
+export function ProvisionForm({
+  locale,
+  defaultQueryHost = '',
+}: {
+  locale: string;
+  defaultQueryHost?: string;
+}) {
   const t = useTranslations('servers.provision');
   const tc = useTranslations('common');
   const [state, formAction, isPending] = useActionState<ProvisionActionState, FormData>(
@@ -44,6 +50,14 @@ export function ProvisionForm({ locale }: { locale: string }) {
       {state.errorKey === 'rateLimited' && (
         <p className="mt-4 rounded-sc-md bg-sc-error/15 px-4 py-3 text-sc-sm text-sc-error">
           {t('rateLimited')}
+        </p>
+      )}
+
+      {(state.errorKey === 'hostInvalid' ||
+        state.errorKey === 'hostBlocked' ||
+        state.errorKey === 'hostRequired') && (
+        <p className="mt-4 rounded-sc-md bg-sc-error/15 px-4 py-3 text-sc-sm text-sc-error">
+          {t(`queryHostError.${state.errorKey}`)}
         </p>
       )}
 
@@ -89,6 +103,25 @@ export function ProvisionForm({ locale }: { locale: string }) {
             <option value="simple">{t('modeSimple')}</option>
             <option value="expert">{t('modeExpert')}</option>
           </select>
+        </div>
+        <div>
+          <label className={labelClass} htmlFor="queryHost">
+            {t('queryHost')}
+          </label>
+          <input
+            id="queryHost"
+            name="queryHost"
+            type="text"
+            defaultValue={defaultQueryHost}
+            placeholder="127.0.0.1"
+            autoComplete="off"
+            className={inputClass}
+          />
+          <p className="mt-1 space-y-0.5 text-sc-caption text-sc-text-muted">
+            <span className="block">• {t('queryHostHint1')}</span>
+            <span className="block">• {t('queryHostHint2')}</span>
+            <span className="block">• {t('queryHostHint3')}</span>
+          </p>
         </div>
         <button
           type="submit"

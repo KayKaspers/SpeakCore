@@ -45,7 +45,10 @@ Agent **serverseitig** übergeben, der es als **ENV** setzt; in **Step 018** wir
 **expliziter Lizenzzustimmung** gestartet (`RUNNING`); in **Step 019** liefert ein **read-only
 Healthcheck** (`/docker/provision/container-status`, nur Token, kein Write-Flag) via `docker container ls`
 den Ist-Zustand (Container läuft? optional TS3 erreichbar?) – **ohne** Lifecycle-Status zu überschreiben.
-**Kein Log-Lesen**, kein Inspect, keine Portscans, keine Reparatur, kein Secret in Logs. Details:
+In **Step 020** bekommt der managed Server eine **explizite Query-Adresse** (`host`; Env-Default
+`MANAGED_TS3_QUERY_HOST` + UI-Override, **kein Raten**, Step-008-Host-Validierung), sodass der TS3-Check
+echte `reachable`/`unreachable`/`notConfigured` liefert. **Kein Log-Lesen**, kein Inspect, **keine
+Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

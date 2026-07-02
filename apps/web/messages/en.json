@@ -146,6 +146,15 @@
       "mode": "Mode",
       "modeSimple": "Simple",
       "modeExpert": "Expert",
+      "queryHost": "Query address / host for health check (optional)",
+      "queryHostHint1": "SpeakCore later uses this address for the read-only TS3 status check.",
+      "queryHostHint2": "No port scan. No automatic detection.",
+      "queryHostHint3": "Without an address, TS3 reachability stays “not configured”.",
+      "queryHostError": {
+        "hostRequired": "Please enter a query address.",
+        "hostInvalid": "Invalid query address.",
+        "hostBlocked": "This address is not allowed (metadata/link-local/unspecified)."
+      },
       "submit": "Prepare resources",
       "resultTitle": "Result",
       "network": "Network",
@@ -171,6 +180,11 @@
       "network": "Network",
       "volume": "Volume",
       "container": "Container",
+      "queryAddress": "Query address",
+      "queryAddressNotConfigured": "Not configured",
+      "queryAddressLabel": "Query address / host (for the read-only health check)",
+      "queryAddressSave": "Save",
+      "queryAddressHint": "Used only for the read-only health check. No port scan. Empty = not configured.",
       "preparedAt": "Prepared at",
       "containerNotCreated": "No container created yet",
       "noServerStarted": "No TS3 server started yet",
@@ -197,6 +211,7 @@
         "lastSuccess": "Last successful health check",
         "readonly": "The health check is read-only.",
         "noLogs": "No logs are read.",
+        "noPortscan": "No port scans are performed.",
         "noRepair": "No repair actions are performed.",
         "runtime": {
           "running": "Running",
@@ -228,7 +243,10 @@
         "licenseRequired": "Please confirm the TeamSpeak 3 license terms first.",
         "startFailed": "The container could not be started.",
         "notFound": "Container not found.",
-        "notManaged": "The health check is only available for managed servers."
+        "notManaged": "The health check is only available for managed servers.",
+        "hostRequired": "Please enter a query address.",
+        "hostInvalid": "Invalid query address.",
+        "hostBlocked": "This address is not allowed (metadata/link-local/unspecified)."
       },
       "status": {
         "DRAFT": "Draft",

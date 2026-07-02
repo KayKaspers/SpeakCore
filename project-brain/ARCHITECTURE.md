@@ -225,6 +225,13 @@ wird beim Create gesetzt (ENV am Start nicht ergänzbar). Details: [ADR-0024](DE
 TS3-`serverinfo` (Step-008/009-Client), wenn der Container läuft **und** eine Query-Adresse konfiguriert
 ist – sonst `notConfigured` (kein Portscan). **Keine** Logs/Inspect/Reparatur.
 
+**Managed Query-Adresse (Step 020):** Die Adresse, unter der die Web-App den TS3-ServerQuery-Port
+**read-only** erreicht, wird **explizit** im `host`-Feld gespeichert (kein neues Feld). **Env-Default**
+(`MANAGED_TS3_QUERY_HOST`) belegt das Provisioning-Formular vor, die **UI-Eingabe hat Vorrang**
+(`resolveConfiguredQueryHost`); **nichts wird geraten**. Host wird mit der Step-008-Validierung geprüft.
+Damit liefert der Healthcheck echte `reachable`/`unreachable`/`notConfigured`. Bearbeiten via OWNER-only
+`updateQueryAddressAction`. Audit: `managed.queryAddress.set/updated`.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

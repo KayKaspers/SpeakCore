@@ -178,6 +178,13 @@ zeigen den Ist-Zustand (Container läuft/beendet/…; TS3 erreichbar/unbekannt/n
 optionale **TS3-Check** nutzt nur read-only ServerQuery-Kommandos (`login/use/serverinfo/version`) und
 läuft nur bei laufendem Container mit konfigurierter Query-Adresse (sonst `notConfigured` – kein Raten).
 Es werden **keine** Roh-Docker-/TS3-Ausgaben und **keine** Secrets gespeichert/ausgegeben.
+
+**Managed Query-Adresse (Step 020):** Die Query-Adresse (`host`) wird **explizit** gesetzt – **Env-Default**
+(`MANAGED_TS3_QUERY_HOST`) als Vorschlag, **UI-Override** hat Vorrang; **keine** automatische IP-Ermittlung,
+**keine** Portscans, **keine** externen Erreichbarkeitschecks. Host wird mit der **Step-008-Validierung**
+geprüft (Cloud-Metadaten/Link-Local/unspezifiziert blockiert; LAN/localhost erlaubt – Self-Hosting).
+OWNER-only (Provisioning + Bearbeiten), rate-limitiert; Audit `managed.queryAddress.set/updated` ohne
+Secrets/technische Dumps. External Server bleiben unverändert.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

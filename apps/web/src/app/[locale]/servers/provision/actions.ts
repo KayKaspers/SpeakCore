@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import type { ManagedResourceResult } from '@speakcore/types';
 import { getCurrentUser } from '@/lib/auth';
 import { checkRateLimit, recordRateLimitHit, type RateLimitConfig } from '@/core/rate-limit';
+import { validateServerHost } from '@/core/host-validation';
+import { MANAGED_QUERY_HOST_ENV, resolveConfiguredQueryHost } from '@/core/managed-query';
 import {
   buildProvisionInput,
   isOwner,
@@ -52,6 +54,18 @@ export async function prepareResourcesAction(
     mode: String(formData.get('mode') ?? 'simple') === 'expert' ? 'expert' : 'simple',
   });
 
-  const result = await prepareManagedTs3Resources(input, user!.email);
+  // Query-Adresse: UI-Eingabe hat Vorrang, sonst Env-Default (kein Raten). Leer erlaubt ⇒ notConfigured.
+  const rawHost = resolveConfiguredQueryHost(
+    formData.get('queryHost') as string | null,
+    process.env[MANAGED_QUERY_HOST_ENV],
+  );
+  let queryHost: string | null = null;
+  if (rawHost) {
+    const check = validateServerHost(rawHost);
+    if (!check.ok) return { errorKey: check.errorKey ?? 'hostInvalid' };
+    queryHost = rawHost;
+  }
+
+  const result = await prepareManagedTs3Resources(input, user!.email, queryHost);
   return { status: result.status, resources: result.resources, serverId: result.serverId };
 }

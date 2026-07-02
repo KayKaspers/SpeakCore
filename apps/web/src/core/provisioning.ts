@@ -23,6 +23,8 @@ export * from './provisioning-helpers';
 export async function prepareManagedTs3Resources(
   input: Ts3ProvisionInput,
   actor: string,
+  /** Bereits validierte Query-Adresse (Host) für den späteren read-only Healthcheck; `null` = keine. */
+  queryHost: string | null = null,
 ): Promise<WebPrepareResult> {
   // Ungültige Eingabe: kein Record anlegen (kein Junk), nur auditieren.
   if (!validateTs3ProvisionInput(input).ok) {
@@ -44,6 +46,7 @@ export async function prepareManagedTs3Resources(
       type: 'teamspeak3',
       mode: 'managed',
       instanceId: input.instanceId,
+      host: queryHost,
       voicePort: input.voicePort,
       queryPort: input.queryPort,
       fileTransferPort: input.fileTransferPort,
@@ -55,6 +58,11 @@ export async function prepareManagedTs3Resources(
       managedContainerName: plan.container.name,
     },
   });
+
+  // Query-Adresse (Host) für den read-only Healthcheck festgehalten (keine Secrets, kein Docker-Detail).
+  if (queryHost) {
+    await logAudit({ action: 'managed.queryAddress.set', actor, target: server.id });
+  }
 
   // 2) Agent prepare (Network/Volume).
   const agent = await prepareManagedResources(input);

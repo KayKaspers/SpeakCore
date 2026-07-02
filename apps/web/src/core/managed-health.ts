@@ -102,7 +102,14 @@ export async function runManagedHealthcheck(serverId: string, actor: string): Pr
     },
   });
 
-  const ts3AuditKind = ts3Reach === 'reachable' ? 'reachable' : ts3Reach === 'unreachable' ? 'unreachable' : null;
+  const ts3AuditKind =
+    ts3Reach === 'reachable'
+      ? 'reachable'
+      : ts3Reach === 'unreachable'
+        ? 'unreachable'
+        : ts3Reach === 'notConfigured'
+          ? 'notConfigured'
+          : null;
   for (const e of buildManagedHealthAuditEntries({
     actor,
     serverId,

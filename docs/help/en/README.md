@@ -32,8 +32,11 @@
   step.*
 - Start/stop/restart a server — *from Step 018: **start** a managed container (after license
   confirmation). From Step 019: a **read-only health check** ("Check status") honestly shows whether the
-  Docker container is running and (if configured) whether the TS3 service is reachable. **No** log
-  reading, **no** inspect, **no** repair, no stop/remove action. Stop follows in its own step.*
+  Docker container is running and (if configured) whether the TS3 service is reachable. From Step 020 you
+  can set a **query address** (during provisioning or on the server page; pre-filled from
+  `MANAGED_TS3_QUERY_HOST`) so the TS3 check returns real states "reachable/unreachable/not configured" –
+  **no port scan, no automatic detection**. **No** log reading, **no** inspect, **no** repair, no
+  stop/remove action. Stop follows in its own step.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

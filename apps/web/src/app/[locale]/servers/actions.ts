@@ -17,6 +17,7 @@ import { prepareManagedContainer } from '@/core/container-prepare';
 import { createManagedContainerForServer } from '@/core/container-create';
 import { startManagedContainerForServer } from '@/core/container-start';
 import { runManagedHealthcheck } from '@/core/managed-health';
+import { updateManagedQueryAddress } from '@/core/managed-query';
 
 export interface AddServerState {
   errorKey?: string;
@@ -258,4 +259,37 @@ export async function healthcheckAction(formData: FormData): Promise<void> {
   }
   // notManaged | invalidState
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Setzt/aktualisiert die Query-Adresse (Host) eines managed Servers für den read-only Healthcheck.
+ * OWNER-only. Leeres Feld entfernt die Adresse (⇒ notConfigured). Host wird validiert (Step-008-Regeln).
+ */
+export async function updateQueryAddressAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const rawHost = String(formData.get('host') ?? '').trim();
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  let host: string | null = null;
+  if (rawHost) {
+    const check = validateServerHost(rawHost);
+    if (!check.ok) {
+      redirect(`/${locale}/servers/${id}?notice=${check.errorKey ?? 'hostInvalid'}`);
+    }
+    host = rawHost;
+  }
+
+  const result = await updateManagedQueryAddress(id, host, user.email);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'notManaged') {
+    redirect(`/${locale}/servers/${id}?notice=notManaged`);
+  }
+  redirect(`/${locale}/servers/${id}`);
 }

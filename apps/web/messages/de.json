@@ -146,6 +146,15 @@
       "mode": "Modus",
       "modeSimple": "Simple",
       "modeExpert": "Expert",
+      "queryHost": "Query-Adresse / Host für Healthcheck (optional)",
+      "queryHostHint1": "Diese Adresse nutzt SpeakCore später für den read-only TS3-Statuscheck.",
+      "queryHostHint2": "Kein Portscan. Keine automatische Ermittlung.",
+      "queryHostHint3": "Ohne Adresse bleibt die TS3-Erreichbarkeit „nicht konfiguriert“.",
+      "queryHostError": {
+        "hostRequired": "Bitte eine Query-Adresse angeben.",
+        "hostInvalid": "Ungültige Query-Adresse.",
+        "hostBlocked": "Diese Adresse ist nicht erlaubt (Metadaten/Link-Local/unspezifiziert)."
+      },
       "submit": "Ressourcen vorbereiten",
       "resultTitle": "Ergebnis",
       "network": "Netzwerk",
@@ -171,6 +180,11 @@
       "network": "Netzwerk",
       "volume": "Volume",
       "container": "Container",
+      "queryAddress": "Query-Adresse",
+      "queryAddressNotConfigured": "Nicht konfiguriert",
+      "queryAddressLabel": "Query-Adresse / Host (für read-only Healthcheck)",
+      "queryAddressSave": "Speichern",
+      "queryAddressHint": "Wird nur für den read-only Healthcheck verwendet. Kein Portscan. Leer = nicht konfiguriert.",
       "preparedAt": "Vorbereitet am",
       "containerNotCreated": "Noch kein Container erstellt",
       "noServerStarted": "Noch kein TS3-Server gestartet",
@@ -197,6 +211,7 @@
         "lastSuccess": "Letzter erfolgreicher Healthcheck",
         "readonly": "Healthcheck ist read-only.",
         "noLogs": "Es werden keine Logs gelesen.",
+        "noPortscan": "Es werden keine Portscans durchgeführt.",
         "noRepair": "Es werden keine Reparaturaktionen ausgeführt.",
         "runtime": {
           "running": "Läuft",
@@ -228,7 +243,10 @@
         "licenseRequired": "Bitte bestätige zuerst die TeamSpeak-3-Lizenzbedingungen.",
         "startFailed": "Container konnte nicht gestartet werden.",
         "notFound": "Container nicht gefunden.",
-        "notManaged": "Healthcheck ist nur für managed Server verfügbar."
+        "notManaged": "Healthcheck ist nur für managed Server verfügbar.",
+        "hostRequired": "Bitte eine Query-Adresse angeben.",
+        "hostInvalid": "Ungültige Query-Adresse.",
+        "hostBlocked": "Diese Adresse ist nicht erlaubt (Metadaten/Link-Local/unspezifiziert)."
       },
       "status": {
         "DRAFT": "Entwurf",

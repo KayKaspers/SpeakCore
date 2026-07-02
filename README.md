@@ -104,15 +104,17 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
 - **TS3 (Step 008–009):** bestehenden TeamSpeak-3-Server **read-only verbinden** (`/servers`),
   Basisstatus ansehen, **aktualisieren** und Server wieder **entfernen** (Credentials werden gelöscht);
   Query-Zugänge verschlüsselt gespeichert (`SECRET_ENCRYPTION_KEY`).
-- **Agent-Docker (Step 010–018):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
+- **Agent-Docker (Step 010–020):** Sicherheitsfundament + read-only Inventar; als OWNER hinter
   Feature-Flag (`AGENT_DOCKER_WRITE_ENABLED`) + Token das kontrollierte Anlegen von managed
   Network/Volume; persistente managed `ServerInstance` (`RESOURCES_PREPARED`), Container-Vorbereitung
   (`CONTAINER_PENDING`) inkl. verschlüsseltem Secret, **echte Container-Erstellung**
   (`CONTAINER_CREATED`, `docker create`) mit Secret-Übergabe per ENV (kein Log-Lesen) und **Container-
   Start** (`RUNNING`, `docker start`) nach **expliziter TS3-Lizenzzustimmung**; **read-only Healthcheck**
   (`docker container ls`) zeigt den Ist-Zustand (Container läuft? optional TS3 erreichbar?) getrennt vom
-  Lifecycle-Status — **kein** Log-Lesen/Inspect/Portscan, keine Reparatur.
-- **Noch kein** ServerQuery-Connect mit erreichbarer Query-Adresse zum managed Server, kein Stop/Remove.
+  Lifecycle-Status. Ab Step 020 eine **explizite Query-Adresse** (Env-Default `MANAGED_TS3_QUERY_HOST` +
+  UI-Override) aktiviert den read-only TS3-Check (`reachable`/`unreachable`/`notConfigured`) — **kein**
+  Log-Lesen/Inspect/Portscan, kein Raten, keine Reparatur.
+- **Noch kein** Stop/Remove des managed Containers, kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
   inkl. `--dry-run`), transaktional & idempotent, **keine Web-UI/API**, keine Secret-Ausgabe.

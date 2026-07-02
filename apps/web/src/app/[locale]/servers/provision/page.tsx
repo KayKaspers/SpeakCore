@@ -11,9 +11,12 @@ export default async function ProvisionPage({ params }: { params: Promise<{ loca
     redirect(`/${locale}/login`);
   }
 
+  // Env-Default als Vorschlag für die Query-Adresse (kein Zwang, kein Raten). UI kann ihn überschreiben.
+  const defaultQueryHost = (process.env.MANAGED_TS3_QUERY_HOST ?? '').trim();
+
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <ProvisionForm locale={locale} />
+      <ProvisionForm locale={locale} defaultQueryHost={defaultQueryHost} />
     </main>
   );
 }

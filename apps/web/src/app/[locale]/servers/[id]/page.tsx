@@ -10,6 +10,7 @@ import {
   prepareContainerAction,
   refreshServerAction,
   startContainerAction,
+  updateQueryAddressAction,
 } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 
@@ -61,6 +62,12 @@ export default async function ServerDetailPage({
       { label: t('managed.network'), value: server.managedNetworkName ?? t('status.notAvailable') },
       { label: t('managed.volume'), value: server.managedVolumeName ?? t('status.notAvailable') },
       { label: t('managed.container'), value: server.managedContainerName ?? t('status.notAvailable') },
+      {
+        label: t('managed.queryAddress'),
+        value: server.host
+          ? `${server.host}:${server.queryPort ?? '—'}`
+          : t('managed.queryAddressNotConfigured'),
+      },
       { label: t('managed.preparedAt'), value: fmtDate(server.resourcesPreparedAt) },
     ];
     return (
@@ -101,6 +108,9 @@ export default async function ServerDetailPage({
               'error',
               'licenseRequired',
               'notManaged',
+              'hostInvalid',
+              'hostBlocked',
+              'hostRequired',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -141,6 +151,32 @@ export default async function ServerDetailPage({
               </>
             )}
           </div>
+
+          <form action={updateQueryAddressAction} className="mt-4 border-t border-sc-border pt-4">
+            <input type="hidden" name="locale" value={locale} />
+            <input type="hidden" name="id" value={server.id} />
+            <label htmlFor="host" className="mb-1 block text-sc-caption text-sc-text-secondary">
+              {t('managed.queryAddressLabel')}
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="host"
+                name="host"
+                type="text"
+                defaultValue={server.host ?? ''}
+                placeholder="127.0.0.1"
+                autoComplete="off"
+                className="flex-1 rounded-sc-md border border-sc-border bg-sc-background px-3 py-1.5 text-sc-sm text-sc-text-primary outline-none focus:border-sc-primary"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-sc-md border border-sc-border-strong px-3 py-1.5 text-sc-sm text-sc-text-secondary"
+              >
+                {t('managed.queryAddressSave')}
+              </button>
+            </div>
+            <p className="mt-1 text-sc-caption text-sc-text-muted">{t('managed.queryAddressHint')}</p>
+          </form>
 
           {provStatus === 'RESOURCES_PREPARED' && (
             <form action={prepareContainerAction} className="mt-6">
@@ -260,6 +296,7 @@ export default async function ServerDetailPage({
               <div className="mt-3 space-y-1 text-sc-caption text-sc-text-muted">
                 <p>• {t('managed.health.readonly')}</p>
                 <p>• {t('managed.health.noLogs')}</p>
+                <p>• {t('managed.health.noPortscan')}</p>
                 <p>• {t('managed.health.noRepair')}</p>
               </div>
             </div>

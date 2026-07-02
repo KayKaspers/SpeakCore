@@ -165,6 +165,11 @@
   unspezifizierte Adressen; Timeouts; Rate-Limit; generische Fehler; kein Roh-Response-Leak.
 - **Rest/geplant:** strengere Egress-Kontrolle (Allowlist/DNS-Rebinding-Schutz/Auflösungsprüfung)
   als späterer Security-Step. Bewusst offen, um legitimes LAN-Self-Hosting nicht zu brechen.
+- **Stand Step 020:** Die managed **Query-Adresse** (`host`) wird **explizit** gesetzt (Env-Default +
+  UI-Override, kein Raten) und mit **derselben Host-Validierung** geprüft (Metadaten/Link-Local/
+  unspezifiziert blockiert). Der read-only Healthcheck nutzt nur diese Adresse – **keine Portscans,
+  keine externen IP-Checks**. Das SSRF-Restrisiko bleibt wie bei external Servern (owner-eingegebener
+  Host im eigenen Netz); die strengere Egress-Kontrolle gilt für beide Fälle als späterer Step.
 
 ## R-10 – i18n-Drift (DE/EN)
 - **E:** mittel · **A:** niedrig · **Risiko:** niedrig

@@ -56,8 +56,8 @@ export interface ManagedHealthAuditParams {
   actor: string;
   serverId: string;
   containerRunning: boolean;
-  /** `null`, wenn der TS3-Check nicht durchgeführt wurde (unknown/notConfigured). */
-  ts3: 'reachable' | 'unreachable' | null;
+  /** `null`, wenn der TS3-Check gar nicht relevant war (Container läuft nicht ⇒ unknown). */
+  ts3: 'reachable' | 'unreachable' | 'notConfigured' | null;
   outcome: 'completed' | 'failed';
 }
 
@@ -78,6 +78,8 @@ export function buildManagedHealthAuditEntries(p: ManagedHealthAuditParams): Aud
     entries.push({ action: 'healthcheck.ts3.reachable', actor: p.actor, target: t });
   } else if (p.ts3 === 'unreachable') {
     entries.push({ action: 'healthcheck.ts3.unreachable', actor: p.actor, target: t });
+  } else if (p.ts3 === 'notConfigured') {
+    entries.push({ action: 'healthcheck.ts3.notConfigured', actor: p.actor, target: t });
   }
 
   entries.push(

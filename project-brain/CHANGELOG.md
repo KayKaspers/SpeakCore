@@ -5,6 +5,43 @@
 
 ## [Unreleased]
 
+### NDF Step 020 – Managed Query-Adresse & TS3 Read-only Healthcheck aktiviert (2026-07-01)
+
+> Schließt die Step-019-Lücke: managed Server bekommen eine **explizite** Query-Adresse, damit der
+> read-only TS3-Check echte `reachable`/`unreachable`/`notConfigured` liefert. **Kein Raten, kein Portscan.**
+
+#### Added
+- **Managed Query-Adresse** (im vorhandenen `host`-Feld – **kein** Schema-Change): wird **explizit**
+  gesetzt. **Env-Default + UI-Override** ([ADR-Empfehlung Option B]): `MANAGED_TS3_QUERY_HOST` belegt das
+  Provisioning-Feld vor, die UI-Eingabe hat Vorrang (`resolveConfiguredQueryHost`). Leer ⇒ `null` ⇒
+  Healthcheck bleibt `notConfigured`. **Nie** automatische IP-Ermittlung/Portscan.
+- **Provisioning-Flow** (`/servers/provision`): neues optionales Feld „Query-Adresse / Host" (mit
+  Hinweisen), server-seitig via **Step-008-Host-Validierung** geprüft (blockt Cloud-Metadaten/Link-Local/
+  unspezifiziert; LAN/localhost erlaubt). Persistiert `host` am managed Record.
+- **Query-Adresse bearbeiten** (`/servers/[id]`, managed): kompaktes OWNER-only Formular
+  (`updateQueryAddressAction` → `updateManagedQueryAddress`); leert oder setzt `host` (validiert).
+- **Healthcheck** nutzt jetzt die gespeicherte Adresse: läuft der Container **und** ist `host`/`queryPort`
+  gesetzt ⇒ read-only TS3-`serverinfo` (Step-008/009-Client) ⇒ `reachable`/`unreachable`; sonst
+  `notConfigured` (kein Portscan/Retry-Schleifen). Reine Entscheidung in `resolveTs3CheckMode`.
+- **UI:** managed Detailseite zeigt **Query-Adresse** (`host:queryPort` oder „nicht konfiguriert") und den
+  Healthcheck-Ist-Zustand; Hinweis „keine Portscans" ergänzt. Alle Texte DE/EN.
+- **Audit:** `managed.queryAddress.set` (beim Provisioning mit Adresse), `managed.queryAddress.updated`
+  (Bearbeiten), `healthcheck.ts3.notConfigured` (Container läuft, aber keine Adresse). **Keine** Secrets/
+  Roh-TS3-/Docker-Ausgaben; Target = ServerInstance-ID.
+- **Env:** `MANAGED_TS3_QUERY_HOST` in `.env.example` dokumentiert.
+- Tests: `resolveConfiguredQueryHost` (Override/Env/leer), `resolveTs3CheckMode`, Host-Validierung
+  (Metadaten/Link-Local/unspezifiziert blockiert, LAN/localhost erlaubt), `notConfigured`-Audit.
+  **196 Tests grün.** DB-Smoke: `host` set/clear, external unverändert (`notManaged`), Audit ohne Secrets.
+
+#### Security
+- OWNER-only; Host-Validierung (Step 008) wiederverwendet; **keine** Portscans/externen IP-Checks/
+  Raten. TS3-Client nur read-only; **keine** Roh-Antworten in DB; keine Secrets im Client/Audit.
+  External Server unverändert funktionsfähig (DB-Smoke bestätigt). Rate-Limit für Healthcheck bleibt.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (196) · `prisma validate` n. z.
+  (kein Schema-Change – `host` wiederverwendet).
+
 ### NDF Step 019 – Managed Server Read-only Healthcheck (2026-07-01)
 
 > **Read-only.** Unterscheidet ehrlich zwischen **Lifecycle-Status** (`provisioningStatus`, unverändert)

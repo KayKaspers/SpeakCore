@@ -73,8 +73,12 @@ Log-Lesen.
 `RUNNING`) vom **Ist-Zustand**. Der Adapter fragt den Agent read-only nach dem Container-Laufzeitstatus
 (`docker container ls`, kein Inspect/Logs) und – wenn der Container läuft und eine Query-Adresse
 konfiguriert ist – optional read-only `serverinfo` (Step-008/009-Client). Ergebnis in separaten
-Healthcheck-Feldern; **keine** Reparatur, **keine** Stop-/Remove-Aktion. **ServerQuery-Connect mit
-erreichbarer Adresse** und **Stop** folgen als eigene Steps.
+Healthcheck-Feldern; **keine** Reparatur, **keine** Stop-/Remove-Aktion.
+
+**Managed Query-Adresse (Step 020):** Die read-only-Query-Adresse wird **explizit** im `host`-Feld
+gespeichert (Env-Default `MANAGED_TS3_QUERY_HOST` + UI-Override, **kein Raten**, Step-008-Host-Validierung).
+Damit liefert der Healthcheck echte `reachable`/`unreachable`/`notConfigured` – **ohne Portscans/externe
+Checks**. **Stop** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

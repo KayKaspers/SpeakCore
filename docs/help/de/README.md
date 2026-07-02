@@ -33,7 +33,10 @@
   in einem späteren Schritt.*
 - Server starten/stoppen/neustarten — *ab Step 018: managed Container **starten** (nach
   Lizenzzustimmung). Ab Step 019: **read-only Healthcheck** („Status prüfen") – zeigt ehrlich, ob der
-  Docker-Container läuft und (falls konfiguriert) ob der TS3-Dienst erreichbar ist. **Kein** Log-Lesen,
+  Docker-Container läuft und (falls konfiguriert) ob der TS3-Dienst erreichbar ist. Ab Step 020 lässt
+  sich eine **Query-Adresse** angeben (im Provisioning oder auf der Serverseite; Vorbelegung über
+  `MANAGED_TS3_QUERY_HOST`), damit der TS3-Check echte Zustände „erreichbar/nicht erreichbar/nicht
+  konfiguriert" liefert – **kein Portscan, keine automatische Ermittlung**. **Kein** Log-Lesen,
   **kein** Inspect, **keine** Reparatur, keine Stop-/Remove-Aktion. Stop folgt als eigener Schritt.*
 - Logs lesen
 - Backup & Restore
