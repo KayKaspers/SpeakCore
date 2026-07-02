@@ -211,6 +211,23 @@
       "stopHintKeepResources": "Volume and network are kept.",
       "stopHintNoLogs": "Logs are not read.",
       "resourcesNoContainer": "Resources prepared, container not present.",
+      "dangerZone": {
+        "title": "Danger zone",
+        "intro": "Deleting the volume removes the TS3 data irreversibly.",
+        "volumeDeleteButton": "Delete volume",
+        "warnData": "The volume contains the TS3 data.",
+        "warnIrreversible": "Deletion cannot be undone.",
+        "warnBackup": "Create a backup first.",
+        "warnContainerFirst": "The container must be removed first.",
+        "warnOthersKept": "Network, server record and credentials are kept.",
+        "confirmDataLossLabel": "I confirm the irreversible data loss.",
+        "confirmBackupLabel": "I have created a backup or do not need one.",
+        "typedLabel": "Type to confirm: DELETE VOLUME",
+        "volumeDeleteConfirmYes": "Delete volume permanently",
+        "volumeDeleteCancel": "Cancel",
+        "volumeRemovedHint": "Volume removed. Network, server record and credentials are kept.",
+        "laterSteps": "Network deletion and server-record archiving follow in their own steps."
+      },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
         "notActive": "Removing volume/network is not enabled yet.",
@@ -281,7 +298,11 @@
         "stillRunning": "The container is still running – please stop it first.",
         "removeFailed": "The container could not be removed.",
         "stopFailed": "Restart aborted: the container could not be stopped.",
-        "startFailed": "Restart incomplete: the container was stopped but not started again."
+        "startFailed": "Restart incomplete: the container was stopped but not started again.",
+        "dataLossRequired": "Please explicitly confirm the data loss.",
+        "backupRequired": "Please confirm the backup note.",
+        "typedMismatch": "Please type exactly “DELETE VOLUME”.",
+        "volumeRemoveFailed": "The volume could not be removed."
       },
       "status": {
         "DRAFT": "Draft",

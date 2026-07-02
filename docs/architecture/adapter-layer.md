@@ -97,9 +97,13 @@ Lizenz-Checkbox). Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler
 
 **Deprovisioning-Blueprint (Step 024):** **reine Guard-/Planungslogik** (`@speakcore/shared` `deprovision.ts`,
 `executable: false`) – **noch keine Löschung**. Stufenmodell Container→Volume→Network→Archive mit
-Datenverlust-/Bestätigungs-/Managed-Only-Modell ([ADR-0028](../../project-brain/DECISIONS.md)). Echte
-**Volume-/Network-Remove**, **ServerRecord-Archive** und ein optionaler **Agent-vermittelter Query-Proxy**
-folgen als eigene, abgesicherte Steps.
+Datenverlust-/Bestätigungs-/Managed-Only-Modell ([ADR-0028](../../project-brain/DECISIONS.md)).
+
+**Volume-Remove (Step 025):** erste **echte** Deprovisioning-Stufe – der Adapter delegiert an den Agent, der
+**`docker volume rm`** (**kein `-f`**) eines **managed** Volumes **nur ohne Container** ausführt. Web erzwingt
+Doppelbestätigung + getippt `DELETE VOLUME` (Step-024-Guard). **Credentials/Network/ServerInstance bleiben
+erhalten**, `managedVolumeState='removed'` ([ADR-0029](../../project-brain/DECISIONS.md)). **Network-Remove**,
+**ServerRecord-Archive** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

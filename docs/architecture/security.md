@@ -54,8 +54,9 @@ werden (`docker stop`, `RUNNING → CONTAINER_CREATED` + `runState='stopped'`) �
 bleiben erhalten**. In **Step 023** kann der Container **neu gestartet** werden – als **Stop→Start-
 Orchestrierung** (`RUNNING → Stop → Start → RUNNING`), **ohne** `docker restart`, mit erneuter Lizenzbestätigung.
 **Step 024** ergänzt ein **Deprovisioning-Sicherheitskonzept** (reine Guard-/Planungslogik, **keine Löschung**,
-`executable: false`): Stufenmodell mit Datenverlust-/Bestätigungs-/Managed-Only-Guards für spätere Volume-/
-Network-Remove-Steps. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine
+`executable: false`); in **Step 025** wird das managed **Datenvolume** tatsächlich entfernbar (`docker volume
+rm`, **kein `-f`**, nur ohne Container, mit Doppelbestätigung + getippt `DELETE VOLUME`) – Credentials/Network/
+ServerInstance bleiben erhalten. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine
 Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

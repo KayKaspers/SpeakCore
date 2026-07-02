@@ -14,6 +14,8 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3ProvisionInput,
+  Ts3VolumeRemoveRequest,
+  VolumeRemoveResult,
 } from '@speakcore/types';
 
 export type AgentSnapshotResult =
@@ -195,6 +197,37 @@ export async function removeManagedContainer(
     });
     if (!res.ok) return null;
     return (await res.json()) as ContainerRemoveResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löst beim Agent das **Entfernen des managed Datenvolumes** aus – **serverseitig**. **Datenverlust!**
+ * Übergibt nur `instanceId` (keine Secrets). `null`, wenn der Agent nicht erreichbar ist. Kein `-f`,
+ * keine Network-/Credential-/Record-Löschung, kein Log-Lesen; Antwort ohne Secret/Roh-Ausgabe.
+ */
+export async function removeManagedVolume(
+  request: Ts3VolumeRemoveRequest,
+  timeoutMs = 10000,
+): Promise<VolumeRemoveResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/remove-volume`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as VolumeRemoveResult;
   } catch {
     return null;
   } finally {

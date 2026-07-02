@@ -16,6 +16,7 @@ import { RemoveServerButton } from '../RemoveServerButton';
 import { StopContainerButton } from '../StopContainerButton';
 import { RemoveContainerButton } from '../RemoveContainerButton';
 import { RestartContainerButton } from '../RestartContainerButton';
+import { RemoveVolumeButton } from '../RemoveVolumeButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,6 +118,9 @@ export default async function ServerDetailPage({
               'stillRunning',
               'stopFailed',
               'startFailed',
+              'dataLossRequired',
+              'backupRequired',
+              'typedMismatch',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -246,15 +250,21 @@ export default async function ServerDetailPage({
           )}
 
           {provStatus === 'RESOURCES_PREPARED' && (
-            <div className="mt-4 rounded-sc-md border border-sc-border bg-sc-surface-raised p-3">
-              <h3 className="text-sc-sm font-medium text-sc-text-primary">
-                {t('managed.deprovision.title')}
-              </h3>
-              <ul className="mt-2 space-y-1 text-sc-caption text-sc-text-muted">
-                <li>• {t('managed.deprovision.notActive')}</li>
-                <li>• {t('managed.deprovision.dataLoss')}</li>
-                <li>• {t('managed.deprovision.later')}</li>
-              </ul>
+            <div className="mt-6 rounded-sc-md border border-sc-error/30 bg-sc-surface-raised p-3">
+              <h3 className="text-sc-sm font-medium text-sc-error">{t('managed.dangerZone.title')}</h3>
+              {server.managedVolumeState === 'removed' ? (
+                <p className="mt-2 text-sc-caption text-sc-text-muted">
+                  • {t('managed.dangerZone.volumeRemovedHint')}
+                </p>
+              ) : (
+                <div className="mt-2 space-y-3">
+                  <p className="text-sc-caption text-sc-text-muted">{t('managed.dangerZone.intro')}</p>
+                  <RemoveVolumeButton locale={locale} id={server.id} />
+                </div>
+              )}
+              <p className="mt-2 text-sc-caption text-sc-text-muted">
+                {t('managed.dangerZone.laterSteps')}
+              </p>
             </div>
           )}
 

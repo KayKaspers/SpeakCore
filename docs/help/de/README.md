@@ -50,8 +50,11 @@
   **keine** Reparatur. Volume-/Network-Löschung (vollständiges Deprovisioning) folgt als eigener Schritt.
   Ab Step 024 gibt es dafür ein **Sicherheitskonzept** (Info-Karte „Deprovisioning noch nicht aktiv"): Es
   erklärt die Stufen (Container → Volume → Network → Server-Eintrag) und das **Datenverlust-Risiko** beim
-  Löschen des Volumes. Es wird **noch nichts gelöscht** – echte Löschungen kommen später mit zusätzlicher
-  Bestätigung.*
+  Löschen des Volumes. Ab Step 025 kann das **Datenvolume** in der **Gefahrenzone** tatsächlich gelöscht
+  werden (`docker volume rm`, **ohne Force**) – nur bei bereits entferntem Container und nur nach
+  **Doppelbestätigung** (Datenverlust + Backup) und getippter Eingabe **`DELETE VOLUME`**. Das ist
+  **unwiderruflich** (vorher Backup!). **Network, Servereintrag und Zugangsdaten bleiben erhalten.**
+  Network-Löschung und Servereintrag-Archivierung folgen als eigene Schritte.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

@@ -92,6 +92,7 @@ model ServerInstance {
   lastProvisioningStep     String?
   lastProvisioningErrorKey String?
   resourcesPreparedAt      DateTime?
+  managedVolumeState       String? // null = vorhanden/unbekannt | "removed" (Datenvolume entfernt, Step 025)
   // Persistierter read-only Status-Snapshot (Step 009). KEINE Secrets, keine Roh-Antworten.
   lastStatus          String?   // "reachable" | "unreachable"
   lastStatusCheckedAt DateTime?

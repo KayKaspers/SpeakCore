@@ -5,6 +5,46 @@
 
 ## [Unreleased]
 
+### NDF Step 025 – REMOVE_MANAGED_VOLUME mit Datenverlust-Schutz (2026-07-02)
+
+> Erste **echte, irreversible** Löschung eines managed TS3-Datenvolumes. **Datenverlust!** Streng
+> abgesichert; **kein Force**, nur ohne Container, mit mehrfacher Bestätigung.
+
+#### Added
+- **Agent-Aktion `removeTs3Volume`** (`apps/agent/src/docker-volume-remove.ts`) + Endpunkt
+  **`POST /docker/provision/remove-volume`** (Token-Gate + `AGENT_DOCKER_WRITE_ENABLED`): **`docker volume
+  rm <managed-volume>`** (nie `-f`, nie `network`/`container` rm) **nur** für ein managed Volume und **nur
+  wenn kein managed Container** dieser `instanceId` mehr existiert. Status `removed | alreadyRemoved |
+  containerStillExists | conflict | error | writeDisabled | invalid | unavailable`. Fehlt das Volume ⇒
+  `alreadyRemoved` (idempotent); fremdes Volume ⇒ `conflict`.
+- **Web-Service** `removeManagedVolumeForServer` (`src/core/volume-remove.ts`) + reine Helfer
+  (`volume-remove-helpers.ts`) + **OWNER-only Server Action** `removeVolumeAction` (rate-limitiert).
+  **Bestätigungs-Vorprüfung** über die **Step-024-Guard-Logik** `canRemoveManagedVolume`
+  (`mapVolumeConfirmationGuard`): nur `RESOURCES_PREPARED` **und** `confirmVolumeDataLoss` +
+  `confirmBackupRecommended` + getippt **`DELETE VOLUME`**. Der Agent re-verifiziert Container/Volume real.
+- **Erhalten** ([ADR-0029](DECISIONS.md)): Credentials, `managedNetworkName`/`managedVolumeName` und der
+  `ServerInstance`-Record bleiben unangetastet (reines `volumeRemoveSuccessUpdate` + Test). `provisioningStatus`
+  bleibt `RESOURCES_PREPARED`; nur **`managedVolumeState='removed'`** markiert den Ist-Zustand.
+- **UI (DE/EN):** **Gefahrenzone** auf der managed Detailseite (`RESOURCES_PREPARED`) mit Doppelbestätigung
+  (zwei Checkboxen + getippte Eingabe `DELETE VOLUME`) und deutlichen Datenverlust-Hinweisen; nach Erfolg
+  „Volume entfernt". **Keine** Network-/ServerInstance-/Credential-Lösch-Buttons.
+- **Prisma:** `managedVolumeState` (Migration `20260702100000_add_managed_volume_state`).
+- **Audit:** `deprovision.volumeRemove.requested/confirmed/blocked/completed/failed/conflict`,
+  `deprovision.volume.removed/alreadyRemoved` (Target = ServerInstance-ID, **keine Secrets/Roh-Ausgaben**).
+- Tests: Agent (volume rm **ohne `-f`**, kein network/container rm, containerStillExists, alreadyRemoved,
+  conflict, unavailable, error, Token/Flag-Gate, Quell-Scan) und Web (Bestätigungs-Guard, Audit,
+  Credentials/Network/Record bleiben via `volumeRemoveSuccessUpdate`, Quell-Scan). **280 Tests grün.**
+
+#### Security
+- OWNER-only; Agent-Token/-URL nur serverseitig (kein Browser→Agent). **Kein Force-Remove**, **keine
+  Network-/Container-/Credential-/ServerInstance-Löschung**, kein `run/create/start/stop/restart/inspect/
+  exec/cp/logs`, kein compose, kein Socket, keine fremde Ressource. Kein Secret im Client/Audit/Response,
+  **kein Log-Lesen**. Datenverlust nur nach **Doppelbestätigung + getippter Bestätigung**. Quell-Scan-Tests
+  erzwingen die Verbote. **[ADR-0029](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (280) · `prisma validate` ✅.
+
 ### NDF Step 024 – Deprovisioning Safety Blueprint (2026-07-01)
 
 > **Reines Sicherheits-/Planungsfundament – es wird NICHTS gelöscht.** Kein `docker volume rm`/`network

@@ -211,6 +211,23 @@
       "stopHintKeepResources": "Volume und Network bleiben bestehen.",
       "stopHintNoLogs": "Logs werden nicht gelesen.",
       "resourcesNoContainer": "Ressourcen vorbereitet, Container nicht vorhanden.",
+      "dangerZone": {
+        "title": "Gefahrenzone",
+        "intro": "Das Löschen des Volumes entfernt die TS3-Daten unwiderruflich.",
+        "volumeDeleteButton": "Volume löschen",
+        "warnData": "Das Volume enthält die TS3-Daten.",
+        "warnIrreversible": "Das Löschen kann nicht rückgängig gemacht werden.",
+        "warnBackup": "Erstelle vorher ein Backup.",
+        "warnContainerFirst": "Der Container muss vorher entfernt sein.",
+        "warnOthersKept": "Network, Servereintrag und Zugangsdaten bleiben erhalten.",
+        "confirmDataLossLabel": "Ich bestätige den unwiderruflichen Datenverlust.",
+        "confirmBackupLabel": "Ich habe ein Backup erstellt bzw. benötige keines.",
+        "typedLabel": "Tippe zur Bestätigung: DELETE VOLUME",
+        "volumeDeleteConfirmYes": "Volume endgültig löschen",
+        "volumeDeleteCancel": "Abbrechen",
+        "volumeRemovedHint": "Volume entfernt. Network, Servereintrag und Zugangsdaten bleiben erhalten.",
+        "laterSteps": "Network-Löschung und Servereintrag-Archivierung folgen als eigene Schritte."
+      },
       "deprovision": {
         "title": "Deprovisioning (noch nicht aktiv)",
         "notActive": "Das Entfernen von Volume/Network ist noch nicht aktiviert.",
@@ -281,7 +298,11 @@
         "stillRunning": "Der Container läuft noch – bitte zuerst stoppen.",
         "removeFailed": "Container konnte nicht entfernt werden.",
         "stopFailed": "Neustart abgebrochen: Der Container konnte nicht gestoppt werden.",
-        "startFailed": "Neustart unvollständig: Der Container wurde gestoppt, aber nicht wieder gestartet."
+        "startFailed": "Neustart unvollständig: Der Container wurde gestoppt, aber nicht wieder gestartet.",
+        "dataLossRequired": "Bitte den Datenverlust ausdrücklich bestätigen.",
+        "backupRequired": "Bitte den Backup-Hinweis bestätigen.",
+        "typedMismatch": "Bitte exakt „DELETE VOLUME“ eingeben.",
+        "volumeRemoveFailed": "Volume konnte nicht entfernt werden."
       },
       "status": {
         "DRAFT": "Entwurf",

@@ -48,7 +48,11 @@
   reading, **no** inspect, **no** repair. Volume/network deletion (full deprovisioning) follows in its own
   step. From Step 024 there is a **safety concept** for it (info card "Deprovisioning not active yet"):
   it explains the stages (container → volume → network → server record) and the **data-loss risk** when
-  deleting the volume. **Nothing is deleted yet** – real deletions come later with additional confirmation.*
+  deleting the volume. From Step 025 the **data volume** can actually be deleted in the **danger zone**
+  (`docker volume rm`, **without force**) – only when the container is already removed and only after a
+  **double confirmation** (data loss + backup) and typing **`DELETE VOLUME`**. This is **irreversible**
+  (back up first!). **Network, server record and credentials are kept.** Network deletion and server-record
+  archiving follow in their own steps.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

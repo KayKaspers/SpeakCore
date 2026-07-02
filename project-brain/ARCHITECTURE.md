@@ -257,8 +257,15 @@ Audit: `docker.containerRestart.*` ([ADR-0027](DECISIONS.md)).
 (`deprovision.ts`, `executable: false`) – **noch keine Löschung**. Stufenmodell Container→Volume→Network→
 Archive mit `dataLossRisk`, Bestätigungsmodell (Volume = `confirmVolumeDataLoss` + `confirmBackupRecommended`),
 Managed-Only-Guards (fremde Ressourcen nie löschbar) und vordefinierten `deprovision.*`-Audit-Events. UI:
-nicht-ausführende Info-Karte. Details: [ADR-0028](DECISIONS.md). Echte Volume-/Network-Remove +
-ServerRecord-Archive folgen als eigene, abgesicherte Steps.
+nicht-ausführende Info-Karte. Details: [ADR-0028](DECISIONS.md).
+
+**Volume-Remove (Step 025):** erste **echte, irreversible** Löschung – `core/volume-remove` →
+`lib/agent-client` → Agent `POST /docker/provision/remove-volume` → **`docker volume rm`** (**kein `-f`**),
+**nur** managed Volume, **nur ohne Container**. Web-seitig erzwingt der Step-024-Guard `canRemoveManagedVolume`
+die Bestätigungen (`confirmVolumeDataLoss` + `confirmBackupRecommended` + getippt `DELETE VOLUME`).
+`provisioningStatus` bleibt `RESOURCES_PREPARED`; `managedVolumeState='removed'` markiert den Ist-Zustand.
+**Credentials/Network/ServerInstance bleiben erhalten** ([ADR-0029](DECISIONS.md)). Network-Remove +
+ServerRecord-Archive folgen als eigene Steps.
 
 ## 7. Verwandte Dokumente
 

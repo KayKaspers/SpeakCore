@@ -395,6 +395,26 @@
   je eigene, dedizierte Steps mit zusätzlicher Bestätigung/Backup-Konzept; Volume-Löschung besonders
   abzusichern (irreversibler Datenverlust). Audit-Events (`deprovision.*`) sind vordefiniert.
 
+## ADR-0029 – Volume-Remove: `docker volume rm` (kein Force), streng bestätigt, nur ohne Container
+
+- **Status:** accepted (Step 025)
+- **Kontext:** Erste **echte, irreversible** Löschung eines managed Datenvolumes (Datenverlust).
+- **Entscheidung:** Agent-Aktion **`REMOVE_MANAGED_VOLUME`** (`POST /docker/provision/remove-volume`) führt
+  **ausschließlich `docker volume rm <managed-volume>`** aus – **kein `-f`/`--force`**, nie `network`/
+  `container` rm, nie andere Docker-Kommandos. Hinter **Token + `AGENT_DOCKER_WRITE_ENABLED`**, nur für ein
+  per Label geprüftes **managed** Volume und **nur wenn kein managed Container** dieser `instanceId` mehr
+  existiert (`containerStillExists` sonst). Fehlt das Volume ⇒ `alreadyRemoved` (idempotent); fremdes
+  gleichnamiges Volume ⇒ `conflict`. Web-seitig erzwingt die **Step-024-Guard-Logik**
+  `canRemoveManagedVolume` **mehrfache Bestätigungen**: `confirmVolumeDataLoss` + `confirmBackupRecommended`
+  + getippt **`DELETE VOLUME`** (kein Vorab-Default). `provisioningStatus` bleibt `RESOURCES_PREPARED`; nur
+  `managedVolumeState='removed'` markiert den Ist-Zustand.
+- **Begründung:** Datenverlust ist irreversibel → maximale Absicherung (Container-Guard, Managed-Only,
+  Doppelbestätigung, Backup-Hinweis, getippte Bestätigung). Kein `-f`, damit „in use"/laufende Nutzung
+  hart fehlschlägt statt Daten zu erzwingen. **Credentials, Network und ServerInstance bleiben erhalten**
+  (per reinem `volumeRemoveSuccessUpdate` + Test).
+- **Konsequenzen:** Minimaler Schema-Zusatz `managedVolumeState` (Migration `20260702100000`). **Network-Remove**
+  und **ServerRecord-Archive** bleiben eigene, spätere Steps.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

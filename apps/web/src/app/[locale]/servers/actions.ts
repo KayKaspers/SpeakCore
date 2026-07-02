@@ -19,6 +19,7 @@ import { startManagedContainerForServer } from '@/core/container-start';
 import { stopManagedContainerForServer } from '@/core/container-stop';
 import { removeManagedContainerForServer } from '@/core/container-remove';
 import { restartManagedContainerForServer } from '@/core/container-restart';
+import { removeManagedVolumeForServer } from '@/core/volume-remove';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -322,6 +323,42 @@ export async function removeContainerAction(formData: FormData): Promise<void> {
     redirect(`/${locale}/servers/${id}`);
   }
   // stillRunning | invalidState | invalidPlan | writeDisabled | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Entfernt das managed **Datenvolume** (RESOURCES_PREPARED). **Datenverlust!** OWNER-only, rate-limitiert,
+ * nur mit Datenverlust- + Backup- + getippter Bestätigung. Kein `-f`; Network/Credentials/ServerInstance bleiben.
+ */
+export async function removeVolumeAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const confirmations = {
+    confirmVolumeDataLoss: formData.get('confirmVolumeDataLoss') === 'on',
+    confirmBackupRecommended: formData.get('confirmBackupRecommended') === 'on',
+    typedConfirmation: String(formData.get('typedConfirmation') ?? ''),
+  };
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:volume-remove:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await removeManagedVolumeForServer(id, user.email, confirmations);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'removed' || result.status === 'alreadyRemoved') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // dataLossRequired | backupRequired | typedMismatch | invalidState | invalidPlan
+  //   | containerStillExists | conflict | writeDisabled | unavailable | unreachable | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

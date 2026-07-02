@@ -35,6 +35,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/start-container` | **write** (Flag-gated): managed **Container starten** (`docker start`, Lizenzzustimmung nötig) |
 | POST | `/docker/provision/stop-container` | **write** (Flag-gated): managed **Container stoppen** (`docker stop`, kein rm/restart) |
 | POST | `/docker/provision/remove-container` | **write** (Flag-gated): managed **Container entfernen** (`docker rm`, kein -f/-v, nur gestoppt) |
+| POST | `/docker/provision/remove-volume` | **write** (Flag-gated): managed **Datenvolume entfernen** (`docker volume rm`, kein -f, nur ohne Container) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -214,10 +215,27 @@ Details: [ADR-0027](../../project-brain/DECISIONS.md).
 ## Deprovisioning (Step 024) – **kein** Agent-Endpunkt, keine Löschung
 
 Der **Deprovisioning-Blueprint** ist **reine Guard-/Planungslogik** in `@speakcore/shared`
-(`deprovision.ts`, `executable: false`) und führt **nichts** aus: **kein** `docker volume rm`/`network rm`,
-**kein** neuer Agent-Endpunkt, keine echte Löschung. Spätere echte Remove-Aktionen dürfen nur über
-**Managed-Only-Guards** laufen (Labels `speakcore.managed=true`/`project`/`instanceId`/`service`, **kein**
-`-f`, kein Wildcard, keine freien Namen). Details: [ADR-0028](../../project-brain/DECISIONS.md).
+(`deprovision.ts`, `executable: false`) und führt **nichts** aus: **kein** neuer Agent-Endpunkt, keine echte
+Löschung. Spätere echte Remove-Aktionen dürfen nur über **Managed-Only-Guards** laufen (Labels
+`speakcore.managed=true`/`project`/`instanceId`/`service`, **kein** `-f`, kein Wildcard, keine freien Namen).
+Details: [ADR-0028](../../project-brain/DECISIONS.md).
+
+## `/docker/provision/remove-volume` – Datenvolume entfernen (Step 025)
+
+Erste **echte, irreversible** Löschung ([ADR-0029](../../project-brain/DECISIONS.md)):
+
+- **Nur `docker volume rm speakcore-volume-ts3-<instanceId>`** (**kein `-f`**, nie `network`/`container` rm);
+  Name aus `instanceId`, **managed-/instanceId-Label** geprüft. Vorprüfung nur über managed-gefilterte Listen.
+- **Token + `AGENT_DOCKER_WRITE_ENABLED`** (`false` ⇒ `writeDisabled`). **Nur wenn kein managed Container**
+  dieser `instanceId` mehr existiert (`containerStillExists` sonst). Fehlt das Volume ⇒ `alreadyRemoved`;
+  fremdes gleichnamiges Volume ⇒ `conflict`; Docker nicht verfügbar ⇒ `unavailable`.
+- **Keine** Network-/Container-/Credential-/ServerInstance-Löschung, **kein** `inspect/exec/cp/logs`, **kein**
+  Log-Lesen. Web erzwingt zusätzlich **Doppelbestätigung** (`confirmVolumeDataLoss` + `confirmBackupRecommended`
+  + getippt `DELETE VOLUME`) über den Step-024-Guard. Quell-Scan-Tests erzwingen die verbotenen Kommandos.
+
+**Web-Auslösung (Step 025):** OWNER-only Server Action (`/servers/[id]`, **Gefahrenzone** mit
+Doppelbestätigung); `provisioningStatus` bleibt `RESOURCES_PREPARED`, `managedVolumeState='removed'`.
+**Network-Remove** und **ServerRecord-Archive** folgen als eigene Steps.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

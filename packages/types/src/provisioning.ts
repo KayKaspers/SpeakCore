@@ -322,6 +322,31 @@ export interface ContainerRemoveResult {
   audit: PlannedAuditAction[];
 }
 
+// --- Managed Volume Remove (NDF Step 025: `docker volume rm`, KEIN -f, Datenverlust!) --------
+
+export type VolumeRemoveStatus =
+  | 'removed'
+  | 'alreadyRemoved'
+  | 'containerStillExists'
+  | 'conflict'
+  | 'error'
+  | 'writeDisabled'
+  | 'invalid'
+  | 'unavailable';
+
+/** Agent-Request zum **Entfernen** des managed Datenvolumes. Nur `instanceId` (Name intern abgeleitet). */
+export interface Ts3VolumeRemoveRequest {
+  instanceId: string;
+}
+
+/** Ergebnis von `docker volume rm` (managed). Enthält NIE Secrets/Roh-Docker-Ausgabe. */
+export interface VolumeRemoveResult {
+  status: VolumeRemoveStatus;
+  volumeName?: string;
+  errors?: ValidationError[];
+  audit: PlannedAuditAction[];
+}
+
 // --- Deprovisioning Safety Blueprint (NDF Step 024: reine Planung, KEINE Ausführung) ---------
 
 /** Umfang einer (späteren) Deprovisioning-Aktion. */

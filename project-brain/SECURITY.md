@@ -218,6 +218,15 @@ Migration. Stufenmodell mit **Managed-Only-Guards** (fremde Ressourcen nie lösc
 `confirmBackupRecommended` (optional getippt `DELETE VOLUME`); Network `confirmNetworkUnused`; Archive
 `confirmServerRecordArchive` + Credential-Entscheidung. Datenverlust-Risiko (Volume) ist explizit
 modelliert und in der UI benannt; kein Button suggeriert echte Löschung.
+
+**Volume-Remove (Step 025, [ADR-0029](DECISIONS.md)):** erste **echte, irreversible** Löschung. Der Agent
+führt **nur `docker volume rm`** aus (**kein `-f`**, nie `network`/`container` rm), hinter **Token +
+`AGENT_DOCKER_WRITE_ENABLED`**, **nur** für ein per Label geprüftes **managed** Volume und **nur wenn kein
+managed Container** mehr existiert (`containerStillExists` sonst). Web erzwingt über den Step-024-Guard die
+**Doppelbestätigung** `confirmVolumeDataLoss` + `confirmBackupRecommended` + getippt **`DELETE VOLUME`** (kein
+Vorab-Default). **Credentials, Network und ServerInstance bleiben erhalten**; nur `managedVolumeState='removed'`.
+Fehlt das Volume ⇒ idempotent `alreadyRemoved`; fremdes Volume ⇒ `conflict`. Kein Browser→Agent; keine
+Secrets/Roh-Docker-Ausgaben; kein Log-Lesen.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).
