@@ -64,7 +64,10 @@
   un-archive or hard delete. From Step 029 a managed server (active or archived) can be **exported as JSON**
   ("Download export", optionally with audit history): it contains **only non-secret metadata** – **no
   credentials, no secrets**. The export is **not a backup/restore of the TS3 data** (volume contents),
-  DB-only (no Docker/agent), and there is **no import**.*
+  DB-only (no Docker/agent), and there is **no import**. From Step 030 there is also a **backup concept**
+  (info card "Backup concept prepared"): it explains that real TS3 volume backups are **not active yet**, can
+  contain **sensitive data**, and that the first real backup step recommends **a stopped container**. Nothing
+  is backed up yet – no download, no restore.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

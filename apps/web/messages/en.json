@@ -276,6 +276,13 @@
         "downloadButton": "Download export",
         "downloadWithAudit": "Export with audit history"
       },
+      "backup": {
+        "title": "Backup concept (prepared)",
+        "notActive": "Real backups are not active yet.",
+        "sensitive": "TS3 backups can contain sensitive data.",
+        "stoppedRecommended": "For the first real backup step a stopped container is recommended.",
+        "notDownload": "This is not a download or restore of the TS3 data."
+      },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",
         "notActive": "Removing volume/network is not enabled yet.",

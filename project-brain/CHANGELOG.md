@@ -5,6 +5,41 @@
 
 ## [Unreleased]
 
+### NDF Step 030 – Managed TS3 Volume Backup Blueprint (2026-07-02)
+
+> **Reines Sicherheits-/Planungsfundament – es wird NICHTS gesichert.** Kein Docker/Agent, kein Archivfile,
+> kein Restore/Import, keine DB-Schreiboperation, `executable: false`.
+
+#### Added
+- **Reine, testbare Guard-/Planungslogik** (`packages/shared/src/provisioning/backup.ts`, über
+  `@speakcore/shared`): `canBackupManagedVolume`, `validateManagedVolumeBackupRequest`,
+  `buildBackupMetadata`, `buildManagedVolumeBackupPlan` (+ `backupFilenamePattern`, `BACKUP_AUDIT`,
+  `BACKUP_TYPED_CONFIRMATION='CREATE BACKUP'`). Ergebnis ist **immer `executable: false`**.
+- **Guard-Modell** ([ADR-0033](DECISIONS.md)): nur **managed** + gültige `instanceId` + **managed Volume
+  vorhanden** (nicht `removed`) + **Container nicht laufend** (konservativ) + Bestätigungen. Fremde/entfernte
+  Ressourcen werden **nie** als sicherbar geplant.
+- **Bestätigungsmodell** (kein Vorab-Default): `confirmBackupMayContainSensitiveData` +
+  `confirmBackupStorageResponsibility` + `confirmContainerShouldBeStopped`, optional getippt `CREATE BACKUP`.
+- **Backup-Format/-Metadaten:** Vorlage `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` +
+  versionierter Metadaten-Blueprint (`containsSecrets: "unknown"` – **nie** „secret-free"; Metadaten selbst
+  ohne Secrets). Geplante Aktion mit **read-only** Quelle. Vordefinierte `backup.managedVolume.*`-Audit-Events.
+- **UI (DE/EN):** nicht-ausführende **Info-Karte** „Backup-Konzept (vorbereitet)" auf der managed Detailseite
+  (Volume vorhanden): echte Backups noch nicht aktiv, TS3-Backups können sensible Daten enthalten, gestoppter
+  Container empfohlen, kein Download/Restore. **Keine** Backup-Schaltfläche.
+- Tests (shared): external/missing/nicht-managed/removed Volume blockiert, laufender Container blockiert,
+  fehlende Bestätigungen blockieren, gültiger Zustand ⇒ Plan mit `executable: false`, **keine Secrets** in
+  Plan/Metadaten/Audit, Quell-Scan (kein `docker`/`docker run`/`execFile`/`prisma`/agent/`child_process`).
+  **332 Tests grün.**
+
+#### Security
+- **Keine echte Sicherung, keine Docker-/Agent-Aktion, kein Archiv/Download/Restore/Import, keine DB-
+  Schreiboperation, keine Pfad-/Shell-Verarbeitung, keine Secrets.** Backup-Dateien werden als **potenziell
+  sensibel** eingestuft (nie „secret-free"). Guards rein/testbar; keine gefährliche UI-Aktion. **[ADR-0033](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (332) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 029 – Read-only Managed Server Export ohne Secrets (2026-07-02)
 
 > Erster read-only **JSON-Export** managed Server (nicht-geheime Metadaten + optional Audit-Historie).

@@ -365,6 +365,83 @@ export interface NetworkRemoveResult {
   audit: PlannedAuditAction[];
 }
 
+// --- Managed Volume Backup Blueprint (NDF Step 030: reine Planung, KEINE Ausführung) ---------
+
+/** Zieltyp eines (späteren) Backups – rein konzeptionell, wird NIE zu einem echten Kommando. */
+export type BackupTargetType = 'local' | 'hostPath' | 'download';
+
+/** Ist-Zustand für die Backup-Guards (vom Aufrufer ermittelt; die Guards sind rein/DB-frei). */
+export interface VolumeBackupState {
+  instanceId: string;
+  mode: string;
+  provisioningStatus: string | null;
+  runState: string | null;
+  serverDisplayName: string;
+  managedVolumeName: string | null;
+  managedVolumeState: string | null; // null = vorhanden/unbekannt | "removed"
+  volume: { exists: boolean; managed: boolean };
+  container: { exists: boolean; running: boolean };
+}
+
+/** Explizite Bestätigungen (kein Vorab-Default). Backup kann sensible TS3-Daten enthalten. */
+export interface VolumeBackupConfirmations {
+  confirmBackupMayContainSensitiveData?: boolean;
+  confirmBackupStorageResponsibility?: boolean;
+  confirmContainerShouldBeStopped?: boolean;
+  /** Optionale getippte Bestätigung, z. B. `CREATE BACKUP`. Wenn gesetzt, muss sie exakt passen. */
+  typedConfirmation?: string;
+}
+
+export interface VolumeBackupRequest {
+  state: VolumeBackupState;
+  confirmations: VolumeBackupConfirmations;
+  requestedTargetType?: BackupTargetType;
+  includeMetadataExport?: boolean;
+  includeAuditExport?: boolean;
+}
+
+/** Metadaten, die ein späterer echter Backup **mitschreiben** würde. **Enthalten selbst KEINE Secrets.** */
+export interface BackupMetadata {
+  backupVersion: number;
+  product: 'SpeakCore';
+  kind: 'managed-ts3-volume-backup';
+  createdAt: string;
+  instanceId: string;
+  serverDisplayName: string;
+  volumeName: string;
+  /** Der Backup-Inhalt (TS3-Daten) KANN sensibel sein – daher `unknown`, nie „secret-free". */
+  containsSecrets: 'unknown';
+  createdBy: string;
+  notes: string[];
+}
+
+/** Deklarative geplante Aktion – **wird in 0.1 NICHT ausgeführt**. Quelle wäre read-only. */
+export interface VolumeBackupPlannedAction {
+  action: 'BACKUP_MANAGED_VOLUME';
+  targetKind: 'volume';
+  managedName?: string;
+  readOnlySource: true;
+}
+
+/** Ergebnis der reinen Guard-/Planungslogik. Enthält KEINE Secrets. */
+export interface VolumeBackupEvaluation {
+  decision: 'allowed' | 'blocked';
+  blockedReasons: string[];
+  requiredConfirmations: string[];
+  warnings: string[];
+  /** TS3-Volumedaten gelten grundsätzlich als sensibel. */
+  dataSensitivity: 'sensitive';
+  plannedActions: VolumeBackupPlannedAction[];
+  /** Dateinamens-Muster (Vorlage) – kein realer Pfad, kein realer Zeitstempel. */
+  backupFormat: string;
+  backupMetadata: BackupMetadata | null;
+  auditEvents: string[];
+  rollbackLimitations: string[];
+  nextRecommendedStep: string | null;
+  /** In 0.1 IMMER `false` – reines Konzept, kein echtes Backup. */
+  executable: false;
+}
+
 // --- Deprovisioning Safety Blueprint (NDF Step 024: reine Planung, KEINE Ausführung) ---------
 
 /** Umfang einer (späteren) Deprovisioning-Aktion. */

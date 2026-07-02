@@ -257,6 +257,14 @@ Secrets/Credentials/verschlüsselten Werte** (Credentials komplett ausgeschlosse
 (nur `action/actor/target/result/createdAt`, keine Payloads). **Keine DB-Schreiboperation außer dem Export-Audit**
 (ohne Exportinhalt). `assertExportContainsNoSecrets` als Defense-in-Depth; Secret-Leak-Tests. **Kein Import/
 Restore/Unarchive/Hard-Delete.**
+
+**Volume-Backup-Blueprint (Step 030, [ADR-0033](DECISIONS.md)):** **reine Planungs-/Guard-Logik, es wird
+NICHTS gesichert** (`executable: false`). **Kein** Docker-Kommando/Hilfscontainer, **kein** Agent-Endpunkt,
+**kein** Archivfile/Download, **kein** Restore/Import, **keine** DB-Schreiboperation, **keine** Pfad-/Shell-
+Verarbeitung, **keine** Secrets. Guard: nur managed + gültige instanceId + managed Volume vorhanden (nicht
+`removed`) + **Container nicht laufend** + Bestätigungen (sensibel/Storage/gestoppt, optional getippt
+`CREATE BACKUP`). Fremde Ressourcen nie sicherbar. **Backup-Dateien gelten als potenziell sensibel** (nie
+„secret-free"); Metadaten selbst ohne Secrets. Unterschied: **Metadaten-Export ≠ Volume-Backup**.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

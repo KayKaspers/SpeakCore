@@ -276,6 +276,13 @@
         "downloadButton": "Export herunterladen",
         "downloadWithAudit": "Export mit Audit-Historie"
       },
+      "backup": {
+        "title": "Backup-Konzept (vorbereitet)",
+        "notActive": "Echte Backups sind noch nicht aktiv.",
+        "sensitive": "TS3-Backups können sensible Daten enthalten.",
+        "stoppedRecommended": "Für den ersten echten Backup-Step wird ein gestoppter Container empfohlen.",
+        "notDownload": "Dies ist kein Download und kein Restore der TS3-Daten."
+      },
       "deprovision": {
         "title": "Deprovisioning (noch nicht aktiv)",
         "notActive": "Das Entfernen von Volume/Network ist noch nicht aktiviert.",

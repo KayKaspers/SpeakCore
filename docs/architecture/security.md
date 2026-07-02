@@ -60,8 +60,9 @@ ServerInstance bleiben erhalten; in **Step 026** das **geteilte** Voice-Network 
 `-f`**, nur wenn kein managed Container mehr existiert, mit `confirmNetworkUnused`) – Container/Volumes/
 Credentials/ServerInstance bleiben erhalten. **Step 027** schließt das Deprovisioning ab: managed **ServerRecord
 archivieren** (rein DB-seitig, **kein Docker/Agent**, **kein Hard-Delete**, Credential-Löschung nur bei
-ausdrücklicher Wahl). **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine Reparatur,
-kein Secret in Logs. Details:
+ausdrücklicher Wahl). **Step 030** ergänzt ein **Volume-Backup-Konzept** (reine Guard-/Planungslogik, **kein
+echtes Backup**, `executable: false`; Backup-Dateien gelten als sensibel). **Kein Log-Lesen**, kein Inspect,
+**keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

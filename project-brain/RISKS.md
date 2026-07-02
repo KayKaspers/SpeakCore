@@ -173,6 +173,12 @@
   Hard-Delete. **Offen:** echtes Volume-Backup-Konzept, erweiterter Audit-Export, Import/Restore mit eigenem
   Sicherheitskonzept, finale Hard-Delete-Policy (erst nach Export-/Backup-Konzept). Restrisiko: der Export ist
   **kein** TS3-Datenbackup (Volume-Inhalte fehlen) – klar dokumentiert.
+- **Stand Step 030:** **Volume-Backup-Blueprint** ([ADR-0033](DECISIONS.md)) – **reine Guard-/Planungslogik,
+  kein echtes Backup** (`executable: false`). Adressiert die Sensibilität von TS3-Volume-Backups (mehrfache
+  Bestätigung, `containsSecrets: "unknown"`, nie „secret-free"), Managed-Only + konservativ „nur bei
+  gestopptem Container". **Offen:** echter Backup-Step, Backup-Download/Storage, Restore/Import (eigenes
+  Security-Design), Hard-Delete-Policy zuletzt. Restrisiko: **Backup-Dateien sind sensibel** und müssen
+  entsprechend geschützt aufbewahrt werden (Betreiberpflicht, dokumentiert).
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

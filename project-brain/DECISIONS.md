@@ -476,6 +476,26 @@
   Exportinhalt**. Kein Schema-Change. **Offen:** echtes Volume-Backup-Konzept, erweiterter Audit-Export,
   Import/Restore (nur mit eigenem Sicherheitskonzept), Hard-Delete-Policy erst nach Export-/Backup-Konzept.
 
+## ADR-0033 – Volume-Backup-Blueprint: reine Planung, read-only Quelle, nur bei gestopptem Container
+
+- **Status:** accepted (Step 030)
+- **Kontext:** Bevor echte Volume-Backups gebaut werden, braucht es ein getestetes Sicherheits-/Guard-Konzept.
+  Ein TS3-Volume-Backup kann **sensible Daten** enthalten und ist deutlich riskanter als der Metadaten-Export.
+- **Entscheidung:** **Reines, testbares Planungs-/Guard-Fundament** (`packages/shared/…/backup.ts`,
+  `executable: false`) ohne jede Ausführung: **kein** Docker-Kommando/Hilfscontainer, **kein** Agent-Endpunkt,
+  **kein** Archivfile/Download, **kein** Restore/Import, **kein** DB-Schreiben, **keine** Pfad-/Shell-Verarbeitung.
+  **Guard** (`canBackupManagedVolume`): nur **managed** + gültige `instanceId` + **managed Volume vorhanden**
+  (nicht `removed`) + **Container nicht laufend** (konservativ) + Bestätigungen `confirmBackupMayContainSensitiveData`
+  + `confirmBackupStorageResponsibility` + `confirmContainerShouldBeStopped` (optional getippt `CREATE BACKUP`).
+  Fremde/entfernte Ressourcen werden **nie** als sicherbar geplant. **Backup-Format** (Vorlage):
+  `speakcore-backup-ts3-<instanceId>-<timestamp>.tar.gz` + Metadaten-Blueprint (`containsSecrets: "unknown"` –
+  **nie** „secret-free"). Der spätere echte Backup-Step würde die Volumequelle **read-only** mounten.
+- **Begründung:** „Erst Vertrauen aufbauen": konservativ (nur gestoppter Container → konsistente Dateien,
+  weniger Risiko), Managed-Only, mehrfache bewusste Bestätigung, klare Datenschutz-Einstufung (sensibel).
+- **Konsequenzen:** Der echte Backup-Step, ein Backup-Download-/Storage-Konzept, **Restore/Import** (eigenes
+  Security-Design) und die **Hard-Delete-Policy** (ganz zuletzt) sind je eigene, spätere Steps. Der
+  **Metadaten-Export** (Step 029) bleibt strikt getrennt vom **Volume-Backup** (dieses kann sensible Inhalte haben).
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

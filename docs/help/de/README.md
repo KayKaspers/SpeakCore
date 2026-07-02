@@ -68,7 +68,11 @@
   **kein** Wiederherstellen (Unarchive) oder Hard-Delete. Ab Step 029 kann ein managed Server (aktiv oder
   archiviert) als **JSON exportiert** werden („Export herunterladen", optional mit Audit-Historie): enthält
   **nur nicht-geheime Metadaten** – **keine Zugangsdaten, keine Secrets**. Der Export ist **kein Backup/Restore
-  der TS3-Daten** (Volume-Inhalte), rein DB-seitig (kein Docker/Agent), und es gibt **keinen Import**.*
+  der TS3-Daten** (Volume-Inhalte), rein DB-seitig (kein Docker/Agent), und es gibt **keinen Import**. Ab
+  Step 030 gibt es zusätzlich ein **Backup-Konzept** (Info-Karte „Backup-Konzept vorbereitet"): Es erklärt,
+  dass echte TS3-Volume-Backups **noch nicht aktiv** sind, **sensible Daten** enthalten können und der erste
+  echte Backup-Step **einen gestoppten Container** empfiehlt. Es wird **noch nichts gesichert** – kein
+  Download, kein Restore.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

@@ -77,6 +77,19 @@ export default async function ServerDetailPage({
     </section>
   );
 
+  // Backup-Konzept (Step 030): nicht-ausführende Info-Karte. Kein echtes Backup, kein Download.
+  const backupInfoCard = (
+    <section className="mt-6 rounded-sc-lg border border-sc-border bg-sc-surface-raised p-4">
+      <h2 className="text-sc-sm font-medium text-sc-text-primary">{t('managed.backup.title')}</h2>
+      <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
+        <li>• {t('managed.backup.notActive')}</li>
+        <li>• {t('managed.backup.sensitive')}</li>
+        <li>• {t('managed.backup.stoppedRecommended')}</li>
+        <li>• {t('managed.backup.notDownload')}</li>
+      </ul>
+    </section>
+  );
+
   // Archivierter managed Server (Step 027): nur Status/Info, KEINE Lifecycle-Aktionen.
   if (server.mode === 'managed' && server.archivedAt) {
     return (
@@ -454,6 +467,7 @@ export default async function ServerDetailPage({
           )}
         </section>
 
+        {server.managedVolumeState !== 'removed' && backupInfoCard}
         {exportCard}
 
         <footer className="mt-6">

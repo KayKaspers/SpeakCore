@@ -290,7 +290,15 @@ Aktion (kein Hard-Delete, kein Unarchive).
 Versioniertes Format mit **explizitem Feld-Mapping** (nur nicht-geheime Metadaten + `credentialStatus`,
 optional redigierte Audit-Historie). **Keine Secrets/Credentials** (`assertExportContainsNoSecrets` als
 Defense-in-Depth). OWNER-only; aktive + archivierte managed Server; **kein Restore/Import/Unarchive**
-([ADR-0032](DECISIONS.md)). Volume-Backup/Import/Hard-Delete-Policy folgen als spätere, eigene Steps.
+([ADR-0032](DECISIONS.md)).
+
+**Volume-Backup-Blueprint (Step 030):** **reine, getestete Guard-/Planungslogik** in `@speakcore/shared`
+(`backup.ts`, `executable: false`) – **noch kein echtes Backup**. Guard (managed + gültige instanceId +
+managed Volume vorhanden/nicht `removed` + Container **nicht laufend**), Bestätigungsmodell, Datei-/Metadaten-
+Vorlage (`containsSecrets: "unknown"`, read-only Quelle) und `backup.managedVolume.*`-Audit-Konzept. UI:
+nicht-ausführende Info-Karte ([ADR-0033](DECISIONS.md)). Echter Backup-Step, Download/Storage, **Restore/Import**
+und die **Hard-Delete-Policy** folgen als eigene, abgesicherte Steps. **Metadaten-Export ≠ Volume-Backup**
+(letzteres kann sensible TS3-Daten enthalten).
 
 ## 7. Verwandte Dokumente
 

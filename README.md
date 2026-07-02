@@ -129,8 +129,10 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   Credential-Löschung nur bei ausdrücklicher Wahl, getippt `ARCHIVE SERVER`). Ab **Step 028** sind archivierte
   Server über die **Serverliste** (Tabs „Aktiv | Archiviert") auffindbar — rein lesend, ohne Lifecycle-Aktionen.
   Ab **Step 029** lässt sich ein managed Server als **JSON exportieren** (nicht-geheime Metadaten + optional
-  Audit-Historie, **ohne Secrets/Credentials**, kein Docker/Agent, kein Restore).
-- **Noch kein** Import/Restore, kein echtes Volume-Backup, kein Unarchive, keine finale Hard-Delete-Policy,
+  Audit-Historie, **ohne Secrets/Credentials**, kein Docker/Agent, kein Restore). Ab **Step 030** ein
+  getestetes **Volume-Backup-Konzept** (reine Guard-/Planungslogik, `executable: false`, Backup-Dateien
+  gelten als sensibel) — **noch kein echtes Backup**.
+- **Noch kein** echtes Volume-Backup, kein Import/Restore, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller
   gespeicherten Zugangsdaten als **Operator-/CLI-Vorgang** (`pnpm --filter @speakcore/web rotate-secrets`,
