@@ -109,6 +109,7 @@ export default async function ServerDetailPage({
           <li>• {t('managed.backupList.sensitiveHint')}</li>
           <li>• {t('managed.backupList.readOnlyHint')}</li>
           <li>• {t('managed.backupList.checksumHint')}</li>
+          <li>• {t('managed.backupList.downloadNotActiveHint')}</li>
         </ul>
         {backupList &&
           verify &&

@@ -336,6 +336,15 @@ fehlender Prüfsummen – Option A). Web: OWNER-only „Prüfsumme prüfen" pro 
 archivierte managed Server), Ergebnis-Banner in der Backup-Liste; Audit
 `backup.managedVolume.verify.*` (+ `verify.mismatch`) bewusst **ohne Dateinamen/Prüfsummenwerte**.
 
+**Backup-Download-Blueprint (Step 036, [ADR-0035](DECISIONS.md)):** **reine, getestete
+Guard-/Planungslogik** (`backup-download.ts` in `@speakcore/shared`, `executable: false`) – **kein
+Download, kein Streaming, keine Route**. Guards: managed + OWNER + striktes Dateinamensmuster +
+Backup existiert + Metadaten gültig + Checksum vorhanden + **Verify `valid` als harte Regel** +
+Rate-Limit + 2 Bestätigungen + getippt `DOWNLOAD BACKUP`. **Zielbild Option A:** Web-proxied
+Streaming (Browser → Web → Agent → Browser; nie Browser→Agent, kein Buffering). Policies modelliert
+(5/h, 20/Tag, Timeout 600 s, Warnung ab 1 GiB); Audit `backup.managedVolume.download.*` ohne
+Inhalt/Dateiname. Der echte Streaming-Download folgt als eigener, abgesicherter Step.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

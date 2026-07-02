@@ -84,7 +84,9 @@
   Server **neu berechnet** und mit den Metadaten verglichen – Ergebnis „gültig" oder „stimmt nicht
   überein" (dann wurde die Datei verändert oder ist beschädigt). Es wird dabei **nichts
   heruntergeladen, wiederhergestellt oder gelöscht**; ältere Backups ohne Prüfsumme zeigen
-  „Prüfsumme fehlt".*
+  „Prüfsumme fehlt". **Backup-Download ist noch nicht aktiv** (Step 036 ist nur das
+  Sicherheitskonzept): Ein späterer Download setzt eine **gültig verifizierte Prüfsumme** voraus,
+  läuft nie direkt vom Browser zum Agent und wird separat bestätigt und auditiert.*
 - Logs lesen
 - Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
   Backups einsehbar; ab Step 034: SHA-256-Integritätsprüfsumme; ab Step 035: read-only

@@ -72,7 +72,10 @@ der Antwort); **Step 034** ergänzt **SHA-256-Prüfsummen** für neue Backups (s
 kein Entpacken; **Integrität, keine Verschlüsselung/Signatur**; Anzeige gekürzt in der Backup-Liste,
 Prüfsummenwert nicht im Audit); **Step 035** ergänzt das **read-only Verify** (SHA-256 neu berechnen
 + mit metadata.json vergleichen ⇒ `valid`/`mismatch`; strikte Dateinamen-Validierung, keine
-Schreibaktion, kein Nachrüsten, keine Host-Pfade). **Kein Log-Lesen**, kein Inspect,
+Schreibaktion, kein Nachrüsten, keine Host-Pfade); **Step 036** ergänzt ein **Download-Konzept als
+reinen Blueprint** (`executable: false`: kein Download, kein Streaming; Zielbild Web-proxied
+Streaming mit Verify-`valid`-Pflicht, Bestätigungen + `DOWNLOAD BACKUP`, Rate-/Größen-Policies,
+nie Browser→Agent). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

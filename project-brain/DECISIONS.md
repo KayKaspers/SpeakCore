@@ -519,6 +519,33 @@
   Aufbewahrung/Rotation der serverseitigen Backup-Dateien liegt beim Betreiber. Erster legitimer Einsatz
   von `docker run` im Agent – Source-Scan-Tests erlauben ihn **nur** im Backup-Modul.
 
+## ADR-0035 – Backup-Download-Blueprint: Verify-vor-Download, Web-proxied Streaming, `executable: false`
+
+- **Status:** accepted (Step 036)
+- **Kontext:** Backups existieren (032), sind sichtbar (033), tragen Prüfsummen (034) und sind
+  verifizierbar (035). Bevor Backup-Bytes das System verlassen, braucht es ein getestetes
+  Sicherheitskonzept – Downloads sind der erste Punkt, an dem sensible TS3-Daten die serverseitige
+  Schutzumgebung verlassen würden.
+- **Entscheidung:** **Reiner, testbarer Download-Blueprint** (`backup-download.ts` in
+  `@speakcore/shared`, `executable: false`) ohne jede Ausführung: keine Download-Route, kein
+  Streaming, keine Datei-/DB-/Agent-Operation. **Harte Guard-Regeln** für den späteren echten
+  Download: managed + OWNER + striktes Instanz-Dateinamensmuster + Backup existiert + Metadaten
+  gültig + Checksum vorhanden + **Verify `valid` zwingend** (mismatch/nicht verifiziert/ohne
+  Prüfsumme ⇒ immer blockiert) + Rate-Limit + zwei Bestätigungen + getippt **`DOWNLOAD BACKUP`**.
+  **Zielbild Option A – Web-proxied Streaming:** Browser → Web (OWNER-Prüfung) → serverseitiger
+  Agent-Call (Token) → Streaming aus `AGENT_BACKUP_DIR` → Browser; **nie Browser→Agent**, kein
+  Memory-Buffering, keine temporäre Kopie. Policies modelliert: 5 Downloads/h, 20/Tag je
+  Owner+Server, Timeout 600 s, Warnung ab 1 GiB. Audit `backup.managedVolume.download.*` ohne
+  Inhalt/Dateiname/Host-Pfad.
+- **Begründung:** Bewährtes Muster „erst Blueprint, dann minimale Ausführung" (024→025/026,
+  030→032). Option A hält Agent-Token/URLs vollständig serverseitig und bündelt die Owner-Prüfung
+  im Web; die Verify-vor-Download-Regel stellt sicher, dass nur integritätsgeprüfte Dateien
+  ausgeliefert würden.
+- **Konsequenzen:** Der echte Streaming-Download ist ein eigener, abgesicherter Step (Backpressure/
+  Timeout/Abbruch im Web-Proxy sind dort zu lösen und zu testen). **Restore/Import/Delete/Rotation**
+  bleiben ausgeschlossen; keine Signatur ⇒ weiterhin keine Authentizitätsgarantie. Der Blueprint
+  ändert am Laufzeitverhalten nichts.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

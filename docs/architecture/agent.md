@@ -337,6 +337,12 @@ Nachträgliche **Integritätsprüfung** eines vorhandenen Backups (Token-Gate, *
 der Karte. Audit: `backup.managedVolume.verify.requested/completed/failed` + `verify.mismatch` –
 bewusst **ohne Dateinamen/Prüfsummenwerte**.
 
+> **Backup-Download (Step 036): nur Blueprint.** Es gibt **keinen** Download-Endpunkt – kein Byte
+> verlässt den Agent. Das Zielbild für einen späteren Step ist **Web-proxied Streaming** (Browser →
+> Web → serverseitiger Agent-Call mit Token → Streaming aus `AGENT_BACKUP_DIR` → Browser; nie
+> Browser→Agent, kein Buffering) mit **Verify-`valid`-Pflicht**, Bestätigungen (`DOWNLOAD BACKUP`)
+> und Rate-/Größen-Policies – siehe [ADR-0035](../../project-brain/DECISIONS.md).
+
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 
 **Read-only** Healthcheck-Baustein (nur Token-Gate, **kein** Write-Flag):

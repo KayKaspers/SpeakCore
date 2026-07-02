@@ -315,6 +315,7 @@
         "checksumHint": "SHA-256 prüft die Integrität – es ist keine Verschlüsselung und keine Signatur.",
         "checksumMissing": "Prüfsumme fehlt",
         "checksumShow": "Vollständige Prüfsumme anzeigen",
+        "downloadNotActiveHint": "Backup-Download ist noch nicht aktiv – ein späterer Download setzt eine gültig verifizierte Prüfsumme voraus und wird separat bestätigt und auditiert.",
         "verifyButton": "Prüfsumme prüfen",
         "verifyResult": {
           "valid": "Prüfung erfolgreich: Die Prüfsumme stimmt überein (Backup unverändert).",

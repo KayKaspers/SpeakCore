@@ -5,6 +5,48 @@
 
 ## [Unreleased]
 
+### NDF Step 036 – Backup Download Security Blueprint (2026-07-02)
+
+> **Reines Sicherheits-/Architekturkonzept** für spätere Backup-Downloads (`executable: false`,
+> analog Steps 024/030). **Kein einziges Backup-Byte verlässt das System**: kein Download, kein
+> Streaming, keine Download-Route, kein Restore/Delete/Import. Grundsatz: erst Download-Sicherheit
+> planen, dann Bytes übertragen.
+
+#### Added
+- **Blueprint `packages/shared/src/provisioning/backup-download.ts`** (rein, testbar, ohne
+  Datei-/DB-/Agent-Operation): `validateBackupDownloadRequest`, `canDownloadManagedBackup`,
+  `buildBackupDownloadFlow`, `buildBackupDownloadPlan` (+ Typen `BackupDownloadState/`
+  `Confirmations/PlannedFlow/Evaluation` u. a. in `@speakcore/types`).
+- **Guard-Voraussetzungen** für einen späteren echten Download: managed + OWNER + strikt gültiger
+  Dateiname (Instanz-Muster, kein `/`/`\`/`..`) + Backup existiert (Step-033-Liste) + Metadaten
+  `present` + Checksum vorhanden + **Verify `valid` als harte Regel** (`mismatch`/`notVerified`/
+  `checksumMissing` blockieren immer) + Rate-Limit frei + Bestätigungen
+  `confirmBackupContainsSensitiveData` + `confirmSecureStorageResponsibility` + getippt
+  **`DOWNLOAD BACKUP`**. Warnungen (nicht blockierend): `serverArchived`, `largeFile` (ab 1 GiB),
+  `sizeUnknown`.
+- **Streaming-Zielbild (Option A, deklarativ):** Web-proxied Streaming – Browser → Web (OWNER) →
+  serverseitiger Agent-Call (Token) → kontrolliertes Streaming aus `AGENT_BACKUP_DIR` → Browser.
+  **Nie Browser→Agent**, kein Memory-Buffering, keine temporäre Kopie
+  (`browserToAgentDirect: false`, `bufferingAllowed: false`).
+- **Policies (nur modelliert):** Rate-Limit `ownerAndServer` (5/h, 20/Tag, Timeout 600 s);
+  Größen-Policy (Warnung ab 1 GiB, `streamingRequired: true`).
+- **Audit-Konzept:** `backup.managedVolume.download.requested/blocked/confirmed/started/`
+  `completed/failed` – ohne Inhalt, ohne Dateiname, ohne Host-Pfad.
+- **UI (nicht-ausführend):** Hinweis in der Backup-Karte „Backup-Download ist noch nicht aktiv –
+  … setzt eine gültig verifizierte Prüfsumme voraus …" (DE/EN). **Keine** Download-Buttons.
+- **Tests:** `packages/shared/test/backup-download.test.ts` (15): alle Blockier-Pfade (external,
+  Rolle, Dateiname/Traversal, Metadaten, Checksum, Verify fehlt/mismatch, Rate-Limit,
+  Bestätigungen, typed), allowed-Plan mit `executable: false`, Warnungen, keine Secrets/Host-Pfade
+  im Plan, Audit ohne Dateinamen, Source-Scan (kein fs/child_process/fetch/prisma/agent-Import).
+
+#### Nicht enthalten (bewusst)
+- Kein echter Download/Streaming, keine Download-Route/-URL, kein Restore/Import/Delete/Rotate,
+  keine neue Agent- oder Docker-Aktion. Umsetzung des Streamings folgt als eigener Step.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (422) · `prisma validate` n. z.
+  (kein Schema-Change). Siehe **ADR-0035**.
+
 ### NDF Step 035 – Read-only Backup Verify (2026-07-02)
 
 > Nachträgliche **read-only Verifikation** vorhandener Backups: SHA-256 neu berechnen und mit der

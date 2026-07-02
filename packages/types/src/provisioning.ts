@@ -474,6 +474,77 @@ export interface BackupVerifyResult {
   errors?: ValidationError[];
 }
 
+// --- Backup Download Blueprint (NDF Step 036: reine Planung, KEIN Download/Streaming) --------
+
+/** Verify-Zustand aus Step 035, wie ihn der Aufrufer für die Download-Guards ermittelt hat. */
+export type BackupDownloadVerifyState = 'valid' | 'mismatch' | 'notVerified' | 'checksumMissing';
+
+/** Ist-Zustand für die Download-Guards (vom Aufrufer ermittelt; die Guards sind rein/DB-frei). */
+export interface BackupDownloadState {
+  mode: string;
+  instanceId: string;
+  /** Archiviert? Download bleibt erlaubt (Warnung) – Backups existieren serverseitig weiter. */
+  archived: boolean;
+  actorRole: string;
+  fileName: string;
+  /** Existiert das Backup laut read-only Liste (Step 033)? */
+  backupExists: boolean;
+  metadataStatus: 'present' | 'missing' | 'invalid';
+  checksumPresent: boolean;
+  verifyStatus: BackupDownloadVerifyState;
+  sizeBytes: number | null;
+  /** Rein modellierter Rate-Limit-Zustand (keine DB-Operation im Blueprint). */
+  rateLimited: boolean;
+}
+
+/** Explizite Bestätigungen für den späteren Download (kein Vorab-Default). */
+export interface BackupDownloadConfirmations {
+  confirmBackupContainsSensitiveData?: boolean;
+  confirmSecureStorageResponsibility?: boolean;
+  /** Getippte Bestätigung, z. B. `DOWNLOAD BACKUP`. Wenn gesetzt, muss sie exakt passen. */
+  typedConfirmation?: string;
+}
+
+/** Geplantes Streaming-Zielbild – deklarativ, wird in 0.1 NICHT ausgeführt. */
+export interface BackupDownloadPlannedFlow {
+  /** Web-proxied Streaming (Option A): Browser → Web (OWNER) → Agent (Token) → Browser. */
+  kind: 'webProxiedStreaming';
+  steps: string[];
+  /** Der Browser spricht den Agent NIE direkt an. */
+  browserToAgentDirect: false;
+  /** Kein Memory-Buffering/keine temporäre Kopie – nur Streaming. */
+  bufferingAllowed: false;
+}
+
+export interface BackupDownloadRateLimitPolicy {
+  scope: 'ownerAndServer';
+  maxDownloadsPerHour: number;
+  maxDownloadsPerDay: number;
+  timeoutMs: number;
+}
+
+export interface BackupDownloadSizeLimitPolicy {
+  /** Ab dieser Größe ist eine explizite Warnung/Zusatzbestätigung vorgesehen. */
+  warnAtBytes: number;
+  streamingRequired: true;
+}
+
+/** Ergebnis der reinen Download-Guard-/Planungslogik. Enthält KEINE Secrets/Host-Pfade. */
+export interface BackupDownloadEvaluation {
+  decision: 'allowed' | 'blocked';
+  blockedReasons: string[];
+  requiredConfirmations: string[];
+  warnings: string[];
+  dataSensitivity: 'sensitive';
+  plannedFlow: BackupDownloadPlannedFlow;
+  auditEvents: string[];
+  rateLimitPolicy: BackupDownloadRateLimitPolicy;
+  sizeLimitPolicy: BackupDownloadSizeLimitPolicy;
+  nextRecommendedStep: string | null;
+  /** In 0.1 IMMER `false` – reines Konzept, kein Download, kein Streaming. */
+  executable: false;
+}
+
 // --- Managed Volume Backup Blueprint (NDF Step 030: reine Planung, KEINE Ausführung) ---------
 
 /** Zieltyp eines (späteren) Backups – rein konzeptionell, wird NIE zu einem echten Kommando. */

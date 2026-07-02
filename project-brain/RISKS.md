@@ -82,8 +82,9 @@
 - **Rest:** **Restore/Import fehlen weiterhin** (bewusst, eigenes Security-Design); **read-only
   Verify seit Step 035** (SHA-256-Neuberechnung + Vergleich, `valid`/`mismatch`), aber Prüfsummen
   ohne Signatur (keine Authentizität) und kein Nachrüsten für Step-032-Backups
-  (`checksumMissing`); keine Rotation der Backup-Dateien; Aufbewahrung liegt beim Betreiber
-  (Backup-Dateien sind **sensibel**).
+  (`checksumMissing`); **Download nur als Blueprint (Step 036)** – kein Byte verlässt das System,
+  echtes Streaming ist eigener Step; keine Rotation der Backup-Dateien; Aufbewahrung liegt beim
+  Betreiber (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen
 - **E:** hoch · **A:** mittel · **Risiko:** mittel

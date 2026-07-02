@@ -315,6 +315,7 @@
         "checksumHint": "SHA-256 verifies integrity – it is not encryption and not a signature.",
         "checksumMissing": "checksum missing",
         "checksumShow": "Show full checksum",
+        "downloadNotActiveHint": "Backup download is not active yet – a later download requires a successfully verified checksum and will be confirmed and audited separately.",
         "verifyButton": "Verify checksum",
         "verifyResult": {
           "valid": "Verification successful: the checksum matches (backup unchanged).",

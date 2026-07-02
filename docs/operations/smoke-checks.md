@@ -86,13 +86,16 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Eintrag auf **„Prüfsumme prüfen"** klicken. Erwartung: grünes Banner „Prüfung erfolgreich …"
   (bzw. „Prüfsumme fehlt" bei Step-032-Backups). Rotes „stimmt NICHT überein" nur, wenn die Datei
   tatsächlich verändert wurde. Es wird nichts geschrieben/geladen/gelöscht.
+- **Kein Download (Step 036 ist nur Blueprint):** Die Backup-Karte zeigt den Hinweis
+  „Backup-Download ist noch nicht aktiv …" und enthält **keine** Download-/Restore-/Delete-/
+  Rotate-Buttons – prüfen, dass keine solche Aktion angeboten wird.
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 407 Tests |
+| lint/typecheck/test/build | ☐ | 422 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |
