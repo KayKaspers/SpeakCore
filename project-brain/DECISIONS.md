@@ -354,6 +354,24 @@
   Bestätigungskonzept); ebenso **Restart** und ein vollständiges **Deprovisioning** (inkl. ServerInstance/
   Credential-Löschung). Kein `rm` verwaister Ressourcen in diesem Step.
 
+## ADR-0027 – Restart als Stop→Start-Orchestrierung (kein `docker restart`)
+
+- **Status:** accepted (Step 023)
+- **Kontext:** Ein managed Container soll neu gestartet werden können, ohne ein neues Docker-Kommando
+  (`docker restart`) oder eine neue Agent-Schreibaktion einzuführen.
+- **Entscheidung:** **Kein `docker restart`.** Der Restart ist ein reiner **Web-Orchestrator**
+  (`restartManagedContainerForServer`), der die bestehenden, geprüften Flows nacheinander nutzt:
+  `RUNNING → Stop (Step 021) → Start (Step 018) → RUNNING`. Beide Teil-Flows erzwingen weiterhin Token +
+  `AGENT_DOCKER_WRITE_ENABLED` und schreiben ihre eigenen `docker.container(Stop|Start).*`-Audits. Restart
+  verlangt eine **erneute explizite Lizenz-Checkbox** (0.1: keine historische Audit-Auswertung). Kein
+  Start, wenn Stop fehlschlägt; kein `RUNNING`, wenn Start fehlschlägt.
+- **Begründung:** Wiederverwendung statt Duplizierung; keine neue Docker-Angriffsfläche; die
+  Sicherheitsgrenzen der Teil-Flows gelten automatisch. Rechtlich sauber durch erneute Zustimmung.
+- **Konsequenzen:** Fehlerzustände sind eindeutig: Stop-Fehler ⇒ Status bleibt `RUNNING`
+  (`restartStopFailed`); Start-Fehler nach Stop ⇒ `CONTAINER_CREATED`/`runState='stopped'`
+  (`restartStartFailed`). **Kein Reparaturverhalten** bei DB-/Ist-Inkonsistenz (nur `RUNNING` erlaubt;
+  Healthcheck bleibt Quelle des Ist-Zustands). Restart-Audit: `docker.containerRestart.*`.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

@@ -51,8 +51,10 @@ echte `reachable`/`unreachable`/`notConfigured` liefert. In **Step 021** kann de
 werden (`docker stop`, `RUNNING → CONTAINER_CREATED` + `runState='stopped'`) – **ohne Löschung**, ohne
 `rm/restart`. In **Step 022** kann der **gestoppte** Container **entfernt** werden (`docker rm`, ohne
 `-f`/`-v`, `CONTAINER_CREATED → RESOURCES_PREPARED`) – **Volume, Network, Credentials und ServerInstance
-bleiben erhalten**. **Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine
-Reparatur, kein Secret in Logs. Details:
+bleiben erhalten**. In **Step 023** kann der Container **neu gestartet** werden – als **Stop→Start-
+Orchestrierung** (`RUNNING → Stop → Start → RUNNING`), **ohne** `docker restart`, mit erneuter Lizenzbestätigung.
+**Kein Log-Lesen**, kein Inspect, **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in
+Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 
 ## Auth-Härtung (Step 004)

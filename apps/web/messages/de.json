@@ -219,6 +219,14 @@
       "removeConfirm4": "Falls der Container noch läuft, musst du ihn zuerst stoppen.",
       "removeConfirmYes": "Ja, Container entfernen",
       "removeConfirmCancel": "Abbrechen",
+      "restartButton": "Container neu starten",
+      "restartHint": "Neustart = zuerst stoppen, dann starten. Healthcheck danach empfohlen.",
+      "restartConfirm1": "Der TS3-Container wird zuerst gestoppt und danach wieder gestartet.",
+      "restartConfirm2": "Es werden keine Daten gelöscht.",
+      "restartConfirm3": "Es werden keine Logs gelesen.",
+      "restartLicenseLabel": "Ich bestätige, dass ich die TeamSpeak-3-Lizenzbedingungen weiterhin einhalte/akzeptiere.",
+      "restartConfirmYes": "Ja, neu starten",
+      "restartConfirmCancel": "Abbrechen",
       "health": {
         "title": "Healthcheck (read-only)",
         "checkButton": "Status prüfen",
@@ -265,7 +273,9 @@
         "hostInvalid": "Ungültige Query-Adresse.",
         "hostBlocked": "Diese Adresse ist nicht erlaubt (Metadaten/Link-Local/unspezifiziert).",
         "stillRunning": "Der Container läuft noch – bitte zuerst stoppen.",
-        "removeFailed": "Container konnte nicht entfernt werden."
+        "removeFailed": "Container konnte nicht entfernt werden.",
+        "stopFailed": "Neustart abgebrochen: Der Container konnte nicht gestoppt werden.",
+        "startFailed": "Neustart unvollständig: Der Container wurde gestoppt, aber nicht wieder gestartet."
       },
       "status": {
         "DRAFT": "Entwurf",
@@ -286,7 +296,11 @@
         "createFailed": "Container konnte nicht erstellt werden.",
         "invalidPlan": "Der Provisioning-Plan ist ungültig.",
         "startFailed": "Container konnte nicht gestartet werden.",
-        "notFound": "Container nicht gefunden."
+        "notFound": "Container nicht gefunden.",
+        "stillRunning": "Der Container läuft noch – bitte zuerst stoppen.",
+        "removeFailed": "Container konnte nicht entfernt werden.",
+        "restartStopFailed": "Neustart abgebrochen: Stop fehlgeschlagen.",
+        "restartStartFailed": "Neustart unvollständig: Start nach dem Stop fehlgeschlagen."
       }
     }
   },

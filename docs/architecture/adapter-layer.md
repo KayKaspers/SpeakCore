@@ -88,8 +88,13 @@ neuer Lifecycle-Status, **keine Löschung** (Volume/Network bleiben), kein `rm/r
 **Container-Remove (Step 022):** `CONTAINER_CREATED → RESOURCES_PREPARED` (+ `runState='unknown'`) – der
 Adapter delegiert an den Agent, der **`docker rm`** eines **gestoppten** managed Containers ausführt (**kein**
 `-f`/`-v`). **Volume, Network, Credentials und der `ServerInstance`-Record bleiben erhalten**; läuft der
-Container noch ⇒ `stillRunning` ([ADR-0026](../../project-brain/DECISIONS.md)). **Volume-/Network-Remove**,
-**Restart** und ein optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
+Container noch ⇒ `stillRunning` ([ADR-0026](../../project-brain/DECISIONS.md)).
+
+**Container-Restart (Step 023):** `RUNNING → Stop → Start → RUNNING` – **kein `docker restart`** und **keine**
+neue Agent-Aktion: der Web-Orchestrator ruft die bestehenden Stop-/Start-Flows nacheinander auf (erneute
+Lizenz-Checkbox). Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler
+([ADR-0027](../../project-brain/DECISIONS.md)). **Volume-/Network-Remove** (Deprovisioning) und ein
+optionaler **Agent-vermittelter Query-Proxy** folgen als eigene Steps.
 
 ## Datenfluss
 

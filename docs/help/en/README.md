@@ -42,7 +42,11 @@
   explicit confirmation): via `docker rm` (no force), status returns to "Resources prepared". **Only the
   container is removed** – **volume, network and stored credentials are kept**, the server instance is not
   deleted. If the container is still running, stop it first. **No** log reading, **no** inspect, **no**
-  repair. Volume/network deletion and restart follow in their own steps.*
+  repair. From Step 023 a running container can be **restarted** ("Restart container" with confirmation and
+  a fresh license checkbox): the container is **stopped first and then started again** – **no** `docker
+  restart`, **no** deletion, **no** log reading. A health check afterwards is recommended. **No** log
+  reading, **no** inspect, **no** repair. Volume/network deletion (full deprovisioning) follows in its own
+  step.*
 - Reading logs
 - Backup & Restore
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials

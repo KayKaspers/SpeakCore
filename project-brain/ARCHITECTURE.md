@@ -246,6 +246,13 @@ Container, **kein** `-f`/`-v`). Läuft er noch ⇒ `stillRunning` (zuerst stoppe
 `alreadyRemoved`; fremder Name ⇒ `conflict`. **Volume, Network, Credentials und der `ServerInstance`-
 Record bleiben erhalten** ([ADR-0026](DECISIONS.md)). Audit: `docker.containerRemove.*`.
 
+**Container-Restart (Step 023):** `RUNNING → Stop → Start → RUNNING`, **OWNER-only** mit erneuter
+Lizenz-Checkbox. **Kein `docker restart`** und **keine** neue Agent-Aktion: `core/container-restart`
+orchestriert die bestehenden **Stop**- (Step 021) und **Start**-Flows (Step 018). Kein Start bei
+Stop-Fehler (`restartStopFailed`, bleibt `RUNNING`); kein `RUNNING` bei Start-Fehler
+(`restartStartFailed`, `CONTAINER_CREATED`/`runState='stopped'`). Kein Reparaturverhalten bei Inkonsistenz.
+Audit: `docker.containerRestart.*` ([ADR-0027](DECISIONS.md)).
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

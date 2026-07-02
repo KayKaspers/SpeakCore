@@ -5,6 +5,42 @@
 
 ## [Unreleased]
 
+### NDF Step 023 – Managed Restart Flow ohne `docker restart` (2026-07-01)
+
+> Sicherer **Neustart** managed Container als **Stop→Start-Orchestrierung** (`RUNNING → Stop → Start →
+> RUNNING`). **Kein** `docker restart`, **keine** neue Agent-Schreibaktion.
+
+#### Added
+- **Web-Orchestrator** `restartManagedContainerForServer` (`src/core/container-restart.ts`) + reine
+  Helfer (`container-restart-helpers.ts`) + **OWNER-only Server Action** `restartContainerAction`
+  (rate-limitiert). Nutzt **ausschließlich** die bestehenden **Stop**- (Step 021) und **Start**-Flows
+  (Step 018) über deren Agent-Endpunkte – **kein** `docker restart`, kein neues Docker-Kommando.
+- **Erneute Lizenzbestätigung** (Checkbox) beim Restart ([ADR-0027](DECISIONS.md)) – rechtlich sauber,
+  ohne historische Audit-Auswertung. Ohne Zustimmung `licenseRequired` (kein Restart).
+- **Fehlerhart getrennt:** Stop fehlgeschlagen ⇒ **kein Start**, Status bleibt `RUNNING`
+  (`restartStopFailed`). Start fehlgeschlagen nach Stop ⇒ `CONTAINER_CREATED`/`runState='stopped'`
+  (`restartStartFailed`). Erfolg ⇒ `RUNNING` + `runState='running'`. **Kein Reparaturverhalten** bei
+  DB-/Ist-Inkonsistenz (nur `RUNNING` erlaubt; Healthcheck bleibt Ist-Quelle).
+- **UI (DE/EN):** managed Detailseite bei `RUNNING` mit **Neu-starten-Button + Bestätigung +
+  Lizenz-Checkbox** (zuerst stoppen, dann starten; keine Löschung; keine Logs; Healthcheck danach
+  empfohlen). **Keine** Remove-/Volume-/Network-Buttons.
+- **Audit:** `docker.containerRestart.requested/licenseConfirmed/stopStarted/stopCompleted/startStarted/
+  completed/failed` (Target = ServerInstance-ID, **keine Secrets/Roh-Ausgaben**); die Teil-Flows schreiben
+  zusätzlich ihre `docker.container(Stop|Start).*`-Events.
+- Tests: Guard (`nur RUNNING`), vollständige Audit-Sequenzen (completed/stopFailed/startFailed/
+  licenseRequired/invalidState), kein Secret im Audit, **Quell-Scan (kein `docker restart`/`rm`/`logs`/
+  Socket)**. Bestehende Stop-/Start-Tests bleiben grün. **243 Tests grün.**
+
+#### Security
+- OWNER-only; die Sicherheitsgrenzen der Teil-Flows gelten automatisch (Token + `AGENT_DOCKER_WRITE_ENABLED`,
+  Managed-Only, kein Browser→Agent). **Kein** `restart`/`run`/`create`/`rm`/`inspect`/`exec`/`cp`/`logs`,
+  kein compose, kein Socket, keine Löschung, **kein Log-Lesen**, keine Secrets im Client/Audit. Quell-Scan-
+  Test erzwingt, dass **kein** `docker restart` eingeführt wird. **[ADR-0027](DECISIONS.md).**
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (243) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 022 – REMOVE_MANAGED_CONTAINER ohne Volume-/Network-Löschung (2026-07-01)
 
 > Kontrolliertes **Entfernen** eines **gestoppten** managed Containers. `CONTAINER_CREATED →

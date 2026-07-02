@@ -15,6 +15,7 @@ import {
 import { RemoveServerButton } from '../RemoveServerButton';
 import { StopContainerButton } from '../StopContainerButton';
 import { RemoveContainerButton } from '../RemoveContainerButton';
+import { RestartContainerButton } from '../RestartContainerButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,6 +115,8 @@ export default async function ServerDetailPage({
               'hostBlocked',
               'hostRequired',
               'stillRunning',
+              'stopFailed',
+              'startFailed',
             ].includes(notice) && (
               <p className="mb-4 rounded-sc-sm bg-sc-warning/15 px-3 py-2 text-sc-sm text-sc-warning">
                 {t(`managed.notice.${notice}`)}
@@ -323,12 +326,18 @@ export default async function ServerDetailPage({
           )}
 
           {provStatus === 'RUNNING' && (
-            <div className="mt-6 border-t border-sc-border pt-4">
-              <StopContainerButton locale={locale} id={server.id} />
-              <div className="mt-2 space-y-1 text-sc-caption text-sc-text-muted">
-                <p>• {t('managed.stopHintNoDelete')}</p>
-                <p>• {t('managed.stopHintKeepResources')}</p>
-                <p>• {t('managed.stopHintNoLogs')}</p>
+            <div className="mt-6 space-y-4 border-t border-sc-border pt-4">
+              <div>
+                <StopContainerButton locale={locale} id={server.id} />
+                <div className="mt-2 space-y-1 text-sc-caption text-sc-text-muted">
+                  <p>• {t('managed.stopHintNoDelete')}</p>
+                  <p>• {t('managed.stopHintKeepResources')}</p>
+                  <p>• {t('managed.stopHintNoLogs')}</p>
+                </div>
+              </div>
+              <div>
+                <RestartContainerButton locale={locale} id={server.id} />
+                <p className="mt-2 text-sc-caption text-sc-text-muted">{t('managed.restartHint')}</p>
               </div>
             </div>
           )}

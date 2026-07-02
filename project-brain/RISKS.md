@@ -146,6 +146,10 @@
   Network-/Credential-/ServerInstance-Löschung**, Idempotenz (`alreadyRemoved`)/`conflict`. `CONTAINER_CREATED
   → RESOURCES_PREPARED`. **Volume-/Network-Remove** (verwaiste Ressourcen, vollständiges Deprovisioning)
   bleibt ein eigener, deutlich gefährlicherer Step mit Backup-/Bestätigungskonzept.
+- **Stand Step 023:** **Restart** ([ADR-0027](DECISIONS.md)) führt **kein** neues Docker-Kommando ein –
+  reine Web-Orchestrierung der Stop-/Start-Flows (`RUNNING → Stop → Start → RUNNING`) mit erneuter
+  Lizenzbestätigung. Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler; kein Reparaturverhalten
+  bei DB-/Ist-Inkonsistenz (Healthcheck bleibt Ist-Quelle).
 - **Stand Step 019:** **read-only Healthcheck** (`docker container ls` mit Label-Filtern) – **kein**
   Write-Flag, **kein** `inspect/logs/exec/start/stop/rm`, kein Socket, keine Portscans, **keine
   Reparatur**. Trennt Lifecycle- vs. Ist-Zustand; keine Roh-Ausgaben/Secrets. Optionaler TS3-Check nur

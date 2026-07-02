@@ -219,6 +219,14 @@
       "removeConfirm4": "If the container is still running, stop it first.",
       "removeConfirmYes": "Yes, remove container",
       "removeConfirmCancel": "Cancel",
+      "restartButton": "Restart container",
+      "restartHint": "Restart = stop first, then start. A health check afterwards is recommended.",
+      "restartConfirm1": "The TS3 container is stopped first and then started again.",
+      "restartConfirm2": "No data is deleted.",
+      "restartConfirm3": "No logs are read.",
+      "restartLicenseLabel": "I confirm that I continue to comply with / accept the TeamSpeak 3 license terms.",
+      "restartConfirmYes": "Yes, restart",
+      "restartConfirmCancel": "Cancel",
       "health": {
         "title": "Health check (read-only)",
         "checkButton": "Check status",
@@ -265,7 +273,9 @@
         "hostInvalid": "Invalid query address.",
         "hostBlocked": "This address is not allowed (metadata/link-local/unspecified).",
         "stillRunning": "The container is still running – please stop it first.",
-        "removeFailed": "The container could not be removed."
+        "removeFailed": "The container could not be removed.",
+        "stopFailed": "Restart aborted: the container could not be stopped.",
+        "startFailed": "Restart incomplete: the container was stopped but not started again."
       },
       "status": {
         "DRAFT": "Draft",
@@ -286,7 +296,11 @@
         "createFailed": "The container could not be created.",
         "invalidPlan": "The provisioning plan is invalid.",
         "startFailed": "The container could not be started.",
-        "notFound": "Container not found."
+        "notFound": "Container not found.",
+        "stillRunning": "The container is still running – please stop it first.",
+        "removeFailed": "The container could not be removed.",
+        "restartStopFailed": "Restart aborted: stop failed.",
+        "restartStartFailed": "Restart incomplete: start after stop failed."
       }
     }
   },

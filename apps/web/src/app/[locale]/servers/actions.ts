@@ -18,6 +18,7 @@ import { createManagedContainerForServer } from '@/core/container-create';
 import { startManagedContainerForServer } from '@/core/container-start';
 import { stopManagedContainerForServer } from '@/core/container-stop';
 import { removeManagedContainerForServer } from '@/core/container-remove';
+import { restartManagedContainerForServer } from '@/core/container-restart';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
 
@@ -260,6 +261,37 @@ export async function stopContainerAction(formData: FormData): Promise<void> {
     redirect(`/${locale}/servers/${id}`);
   }
   // invalidState | invalidPlan | writeDisabled | unavailable | unreachable | conflict | error
+  redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Startet den managed Container **neu** (RUNNING → Stop → Start → RUNNING). OWNER-only, rate-limitiert,
+ * mit erneuter Lizenzbestätigung. **Kein** `docker restart`; keine Löschung, kein Log-Lesen.
+ */
+export async function restartContainerAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const licenseAccepted = formData.get('licenseAccepted') === 'on';
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `container:restart:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await restartManagedContainerForServer(id, user.email, licenseAccepted);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  if (result.status === 'restarted') {
+    redirect(`/${locale}/servers/${id}`);
+  }
+  // licenseRequired | invalidState | stopFailed | startFailed
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
 }
 

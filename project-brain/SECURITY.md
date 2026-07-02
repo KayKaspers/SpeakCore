@@ -202,6 +202,13 @@ stoppen). **Volume, Network, Credentials und der `ServerInstance`-Record bleiben
 Container wird entfernt. OWNER-only mit **deutlicher Bestätigung**, Idempotenz (`alreadyRemoved`) +
 Konfliktschutz (`conflict`). **Kein** `inspect/exec/cp/logs`, **kein** compose, **kein Log-Lesen**, kein
 Socket/Host-Mount. Kein Browser→Agent; keine Secrets im Request/Ergebnis/Audit.
+
+**Container-Restart (Step 023, [ADR-0027](DECISIONS.md)):** **Kein `docker restart`** und **keine** neue
+Agent-Schreibaktion – der Restart orchestriert web-seitig die bestehenden **Stop**- und **Start**-Flows
+(`RUNNING → Stop → Start → RUNNING`), deren Sicherheitsgrenzen (Token + `AGENT_DOCKER_WRITE_ENABLED`,
+Managed-Only, OWNER-only, keine Löschung, kein Log-Lesen) automatisch gelten. **Erneute Lizenzbestätigung**
+per Checkbox. Kein Start bei Stop-Fehler; kein `RUNNING` bei Start-Fehler. Kein Browser→Agent; keine Secrets
+im Client/Audit.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

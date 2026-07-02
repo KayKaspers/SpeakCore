@@ -43,8 +43,11 @@
   **entfernt** werden („Container entfernen" mit deutlicher Bestätigung): via `docker rm` (ohne Force),
   Status zurück auf „Ressourcen vorbereitet". **Es werden nur der Container entfernt** – **Volume,
   Network und gespeicherte Zugangsdaten bleiben erhalten**, die ServerInstance wird nicht gelöscht.
-  Läuft der Container noch, musst du ihn zuerst stoppen. **Kein** Log-Lesen, **kein** Inspect, **keine**
-  Reparatur. Volume-/Network-Löschung und Restart folgen als eigene Schritte.*
+  Läuft der Container noch, musst du ihn zuerst stoppen. Ab Step 023 kann ein laufender Container **neu
+  gestartet** werden („Container neu starten" mit Bestätigung + erneuter Lizenz-Checkbox): der Container
+  wird **zuerst gestoppt und dann wieder gestartet** – **kein** `docker restart`, **keine** Löschung,
+  **kein** Log-Lesen. Danach empfiehlt sich ein Healthcheck. **Kein** Log-Lesen, **kein** Inspect,
+  **keine** Reparatur. Volume-/Network-Löschung (vollständiges Deprovisioning) folgt als eigener Schritt.*
 - Logs lesen
 - Backup & Restore
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte

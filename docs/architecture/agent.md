@@ -203,6 +203,14 @@ Bestätigung**); Status `CONTAINER_CREATED → RESOURCES_PREPARED` + `runState='
 Container `stillRunning` (zuerst stoppen). **Volume-/Network-Remove** und vollständiges **Deprovisioning**
 folgen als eigene, deutlich gefährlichere Steps.
 
+## Restart (Step 023) – **kein** neuer Agent-Endpunkt
+
+Der **Neustart** führt **kein** `docker restart` und **keinen** neuen Agent-Endpunkt ein. Er ist eine reine
+**Web-Orchestrierung** (`core/container-restart`): `RUNNING → Stop → Start → RUNNING` über die bestehenden
+Endpunkte `/docker/provision/stop-container` (Step 021) und `/docker/provision/start-container` (Step 018).
+Damit gelten deren Sicherheitsgrenzen (Token + `AGENT_DOCKER_WRITE_ENABLED`, Managed-Only) automatisch.
+Details: [ADR-0027](../../project-brain/DECISIONS.md).
+
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 
 **Read-only** Healthcheck-Baustein (nur Token-Gate, **kein** Write-Flag):
