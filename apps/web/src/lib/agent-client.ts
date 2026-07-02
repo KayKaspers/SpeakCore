@@ -1,6 +1,7 @@
 import 'server-only';
 import type {
   BackupListResult,
+  BackupVerifyResult,
   ContainerCreateResult,
   ContainerRemoveResult,
   ContainerStartResult,
@@ -16,6 +17,7 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3BackupListRequest,
+  Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
   Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
@@ -265,6 +267,39 @@ export async function listManagedVolumeBackups(
     });
     if (!res.ok) return null;
     return (await res.json()) as BackupListResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Verifiziert **read-only** eine vorhandene Backup-Datei (SHA-256 neu berechnen + mit metadata.json
+ * vergleichen) – **serverseitig**, es wird nichts verändert/geladen/gelöscht. Übergibt nur
+ * `instanceId` + strikt validierten Dateinamen. Antwort: Status + Prüfsummenwerte (keine Host-Pfade,
+ * keine Secrets, kein Dateiinhalt). `null`, wenn der Agent nicht erreichbar ist. Timeout großzügig,
+ * weil große Dateien vollständig gestreamt/gehasht werden.
+ */
+export async function verifyManagedVolumeBackup(
+  request: Ts3BackupVerifyRequest,
+  timeoutMs = 120000,
+): Promise<BackupVerifyResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/verify-backup`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as BackupVerifyResult;
   } catch {
     return null;
   } finally {

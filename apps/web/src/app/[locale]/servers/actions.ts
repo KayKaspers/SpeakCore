@@ -22,6 +22,7 @@ import { restartManagedContainerForServer } from '@/core/container-restart';
 import { removeManagedVolumeForServer } from '@/core/volume-remove';
 import { removeManagedNetworkForServer } from '@/core/network-remove';
 import { backupManagedVolumeForServer } from '@/core/volume-backup';
+import { verifyManagedVolumeBackupForServer } from '@/core/backup-verify';
 import { archiveManagedServer, type CredentialDecision } from '@/core/server-archive';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
@@ -401,6 +402,35 @@ export async function backupVolumeAction(formData: FormData): Promise<void> {
   //   | typedMismatch | containerStillExists | volumeNotFound | volumeNotManaged | backupDirUnavailable
   //   | imageUnavailable | writeDisabled | unavailable | unreachable | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * **Read-only** Backup-Verify (Step 035): SHA-256 neu berechnen + mit metadata.json vergleichen.
+ * OWNER-only, rate-limitiert. Es wird **nichts** verändert/geladen/gelöscht; auch archivierte
+ * managed Server dürfen verifizieren. Ergebnis landet als Query-Status in der Backup-Liste.
+ */
+export async function verifyBackupAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const fileName = String(formData.get('fileName') ?? '');
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const rlKey = `backup:verify:${user.id}`;
+  if ((await checkRateLimit(rlKey, CONNECT_RATE_LIMIT)).limited) {
+    redirect(`/${locale}/servers/${id}?backups=1&notice=rateLimited`);
+  }
+  await recordRateLimitHit(rlKey);
+
+  const result = await verifyManagedVolumeBackupForServer(id, user.email, fileName);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  const file = result.fileName ? `&verifyFile=${encodeURIComponent(result.fileName)}` : '';
+  redirect(`/${locale}/servers/${id}?backups=1&verify=${result.status}${file}`);
 }
 
 /**

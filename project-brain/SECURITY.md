@@ -298,6 +298,17 @@ erlaubt), wird aber **nicht ins Audit** übernommen (nur Event `checksumCreated`
 akzeptiert nur strikt valide `checksum`-Objekte (`sha256`, 64 Hex) – sonst `invalid`. Backup-Dateien
 bleiben **sensibel**; die Prüfsumme schützt nicht vor unbefugtem Lesen, nur vor unbemerkter
 Beschädigung/Veränderung ohne Neuberechnung.
+
+**Read-only Backup-Verify (Step 035):** `POST /docker/provision/verify-backup` – Token-Gate, **kein**
+Write-Flag, **kein** Docker/`execFile`/Shell/Socket, **keine Schreibaktion** (auch kein Nachrüsten
+fehlender Prüfsummen), **kein** Entpacken/Download (Dateiinhalt verlässt den Agent nie). Dateiname
+wird **strikt** gegen das Instanz-Muster validiert (kein `/`/`\`/`..`, keine fremden Instanzen);
+alle Zugriffe nur über `AGENT_BACKUP_DIR`. Response nur Status + Prüfsummenwerte (keine Host-Pfade,
+keine Roh-Metadaten, keine Secrets). OWNER-only; Web prüft den Dateinamen zusätzlich vor
+(`isSafeBackupFileName`, Defense-in-Depth). Audit `backup.managedVolume.verify.*` bewusst **ohne
+Dateinamen** (keine Dateilisten im Audit) und ohne Prüfsummenwerte. Grenzen: `mismatch` erkennt
+Veränderung/Beschädigung, aber **keine Authentizität** (wer Datei + metadata.json ändern kann,
+kann beide konsistent halten – keine Signatur).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

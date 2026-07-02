@@ -13,6 +13,7 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3BackupListRequest,
+  Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
   Ts3VolumeBackupRequest,
   Ts3VolumeRemoveRequest,
@@ -29,6 +30,7 @@ import { removeTs3Volume } from './docker-volume-remove';
 import { removeTs3Network } from './docker-network-remove';
 import { backupTs3Volume, DEFAULT_BACKUP_IMAGE } from './docker-backup';
 import { listTs3VolumeBackups, METADATA_MAX_BYTES } from './backup-list';
+import { verifyTs3VolumeBackup } from './backup-verify';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -60,6 +62,24 @@ function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
 }
 
 const startedAt = Date.now();
+
+/**
+ * SHA-256 einer Datei im serverseitigen Backup-Verzeichnis – gestreamt, **kein Entpacken**,
+ * Inhalt verlässt den Agent nie (Step 034/035). `null` bei Lesefehler.
+ */
+function sha256OfFile(dir: string, fileName: string): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    try {
+      const hash = createHash('sha256');
+      const stream = createReadStream(join(dir, fileName));
+      stream.on('error', () => resolve(null));
+      stream.on('data', (chunk) => hash.update(chunk));
+      stream.on('end', () => resolve(hash.digest('hex')));
+    } catch {
+      resolve(null);
+    }
+  });
+}
 
 function sendJson(res: http.ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
@@ -221,18 +241,7 @@ async function handle(
         }
       },
       // SHA-256 der erzeugten Datei (Step 034): gestreamt, kein Entpacken, kein Inhalt im Response.
-      computeSha256: (fileName) =>
-        new Promise<string | null>((resolve) => {
-          try {
-            const hash = createHash('sha256');
-            const stream = createReadStream(join(backupDir, fileName));
-            stream.on('error', () => resolve(null));
-            stream.on('data', (chunk) => hash.update(chunk));
-            stream.on('end', () => resolve(hash.digest('hex')));
-          } catch {
-            resolve(null);
-          }
-        }),
+      computeSha256: (fileName) => sha256OfFile(backupDir, fileName),
     });
     sendJson(res, 200, result);
     return;
@@ -285,6 +294,51 @@ async function handle(
           return null;
         }
       },
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/verify-backup') {
+    // READ-ONLY Backup-Verify (Step 035): SHA-256 neu berechnen + mit metadata.json vergleichen.
+    // Token-Gate, KEIN Write-Flag (kein Docker, kein Prozessaufruf, KEINE Schreibaktion, kein Entpacken).
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const verifyBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const result = await verifyTs3VolumeBackup(body as Ts3BackupVerifyRequest, {
+      dirAvailable: async () => {
+        try {
+          return (await stat(verifyBackupDir)).isDirectory();
+        } catch {
+          return false;
+        }
+      },
+      fileExists: async (fileName) => {
+        try {
+          return (await stat(join(verifyBackupDir, fileName))).isFile();
+        } catch {
+          return false;
+        }
+      },
+      readMetadataFile: async (fileName) => {
+        try {
+          const s = await stat(join(verifyBackupDir, fileName));
+          if (!s.isFile() || s.size > METADATA_MAX_BYTES) return null;
+          return await readFile(join(verifyBackupDir, fileName), 'utf8');
+        } catch {
+          return null;
+        }
+      },
+      computeSha256: (fileName) => sha256OfFile(verifyBackupDir, fileName),
     });
     sendJson(res, 200, result);
     return;

@@ -39,6 +39,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/remove-network` | **write** (Flag-gated): managed **Voice-Network entfernen** (`docker network rm`, kein -f, nur wenn kein managed Container) |
 | POST | `/docker/provision/backup-volume` | **write** (Flag-gated): managed **Volume-Backup** (read-only Quelle → serverseitiges `AGENT_BACKUP_DIR`, festes Image, nur ohne Container) |
 | POST | `/docker/provision/list-backups` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Liste** aus `AGENT_BACKUP_DIR` (kein Docker, kein execFile, kein Download/Restore/Delete) |
+| POST | `/docker/provision/verify-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Verify** – SHA-256 neu berechnen + mit metadata.json vergleichen (keine Schreibaktion) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -312,6 +313,29 @@ Aufbewahrungsverantwortung / Container gestoppt) + getippt **`CREATE BACKUP`**. 
 **archivierte** managed Server; External zeigt keine Karte). Laden erst per Klick; Web verwirft
 verdächtige Antworten (`assertBackupListContainsNoSecrets`). Audit:
 `backup.managedVolume.list.requested/completed/failed` – ohne Dateiliste/Metadaten/Host-Pfade.
+
+## `/docker/provision/verify-backup` – read-only Backup-Verify (Step 035)
+
+Nachträgliche **Integritätsprüfung** eines vorhandenen Backups (Token-Gate, **kein** Write-Flag):
+
+- **Ablauf:** Datei existiert? → Metadaten existieren? → Metadaten sanitisieren (Step-033-Logik) →
+  `checksum` vorhanden? → SHA-256 **neu berechnen** (gestreamt, kein Entpacken) → Vergleich ⇒
+  `valid` oder `mismatch`. Weitere Status: `metadataMissing/checksumMissing/backupNotFound/`
+  `metadataInvalid/invalid/backupDirUnavailable/error`.
+- **Strikte Eingaben:** `instanceId` validiert; `fileName` muss **exakt** dem Step-032-Muster der
+  Instanz entsprechen (kein `/`, kein `\`, kein `..`, keine Subdirectories, keine fremden
+  Instanzen). Die Metadaten-Datei wird **intern** abgeleitet (`<backup>.metadata.json`) –
+  kein Pfad vom Client, alle Zugriffe nur über `AGENT_BACKUP_DIR`.
+- **Read-only per Konstruktion:** kein Docker, kein `execFile`, keine Shell, kein Socket,
+  **keine Schreibaktion** (kein Nachrüsten fehlender Prüfsummen – Step-032-Backups ⇒
+  `checksumMissing`), kein Download (Dateiinhalt verlässt den Agent nie).
+- Response: nur Status, Dateiname, `sha256`, beide Prüfsummenwerte, `verifiedAt` –
+  **keine** Host-Pfade, **keine** Roh-Metadaten, **keine** Secrets.
+
+**Web-Auslösung (Step 035):** OWNER-only Button „Prüfsumme prüfen" pro Eintrag der Backup-Liste
+(auch für **archivierte** managed Server; External abgelehnt), rate-limitiert; Ergebnis-Banner in
+der Karte. Audit: `backup.managedVolume.verify.requested/completed/failed` + `verify.mismatch` –
+bewusst **ohne Dateinamen/Prüfsummenwerte**.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

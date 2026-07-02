@@ -70,7 +70,9 @@ Volume-Backup** um: read-only Quelle (`:/data:ro`), **serverseitiges** Ziel (`AG
 Namensmuster, kein Docker/`execFile`, kein Download/Restore/Delete/Entpacken, keine Host-Pfade in
 der Antwort); **Step 034** ergänzt **SHA-256-Prüfsummen** für neue Backups (serverseitig gestreamt,
 kein Entpacken; **Integrität, keine Verschlüsselung/Signatur**; Anzeige gekürzt in der Backup-Liste,
-Prüfsummenwert nicht im Audit). **Kein Log-Lesen**, kein Inspect,
+Prüfsummenwert nicht im Audit); **Step 035** ergänzt das **read-only Verify** (SHA-256 neu berechnen
++ mit metadata.json vergleichen ⇒ `valid`/`mismatch`; strikte Dateinamen-Validierung, keine
+Schreibaktion, kein Nachrüsten, keine Host-Pfade). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

@@ -315,6 +315,21 @@
         "checksumHint": "SHA-256 prüft die Integrität – es ist keine Verschlüsselung und keine Signatur.",
         "checksumMissing": "Prüfsumme fehlt",
         "checksumShow": "Vollständige Prüfsumme anzeigen",
+        "verifyButton": "Prüfsumme prüfen",
+        "verifyResult": {
+          "valid": "Prüfung erfolgreich: Die Prüfsumme stimmt überein (Backup unverändert).",
+          "mismatch": "Achtung: Die Prüfsumme stimmt NICHT überein – die Datei wurde verändert oder ist beschädigt.",
+          "metadataMissing": "Prüfung nicht möglich: Die Metadaten-Datei fehlt.",
+          "checksumMissing": "Prüfung nicht möglich: Die Metadaten enthalten keine Prüfsumme (älteres Backup).",
+          "backupNotFound": "Prüfung nicht möglich: Die Backup-Datei wurde nicht gefunden.",
+          "metadataInvalid": "Prüfung nicht möglich: Die Metadaten sind ungültig.",
+          "invalid": "Prüfung abgelehnt: Ungültige Anfrage.",
+          "backupDirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
+          "error": "Prüfung fehlgeschlagen.",
+          "unavailable": "Prüfung derzeit nicht verfügbar.",
+          "unreachable": "Agent nicht erreichbar – Prüfung nicht möglich.",
+          "notManaged": "Prüfung ist nur für verwaltete Server verfügbar."
+        },
         "dirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
         "unreachable": "Agent nicht erreichbar – Backups können nicht gelistet werden.",
         "error": "Backups konnten nicht gelistet werden."

@@ -5,6 +5,50 @@
 
 ## [Unreleased]
 
+### NDF Step 035 – Read-only Backup Verify (2026-07-02)
+
+> Nachträgliche **read-only Verifikation** vorhandener Backups: SHA-256 neu berechnen und mit der
+> `.metadata.json` vergleichen – **es wird nichts verändert**. Kein Download, kein Restore, kein
+> Delete, keine Docker-Aktion, keine Metadata-Schreibaktion. Grundsatz: Verifizieren vor Download
+> und Restore.
+
+#### Added
+- **Agent `POST /docker/provision/verify-backup`** (read-only, Token-Gate, **kein Write-Flag**,
+  `apps/agent/src/backup-verify.ts`): validiert `instanceId` + Dateiname **strikt** (exaktes
+  Step-032-Muster der Instanz, kein `/`, kein `\`, kein `..`, keine fremden Instanzen), leitet die
+  Metadaten-Datei **intern** ab, sanitisiert sie (Step-033-Logik) und vergleicht die **neu
+  berechnete** SHA-256 (gestreamt, kein Entpacken, Inhalt verlässt den Agent nie) mit dem
+  `checksum`-Wert. Status: `valid/mismatch/metadataMissing/checksumMissing/backupNotFound/`
+  `metadataInvalid/invalid/backupDirUnavailable/error/unavailable`. Response nur mit Dateiname,
+  Algorithmus, beiden Prüfsummenwerten und `verifiedAt` – keine Host-Pfade, keine Roh-Metadaten.
+- **Web-Service** `apps/web/src/core/backup-verify.ts` (+ reine Helfer `backup-verify-helpers.ts`
+  mit `isSafeBackupFileName` als Defense-in-Depth): nur managed Server (External ⇒ `notManaged`),
+  **auch archivierte** dürfen verifizieren. **Keine DB-Schreiboperation außer Verify-Audit.**
+- **OWNER-only UI:** Button **„Prüfsumme prüfen"** pro Backup-Eintrag in der Backup-Liste
+  (Server Action `verifyBackupAction`, rate-limitiert); Ergebnis als farbiges Banner in der Karte
+  (valid = grün, mismatch = rot, sonst Warnung) inkl. geprüftem Dateinamen. Weiterhin **keine**
+  Download-/Restore-/Delete-/Rotate-Buttons.
+- **Audit:** `backup.managedVolume.verify.requested/completed/failed` + eigenes
+  `verify.mismatch`-Event (mismatch = abgeschlossene Prüfung mit negativem Ergebnis). Bewusst
+  **ohne Dateinamen** (keine Dateilisten im Audit), ohne Prüfsummenwerte, ohne Host-Pfade.
+- **Refactoring:** gestreamte SHA-256-Berechnung in `server.ts` als gemeinsamer Helfer
+  `sha256OfFile` (genutzt von Backup-Erstellung Step 034 **und** Verify Step 035).
+- **Tests:** `apps/agent/test/backup-verify.test.ts` (14, inkl. HTTP-Test gegen realen Temp-Ordner
+  mit echtem SHA-256-Vergleich valid **und** mismatch) + `apps/web/test/backup-verify.test.ts` (6):
+  strikte Dateinamen-/Traversal-Abwehr, alle Statuspfade, kein Hash ohne erwartete Prüfsumme,
+  keine Host-Pfade/Secrets in Response/Audit, Source-Scans (kein Docker/execFile/Shell/Socket/
+  Schreiboperationen im Verify-Modul).
+
+#### Nicht enthalten (bewusst)
+- **Kein Nachrüsten fehlender Prüfsummen** (Option A gewählt): Step-032-Backups ⇒ `checksumMissing`,
+  Verify bleibt strikt read-only – Nachrüsten wäre eine Metadata-Schreibaktion (eigener Step).
+- Keine Signatur, keine Verschlüsselung, keine Rotation, keine Wiederherstellung, keine
+  automatische Reparatur.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (407) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 034 – Backup Integrity Checksums (2026-07-02)
 
 > Risikoarme **Integritäts**verbesserung: neue Backups erhalten eine **SHA-256-Prüfsumme**, die

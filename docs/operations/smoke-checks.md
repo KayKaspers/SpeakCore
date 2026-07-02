@@ -82,13 +82,17 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Download-/Restore-/Delete-Buttons; keine Docker-Aktion, kein Write-Flag nötig. Bei Backups aus
   Step 034 zusätzlich: `SHA-256: <gekürzt>…` + „Vollständige Prüfsumme anzeigen"; ältere Backups
   zeigen „Prüfsumme fehlt" (beides korrekt).
+- **Backup-Verify (Step 035, komplett read-only – gefahrlos):** In der Backup-Liste bei einem
+  Eintrag auf **„Prüfsumme prüfen"** klicken. Erwartung: grünes Banner „Prüfung erfolgreich …"
+  (bzw. „Prüfsumme fehlt" bei Step-032-Backups). Rotes „stimmt NICHT überein" nur, wenn die Datei
+  tatsächlich verändert wurde. Es wird nichts geschrieben/geladen/gelöscht.
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 387 Tests |
+| lint/typecheck/test/build | ☐ | 407 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

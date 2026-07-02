@@ -12,6 +12,7 @@ import {
   refreshServerAction,
   startContainerAction,
   updateQueryAddressAction,
+  verifyBackupAction,
 } from '../actions';
 import { RemoveServerButton } from '../RemoveServerButton';
 import { StopContainerButton } from '../StopContainerButton';
@@ -37,10 +38,10 @@ export default async function ServerDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ notice?: string; backups?: string }>;
+  searchParams: Promise<{ notice?: string; backups?: string; verify?: string; verifyFile?: string }>;
 }) {
   const { locale, id } = await params;
-  const { notice, backups: backupsParam } = await searchParams;
+  const { notice, backups: backupsParam, verify, verifyFile } = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
     redirect(`/${locale}/login`);
@@ -109,6 +110,37 @@ export default async function ServerDetailPage({
           <li>• {t('managed.backupList.readOnlyHint')}</li>
           <li>• {t('managed.backupList.checksumHint')}</li>
         </ul>
+        {backupList &&
+          verify &&
+          [
+            'valid',
+            'mismatch',
+            'metadataMissing',
+            'checksumMissing',
+            'backupNotFound',
+            'metadataInvalid',
+            'invalid',
+            'backupDirUnavailable',
+            'error',
+            'unavailable',
+            'unreachable',
+            'notManaged',
+          ].includes(verify) && (
+            <div
+              className={`mt-3 rounded-sc-sm px-3 py-2 text-sc-sm ${
+                verify === 'valid'
+                  ? 'bg-sc-success/15 text-sc-success'
+                  : verify === 'mismatch'
+                    ? 'bg-sc-error/15 text-sc-error'
+                    : 'bg-sc-warning/15 text-sc-warning'
+              }`}
+            >
+              <p>{t(`managed.backupList.verifyResult.${verify}`)}</p>
+              {verifyFile && (
+                <p className="mt-1 break-all font-mono text-sc-caption">{verifyFile}</p>
+              )}
+            </div>
+          )}
         {!backupList && (
           <div className="mt-3">
             <Link
@@ -163,6 +195,17 @@ export default async function ServerDetailPage({
                           </p>
                         </details>
                       )}
+                      <form action={verifyBackupAction} className="mt-2">
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="id" value={server.id} />
+                        <input type="hidden" name="fileName" value={b.fileName} />
+                        <button
+                          type="submit"
+                          className="rounded-sc-md border border-sc-border-strong px-3 py-1.5 text-sc-caption text-sc-text-secondary"
+                        >
+                          {t('managed.backupList.verifyButton')}
+                        </button>
+                      </form>
                     </li>
                   ))}
                 </ul>

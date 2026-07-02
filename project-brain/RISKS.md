@@ -79,10 +79,11 @@
   Download/Restore/Delete). **SHA-256-Prüfsummen seit Step 034** (in `metadata.json` + Anzeige;
   Integrität, keine Verschlüsselung/Signatur). Restore niemals destruktiv ohne Bestätigung;
   „dry-run"/Vorschau; Audit-Log; Tests als Teil der Definition of Done.
-- **Rest:** **Restore/Import fehlen weiterhin** (bewusst, eigenes Security-Design); kein
-  Verify-Endpunkt für Bestands-Backups (Prüfsumme wird bei Erstellung berechnet, aber noch nicht
-  nachträglich verifiziert – Step 035); keine Rotation der Backup-Dateien; Aufbewahrung liegt beim
-  Betreiber (Backup-Dateien sind **sensibel**).
+- **Rest:** **Restore/Import fehlen weiterhin** (bewusst, eigenes Security-Design); **read-only
+  Verify seit Step 035** (SHA-256-Neuberechnung + Vergleich, `valid`/`mismatch`), aber Prüfsummen
+  ohne Signatur (keine Authentizität) und kein Nachrüsten für Step-032-Backups
+  (`checksumMissing`); keine Rotation der Backup-Dateien; Aufbewahrung liegt beim Betreiber
+  (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen
 - **E:** hoch · **A:** mittel · **Risiko:** mittel
@@ -266,7 +267,7 @@ Status je Risiko für die **interne 0.1 Alpha**: **offen** · **mitigiert** · *
 | R-14 Secrets in Docker-Logs | **mitigiert (Step 017)** | Query-Passwort per ENV, kein Log-Lesen. |
 | R-13 SSRF (TS3-Host) | **akzeptiert (0.1)** | LAN/localhost erlaubt (Self-Hosting); Metadaten/Link-Local/unspez. blockiert; strengere Egress später. |
 | R-05 TS3-Lizenz | **akzeptiert (0.1)** | explizite Nutzerbestätigung beim Start; Verantwortung beim Betreiber. |
-| R-06 Backup/Restore | **teilweise mitigiert (Step 032)** | echtes read-only Volume-Backup vorhanden; **Restore/Import fehlen bewusst**; Aufbewahrung beim Betreiber. |
+| R-06 Backup/Restore | **teilweise mitigiert (Steps 032–035)** | echtes read-only Volume-Backup + Sichtbarkeit + SHA-256-Checksums + read-only Verify; **Restore/Import fehlen bewusst**; Aufbewahrung beim Betreiber. |
 | Hard-Delete / Unarchive | **bewusst nicht enthalten** | erst nach Backup-/Export-Konzept; Export ≠ TS3-Datenbackup. |
 | R-08 WebUI-Sicherheit | **mitigiert** | Auth-Härtung, Rate-Limit, Security-Header/CSP (R-11 offen: `'unsafe-inline'`). |
 

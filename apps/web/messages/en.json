@@ -315,6 +315,21 @@
         "checksumHint": "SHA-256 verifies integrity – it is not encryption and not a signature.",
         "checksumMissing": "checksum missing",
         "checksumShow": "Show full checksum",
+        "verifyButton": "Verify checksum",
+        "verifyResult": {
+          "valid": "Verification successful: the checksum matches (backup unchanged).",
+          "mismatch": "Warning: the checksum does NOT match – the file was modified or is corrupted.",
+          "metadataMissing": "Verification not possible: the metadata file is missing.",
+          "checksumMissing": "Verification not possible: the metadata contains no checksum (older backup).",
+          "backupNotFound": "Verification not possible: the backup file was not found.",
+          "metadataInvalid": "Verification not possible: the metadata is invalid.",
+          "invalid": "Verification rejected: invalid request.",
+          "backupDirUnavailable": "The backup directory is unavailable on the agent.",
+          "error": "Verification failed.",
+          "unavailable": "Verification is currently unavailable.",
+          "unreachable": "Agent unreachable – verification not possible.",
+          "notManaged": "Verification is only available for managed servers."
+        },
         "dirUnavailable": "The backup directory is unavailable on the agent.",
         "unreachable": "Agent unreachable – backups cannot be listed.",
         "error": "Backups could not be listed."

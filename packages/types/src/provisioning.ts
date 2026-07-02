@@ -435,6 +435,45 @@ export interface BackupListResult {
   errors?: ValidationError[];
 }
 
+// --- Read-only Backup-Verify (NDF Step 035: SHA-256 neu berechnen + vergleichen, NICHTS ändern) ---
+
+export type BackupVerifyStatus =
+  | 'valid'
+  | 'mismatch'
+  | 'metadataMissing'
+  | 'checksumMissing'
+  | 'backupNotFound'
+  | 'metadataInvalid'
+  | 'invalid'
+  | 'backupDirUnavailable'
+  | 'error'
+  | 'unavailable';
+
+/**
+ * Read-only Verify-Request: `instanceId` + **strikt validierter** Backup-Dateiname (exaktes
+ * Step-032-Muster, keine Pfade/Traversal). Die Metadaten-Datei wird intern abgeleitet.
+ */
+export interface Ts3BackupVerifyRequest {
+  instanceId: string;
+  fileName: string;
+}
+
+/**
+ * Verify-Ergebnis: nur Status, Dateiname und Prüfsummenwerte (Integritätsinfo, keine Secrets) –
+ * **keine** Host-Pfade, **keine** Roh-Metadaten, **kein** Dateiinhalt.
+ */
+export interface BackupVerifyResult {
+  status: BackupVerifyStatus;
+  fileName?: string;
+  algorithm?: 'sha256';
+  /** Neu berechnete SHA-256 der tar.gz. */
+  checksumSha256?: string;
+  /** Erwartete SHA-256 aus der metadata.json. */
+  metadataChecksumSha256?: string;
+  verifiedAt?: string;
+  errors?: ValidationError[];
+}
+
 // --- Managed Volume Backup Blueprint (NDF Step 030: reine Planung, KEINE Ausführung) ---------
 
 /** Zieltyp eines (späteren) Backups – rein konzeptionell, wird NIE zu einem echten Kommando. */

@@ -326,7 +326,15 @@ Sichtbarkeit vor Download, Restore oder Löschung.
 Shell, kein Entpacken). Response enthält `checksumSha256` (kein Secret); die Backup-Liste validiert
 das Feld strikt (64 Hex, `sha256`; vorhanden-aber-ungültig ⇒ `invalid`) und zeigt es gekürzt an.
 **Integrität, keine Verschlüsselung/Signatur**; Audit nur als Event `checksumCreated` ohne Wert.
-Ein read-only **Verify** (Neuberechnung + Vergleich) folgt als eigener Step.
+
+**Read-only Backup-Verify (Step 035):** `POST /docker/provision/verify-backup` (Token-Gate, **kein**
+Write-Flag). `instanceId` + Dateiname werden **strikt** validiert (exaktes Instanz-Muster, keine
+Pfadbestandteile); die Metadaten-Datei wird intern abgeleitet, sanitisiert und die **neu berechnete**
+SHA-256 (gestreamt, kein Entpacken) mit dem `checksum`-Wert verglichen ⇒
+`valid/mismatch/metadataMissing/checksumMissing/…`. **Keine Schreibaktion** (kein Nachrüsten
+fehlender Prüfsummen – Option A). Web: OWNER-only „Prüfsumme prüfen" pro Backup-Eintrag (auch für
+archivierte managed Server), Ergebnis-Banner in der Backup-Liste; Audit
+`backup.managedVolume.verify.*` (+ `verify.mismatch`) bewusst **ohne Dateinamen/Prüfsummenwerte**.
 
 ## 7. Verwandte Dokumente
 
