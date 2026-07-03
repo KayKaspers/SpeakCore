@@ -24,10 +24,10 @@ secrets/
 *.db
 prisma/dev.db*
 
-# SpeakCore runtime / Daten
-data/
-backups/
-logs/
+# SpeakCore runtime / Daten (nur Wurzel-Verzeichnisse – NICHT src-Routen wie …/backups/download)
+/data/
+/backups/
+/logs/
 *.log
 
 # OS / Editor
