@@ -344,6 +344,23 @@
           "typedLabel": "Type \"DOWNLOAD BACKUP\" to confirm.",
           "button": "Download backup"
         },
+        "backfill": {
+          "hint": "The backup file is not modified – only the metadata file is extended with a SHA-256 checksum (integrity, not encryption; the backup remains sensitive).",
+          "button": "Add checksum"
+        },
+        "backfillResult": {
+          "updated": "Checksum was added – the backup can now be verified and downloaded.",
+          "alreadyPresent": "Checksum is already present.",
+          "metadataMissing": "Cannot add checksum: the metadata file is missing.",
+          "metadataInvalid": "Cannot add checksum: the metadata is invalid.",
+          "backupNotFound": "Cannot add checksum: the backup file was not found.",
+          "invalid": "Request rejected: invalid request.",
+          "notManaged": "This action is only available for managed servers.",
+          "backupDirUnavailable": "The backup directory is unavailable on the agent.",
+          "unavailable": "Currently unavailable.",
+          "unreachable": "Agent unreachable – cannot add checksum.",
+          "error": "Adding the checksum failed."
+        },
         "downloadResult": {
           "invalid": "Download rejected: invalid request.",
           "notManaged": "Download is only available for managed servers.",

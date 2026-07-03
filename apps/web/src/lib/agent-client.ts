@@ -1,5 +1,6 @@
 import 'server-only';
 import type {
+  BackupChecksumBackfillResult,
   BackupListResult,
   BackupVerifyResult,
   ContainerCreateResult,
@@ -16,6 +17,7 @@ import type {
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
+  Ts3BackupChecksumBackfillRequest,
   Ts3BackupDownloadRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
@@ -301,6 +303,38 @@ export async function verifyManagedVolumeBackup(
     });
     if (!res.ok) return null;
     return (await res.json()) as BackupVerifyResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Trägt beim Agent eine fehlende SHA-256-Prüfsumme in die `.metadata.json` eines Backups nach –
+ * **serverseitig**. Die tar.gz wird nur gelesen (Hash), nie verändert. Übergibt `instanceId` +
+ * strikt validierten Dateinamen + explizite Bestätigung. `null`, wenn der Agent nicht erreichbar
+ * ist. Timeout großzügig (Datei wird vollständig gestreamt/gehasht).
+ */
+export async function backfillBackupChecksum(
+  request: Ts3BackupChecksumBackfillRequest,
+  timeoutMs = 120000,
+): Promise<BackupChecksumBackfillResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/backfill-backup-checksum`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as BackupChecksumBackfillResult;
   } catch {
     return null;
   } finally {

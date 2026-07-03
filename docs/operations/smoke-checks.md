@@ -86,6 +86,11 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Eintrag auf **„Prüfsumme prüfen"** klicken. Erwartung: grünes Banner „Prüfung erfolgreich …"
   (bzw. „Prüfsumme fehlt" bei Step-032-Backups). Rotes „stimmt NICHT überein" nur, wenn die Datei
   tatsächlich verändert wurde. Es wird nichts geschrieben/geladen/gelöscht.
+- **Checksum-Backfill (Step 038, gefahrlos – tar.gz bleibt unverändert):** Bei einem älteren
+  Backup mit „Prüfsumme fehlt" auf **„Prüfsumme nachtragen"** klicken. Erwartung: grünes Banner
+  „Prüfsumme wurde nachgetragen …"; erneuter Klick wäre nicht mehr möglich (Button verschwindet),
+  ein direkter zweiter Agent-Aufruf ergäbe `alreadyPresent`. Danach funktioniert „Prüfsumme
+  prüfen" für dieses Backup.
 - **Backup-Download (Step 037, read-only – gefahrlos, aber Datei ist sensibel):** Nach einem
   Verify mit Ergebnis „gültig" erscheint am Eintrag die Download-Form. Ohne beide Checkboxen bzw.
   ohne getipptes `DOWNLOAD BACKUP` blockt die Route mit klarem Hinweis (Redirect zurück zur
@@ -98,7 +103,7 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 439 Tests |
+| lint/typecheck/test/build | ☐ | 454 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

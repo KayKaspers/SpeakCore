@@ -77,7 +77,10 @@ Blueprint; **Step 037** setzt es um: **Web-proxied Streaming-Download** (OWNER-o
 Bestätigungen ohne Defaults + getippt `DOWNLOAD BACKUP`, Rate-Limit 5/h je Owner+Server,
 **Verify direkt vor jedem Download** – nur `valid` streamt; Agent streamt genau eine strikt
 validierte tar.gz, nie metadata.json; Web reicht den Stream ohne Komplett-Einlesen durch;
-**nie Browser→Agent**, keine Host-Pfade, Audit ohne Dateiname/Inhalt). **Kein Log-Lesen**, kein Inspect,
+**nie Browser→Agent**, keine Host-Pfade, Audit ohne Dateiname/Inhalt). **Step 038** ergänzt den
+**Checksum-Backfill** für alte Step-032-Backups (nur metadata.json wird normalisiert um eine
+SHA-256 ergänzt – kein Blind-Merge, tar.gz bleibt unverändert, vorhandene Prüfsummen werden nie
+überschrieben). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

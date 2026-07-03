@@ -356,6 +356,15 @@ Agent-Call `GET /docker/provision/download-backup` (Token-Gate, striktes Instanz
 der letzte zuverlässige Punkt**, `completed` wird ehrlich nicht geloggt. UI: Download-Form nur nach
 frisch bestätigtem Verify-`valid`.
 
+**Checksum-Backfill (Step 038):** `POST /docker/provision/backfill-backup-checksum` (Token-Gate,
+kein Docker-Write-Flag – keine Docker-Aktion; Datei-Schreibaktion durch explizite Bestätigung +
+OWNER-Flow gedeckt). Trägt bei Step-032-Backups **ohne** Prüfsumme eine SHA-256 in die
+`.metadata.json` nach – die **tar.gz bleibt unverändert**. **Kein Blind-Merge:** Metadaten werden
+sanitisiert gelesen und **normalisiert** neu geschrieben (nur bekannte Felder + `checksum`);
+vorhandene Prüfsumme ⇒ `alreadyPresent` ohne Schreibaktion (idempotent). Web: OWNER-only Button
+„Prüfsumme nachtragen" nur bei gültigen Metadaten ohne Prüfsumme (auch archivierte Server); Audit
+`backup.managedVolume.checksumBackfill.*` ohne Dateiname/Prüfsumme.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

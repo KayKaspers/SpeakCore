@@ -6,6 +6,7 @@ import { getServer } from '@/core/servers';
 import { formatBackupSize, listManagedVolumeBackupsForServer, shortChecksum } from '@/core/backup-list';
 import { BrandMark } from '@/components/BrandMark';
 import {
+  backfillChecksumAction,
   createContainerAction,
   healthcheckAction,
   prepareContainerAction,
@@ -44,10 +45,18 @@ export default async function ServerDetailPage({
     verify?: string;
     verifyFile?: string;
     download?: string;
+    backfill?: string;
   }>;
 }) {
   const { locale, id } = await params;
-  const { notice, backups: backupsParam, verify, verifyFile, download } = await searchParams;
+  const {
+    notice,
+    backups: backupsParam,
+    verify,
+    verifyFile,
+    download,
+    backfill,
+  } = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
     redirect(`/${locale}/login`);
@@ -176,6 +185,31 @@ export default async function ServerDetailPage({
               <p>{t(`managed.backupList.downloadResult.${download}`)}</p>
             </div>
           )}
+        {backupList &&
+          backfill &&
+          [
+            'updated',
+            'alreadyPresent',
+            'metadataMissing',
+            'metadataInvalid',
+            'backupNotFound',
+            'invalid',
+            'notManaged',
+            'backupDirUnavailable',
+            'unavailable',
+            'unreachable',
+            'error',
+          ].includes(backfill) && (
+            <div
+              className={`mt-3 rounded-sc-sm px-3 py-2 text-sc-sm ${
+                backfill === 'updated'
+                  ? 'bg-sc-success/15 text-sc-success'
+                  : 'bg-sc-warning/15 text-sc-warning'
+              }`}
+            >
+              <p>{t(`managed.backupList.backfillResult.${backfill}`)}</p>
+            </div>
+          )}
         {!backupList && (
           <div className="mt-3">
             <Link
@@ -241,6 +275,22 @@ export default async function ServerDetailPage({
                           {t('managed.backupList.verifyButton')}
                         </button>
                       </form>
+                      {b.metadataStatus === 'present' && !b.metadata?.checksum && (
+                        <form action={backfillChecksumAction} className="mt-2 space-y-1">
+                          <input type="hidden" name="locale" value={locale} />
+                          <input type="hidden" name="id" value={server.id} />
+                          <input type="hidden" name="fileName" value={b.fileName} />
+                          <p className="text-sc-caption text-sc-text-muted">
+                            {t('managed.backupList.backfill.hint')}
+                          </p>
+                          <button
+                            type="submit"
+                            className="rounded-sc-md border border-sc-border-strong px-3 py-1.5 text-sc-caption text-sc-text-secondary"
+                          >
+                            {t('managed.backupList.backfill.button')}
+                          </button>
+                        </form>
+                      )}
                       {verify === 'valid' && verifyFile === b.fileName && (
                         <form
                           method="post"

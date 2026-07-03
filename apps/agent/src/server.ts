@@ -12,6 +12,7 @@ import type {
   Ts3ContainerRemoveRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
+  Ts3BackupChecksumBackfillRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
@@ -32,6 +33,7 @@ import { backupTs3Volume, DEFAULT_BACKUP_IMAGE } from './docker-backup';
 import { listTs3VolumeBackups, METADATA_MAX_BYTES } from './backup-list';
 import { verifyTs3VolumeBackup } from './backup-verify';
 import { resolveBackupDownload } from './backup-download';
+import { backfillBackupChecksum } from './backup-checksum-backfill';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -405,6 +407,60 @@ async function handle(
         }
       },
       computeSha256: (fileName) => sha256OfFile(verifyBackupDir, fileName),
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/backfill-backup-checksum') {
+    // Checksum-Backfill (Step 038): SHA-256 in metadata.json nachtragen. Token-Gate; KEIN
+    // Docker-Write-Flag (keine Docker-Aktion) – aber explizite Bestätigung + Owner-Flow über Web.
+    // Die tar.gz wird NUR gelesen (Hash), nie verändert; metadata.json wird normalisiert geschrieben.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const bfBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const result = await backfillBackupChecksum(body as Ts3BackupChecksumBackfillRequest, {
+      dirAvailable: async () => {
+        try {
+          return (await stat(bfBackupDir)).isDirectory();
+        } catch {
+          return false;
+        }
+      },
+      fileExists: async (fileName) => {
+        try {
+          return (await stat(join(bfBackupDir, fileName))).isFile();
+        } catch {
+          return false;
+        }
+      },
+      readMetadataFile: async (fileName) => {
+        try {
+          const s = await stat(join(bfBackupDir, fileName));
+          if (!s.isFile() || s.size > METADATA_MAX_BYTES) return null;
+          return await readFile(join(bfBackupDir, fileName), 'utf8');
+        } catch {
+          return null;
+        }
+      },
+      computeSha256: (fileName) => sha256OfFile(bfBackupDir, fileName),
+      writeMetadataFile: async (fileName, content) => {
+        try {
+          await writeFile(join(bfBackupDir, fileName), content, 'utf8');
+          return true;
+        } catch {
+          return false;
+        }
+      },
     });
     sendJson(res, 200, result);
     return;

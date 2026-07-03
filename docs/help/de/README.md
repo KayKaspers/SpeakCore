@@ -90,7 +90,10 @@
   **serverseitig erneut geprüft** (nur „gültig" wird ausgeliefert); der Download läuft **nie direkt
   vom Browser zum Agent**, ist auf **5 pro Stunde** begrenzt und wird auditiert. Die
   heruntergeladene Datei ist **unverschlüsselt und sensibel** – sicher aufbewahren. **Restore ist
-  weiterhin nicht implementiert.***
+  weiterhin nicht implementiert.** Ab Step 038 kannst du bei älteren Backups mit „Prüfsumme fehlt"
+  auf **„Prüfsumme nachtragen"** klicken: Die Backup-Datei wird dabei **nicht verändert** – nur die
+  Metadaten-Datei wird um eine SHA-256-Prüfsumme ergänzt; danach sind auch diese Backups prüf- und
+  downloadfähig.*
 - Logs lesen
 - Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
   Backups einsehbar; ab Step 034: SHA-256-Integritätsprüfsumme; ab Step 035: read-only

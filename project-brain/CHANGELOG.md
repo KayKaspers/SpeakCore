@@ -5,6 +5,46 @@
 
 ## [Unreleased]
 
+### NDF Step 038 – Checksum Backfill für bestehende Backups (2026-07-02)
+
+> Bewusste Owner-Aktion: bei **Step-032-Backups ohne Prüfsumme** wird eine SHA-256 in die
+> `.metadata.json` **nachgetragen** – die **tar.gz wird nur gelesen (Hash), nie verändert**.
+> Macht alte Backups verify- (035) und downloadfähig (037). Kein Download/Restore/Delete/Docker.
+
+#### Added
+- **Agent `POST /docker/provision/backfill-backup-checksum`** (Token-Gate, **kein**
+  Docker-Write-Flag – keine Docker-Aktion; die Datei-Schreibaktion ist durch explizite
+  Bestätigung + OWNER-Flow gedeckt; `apps/agent/src/backup-checksum-backfill.ts`): strikte
+  Validierung (`instanceId`, exaktes Dateinamensmuster, `confirmChecksumBackfill` Pflicht) →
+  Metadaten via Step-033-Sanitisierung lesen → **`alreadyPresent` ohne Schreibaktion**, wenn
+  Prüfsumme existiert (idempotent, nie überschreiben) → sonst SHA-256 gestreamt berechnen und
+  die Metadaten **normalisiert** neu schreiben (**kein Blind-Merge**: nur bekannte Felder +
+  `checksum`; eingeschleuste/unbekannte/Secret-artige Felder fallen weg). Status:
+  `updated/alreadyPresent/metadataMissing/metadataInvalid/backupNotFound/invalid/`
+  `backupDirUnavailable/error/unavailable` – ohne Host-Pfade/Roh-Metadaten.
+- **Web-Service** `apps/web/src/core/backup-backfill.ts` (+ reine Helfer): managed-only
+  (External ⇒ `notManaged`), **auch archivierte** Server dürfen nachrüsten; Dateinamen-Vorprüfung
+  (Defense-in-Depth). **Keine DB-Schreiboperation außer Audit.**
+- **OWNER-only UI:** Button **„Prüfsumme nachtragen"** erscheint pro Backup nur bei gültigen
+  Metadaten **ohne** Prüfsumme (Server Action `backfillChecksumAction`, rate-limitiert); Hinweis
+  „Backup-Datei wird nicht verändert – nur die Metadaten-Datei wird ergänzt"; Ergebnis-Banner
+  (`updated` grün, `alreadyPresent`/Fehler als Hinweis) in DE/EN.
+- **Audit:** `backup.managedVolume.checksumBackfill.requested/completed/failed/alreadyPresent` –
+  bewusst **ohne Dateinamen/Prüfsumme/Metadaten/Host-Pfade** (bisherige Linie).
+- **Tests:** `apps/agent/test/backup-checksum-backfill.test.ts` (9, inkl. HTTP-Test gegen realen
+  Temp-Ordner: echter Backfill mit korrekter SHA-256, **tar.gz byte-identisch**, zweiter Aufruf ⇒
+  `alreadyPresent`; eingeschleuste Secret-/Host-Pfad-Felder überleben das normalisierte Schreiben
+  nicht) + `apps/web/test/backup-backfill.test.ts` (5: Audit-Outcomes ohne Dateiname/Checksum,
+  Source-Scans).
+
+#### Nicht enthalten (bewusst)
+- Kein Download/Restore/Import/Delete/Rotate, kein Docker, keine Änderung an `.tar.gz`,
+  kein Überschreiben vorhandener Prüfsummen.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (454) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 037 – Web-proxied Backup Download (2026-07-02)
 
 > Echte Umsetzung des Step-036-Blueprints: **verifizierte, bestätigte** Ausgabe eines managed

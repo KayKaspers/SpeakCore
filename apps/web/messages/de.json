@@ -344,6 +344,23 @@
           "typedLabel": "Zum Bestätigen „DOWNLOAD BACKUP\" eingeben.",
           "button": "Backup herunterladen"
         },
+        "backfill": {
+          "hint": "Die Backup-Datei wird nicht verändert – nur die Metadaten-Datei wird um eine SHA-256-Prüfsumme ergänzt (Integrität, keine Verschlüsselung; Backup bleibt sensibel).",
+          "button": "Prüfsumme nachtragen"
+        },
+        "backfillResult": {
+          "updated": "Prüfsumme wurde nachgetragen – das Backup ist jetzt prüf- und downloadfähig.",
+          "alreadyPresent": "Prüfsumme ist bereits vorhanden.",
+          "metadataMissing": "Nachtragen nicht möglich: Die Metadaten-Datei fehlt.",
+          "metadataInvalid": "Nachtragen nicht möglich: Die Metadaten sind ungültig.",
+          "backupNotFound": "Nachtragen nicht möglich: Die Backup-Datei wurde nicht gefunden.",
+          "invalid": "Nachtragen abgelehnt: Ungültige Anfrage.",
+          "notManaged": "Nachtragen ist nur für verwaltete Server verfügbar.",
+          "backupDirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
+          "unavailable": "Nachtragen derzeit nicht verfügbar.",
+          "unreachable": "Agent nicht erreichbar – Nachtragen nicht möglich.",
+          "error": "Nachtragen fehlgeschlagen."
+        },
         "downloadResult": {
           "invalid": "Download abgelehnt: Ungültige Anfrage.",
           "notManaged": "Download ist nur für verwaltete Server verfügbar.",

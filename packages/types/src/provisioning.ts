@@ -474,6 +474,36 @@ export interface BackupVerifyResult {
   errors?: ValidationError[];
 }
 
+// --- Checksum-Backfill (NDF Step 038: fehlende Prüfsumme in metadata.json nachtragen) --------
+
+export type BackupChecksumBackfillStatus =
+  | 'updated'
+  | 'alreadyPresent'
+  | 'metadataMissing'
+  | 'metadataInvalid'
+  | 'backupNotFound'
+  | 'invalid'
+  | 'backupDirUnavailable'
+  | 'error'
+  | 'unavailable';
+
+/**
+ * Backfill-Request: `instanceId` + strikt validierter Dateiname + explizite Bestätigung.
+ * Die `.tar.gz` wird NUR gelesen (Hash), NIE verändert; nur die `.metadata.json` wird
+ * kontrolliert neu geschrieben.
+ */
+export interface Ts3BackupChecksumBackfillRequest {
+  instanceId: string;
+  fileName: string;
+  confirmChecksumBackfill?: boolean;
+}
+
+/** Backfill-Ergebnis: nur Status + Dateiname – keine Host-Pfade, keine Roh-Metadaten. */
+export interface BackupChecksumBackfillResult {
+  status: BackupChecksumBackfillStatus;
+  fileName?: string;
+}
+
 // --- Backup Download (NDF Step 037: Web-proxied Streaming eines verifizierten Backups) -------
 
 /**

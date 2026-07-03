@@ -328,6 +328,17 @@ durch (kein Memory-Buffering, keine temporäre Kopie, Gesamttimeout 600 s). Audi
 **`started` ist der letzte zuverlässige Audit-Punkt** (ein `completed` wird nicht behauptet).
 Grenzen: keine Signatur/Verschlüsselung (die heruntergeladene Datei ist unverschlüsselt sensibel –
 Verantwortung beim Owner), kein Restore/Delete/Import, Tageslimit noch nicht durchgesetzt.
+
+**Checksum-Backfill (Step 038):** einzige erlaubte Schreibaktion im Backup-Verzeichnis neben der
+Backup-Erstellung: die `.metadata.json` eines Backups **ohne** Prüfsumme wird um ein
+`checksum`-Objekt ergänzt – die **tar.gz wird nur gelesen (Hash), nie verändert**; Test verifiziert
+Byte-Identität. **Kein Blind-Merge**: sanitisierte Felder + `checksum` werden normalisiert
+geschrieben, eingeschleuste unbekannte/Secret-artige Felder überleben nicht. Vorhandene Prüfsummen
+werden **nie überschrieben** (`alreadyPresent`). Token-Gate + explizite Bestätigung
+(`confirmChecksumBackfill`) + OWNER-only-Web-Flow (rate-limitiert); kein Docker/`execFile`/Shell;
+keine Host-Pfade/Roh-Metadaten in Responses; Audit `checksumBackfill.*` ohne Dateiname/Prüfsumme.
+Hinweis: Der Backfill beweist Integrität nur **ab jetzt** – eine vor dem Backfill unbemerkt
+veränderte Datei erhält eine „gültige" Prüfsumme (keine rückwirkende Garantie, dokumentiert).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

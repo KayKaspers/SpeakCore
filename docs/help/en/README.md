@@ -83,7 +83,10 @@
   **`DOWNLOAD BACKUP`**. Before the download the checksum is **re-verified server-side** (only
   "valid" is delivered); the download never runs directly from the browser to the agent, is limited
   to **5 per hour** and is audited. The downloaded file is **unencrypted and sensitive** – store it
-  securely. **Restore is still not implemented.***
+  securely. **Restore is still not implemented.** From Step 038 you can click **"Add checksum"** on
+  older backups showing "checksum missing": the backup file itself is **not modified** – only the
+  metadata file is extended with a SHA-256 checksum; afterwards these backups can be verified and
+  downloaded too.*
 - Reading logs
 - Backup & Restore — *from Step 032: backups exist (server-side, read-only source); from Step 033:
   backups are viewable; from Step 034: SHA-256 integrity checksum; from Step 035: read-only

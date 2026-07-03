@@ -41,6 +41,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/list-backups` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Liste** aus `AGENT_BACKUP_DIR` (kein Docker, kein execFile, kein Download/Restore/Delete) |
 | POST | `/docker/provision/verify-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Verify** – SHA-256 neu berechnen + mit metadata.json vergleichen (keine Schreibaktion) |
 | GET | `/docker/provision/download-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Stream** – genau eine strikt validierte tar.gz aus `AGENT_BACKUP_DIR` (nie metadata.json, kein Listing/Entpacken) |
+| POST | `/docker/provision/backfill-backup-checksum` | **metadata-write** (Token-gated, ohne Docker-Write-Flag): **SHA-256 nachtragen** – nur metadata.json wird normalisiert ergänzt, tar.gz bleibt unverändert |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -358,6 +359,29 @@ Route Handler): Bestätigungen ohne Defaults (2 Checkboxen + getippt **`DOWNLOAD
 Agent-Stream wird **ohne Buffering** an den Browser durchgereicht. **Nie Browser→Agent**;
 Agent-URL/Token bleiben serverseitig. Audit `backup.managedVolume.download.*` ohne Dateiname/
 Prüfsumme; `started` ist der letzte zuverlässige Audit-Punkt (kein behauptetes `completed`).
+
+## `/docker/provision/backfill-backup-checksum` – Prüfsumme nachtragen (Step 038)
+
+Bewusste Owner-Aktion für **Step-032-Backups ohne Prüfsumme** (Token-Gate; **kein**
+Docker-Write-Flag, weil keine Docker-Aktion – die Datei-Schreibaktion ist durch
+`confirmChecksumBackfill` + OWNER-Flow im Web gedeckt):
+
+- **Strikte Eingaben** wie beim Verify: `instanceId` + exaktes Dateinamensmuster (kein `/`/`\`/
+  `..`, keine fremden Instanzen); die Metadaten-Datei wird intern abgeleitet.
+- **Ablauf:** Backup existiert? → Metadaten existieren + gültig (Step-033-Sanitisierung)? →
+  Prüfsumme vorhanden ⇒ **`alreadyPresent`, keine Schreibaktion** (idempotent, nie überschreiben)
+  → sonst SHA-256 gestreamt berechnen → `.metadata.json` **normalisiert** neu schreiben
+  (**kein Blind-Merge**: nur bekannte Felder + `checksum`; eingeschleuste unbekannte/Secret-artige
+  Felder fallen weg) ⇒ `updated`.
+- Die **tar.gz wird nur gelesen (Hash), nie verändert/entpackt**; keine Host-Pfade/Roh-Metadaten
+  in Responses. Status: `updated/alreadyPresent/metadataMissing/metadataInvalid/backupNotFound/`
+  `invalid/backupDirUnavailable/error`.
+
+**Web-Auslösung (Step 038):** OWNER-only Button „Prüfsumme nachtragen" pro Backup-Eintrag – nur
+sichtbar bei gültigen Metadaten **ohne** Prüfsumme (auch für archivierte managed Server; External
+abgelehnt), rate-limitiert; Ergebnis-Banner in der Backup-Liste. Audit:
+`backup.managedVolume.checksumBackfill.requested/completed/failed/alreadyPresent` – ohne
+Dateiname/Prüfsumme.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 
