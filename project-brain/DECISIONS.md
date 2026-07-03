@@ -575,6 +575,31 @@
   harten Verify-Regel. Tageslimit, Signatur/Verschlüsselung, Restore/Delete/Rotation bleiben offen
   (je eigene Steps).
 
+## ADR-0037 – Backup-Delete/Rotation-Blueprint: Warnungen statt Verify-Pflicht, Rotation nur als Dry-Run
+
+- **Status:** accepted (Step 039)
+- **Kontext:** Der Backup-Lebenszyklus (erstellen 032, sehen 033, prüfen 034/035, laden 037,
+  nachrüsten 038) hat keine Löschung – `AGENT_BACKUP_DIR` wächst unbegrenzt. Löschen ist die
+  **irreversibelste** Aktion des Zyklus und braucht vor jeder Umsetzung ein getestetes Konzept.
+- **Entscheidung:** **Reiner Blueprint** (`backup-delete.ts` in `@speakcore/shared`,
+  `executable: false`) ohne jede Datei-/DB-/Agent-Operation. **Einzel-Delete-Guards:** managed +
+  OWNER + striktes Instanz-Dateinamensmuster + Backup existiert + 3 Bestätigungen + getippt
+  **`DELETE BACKUP`**; Löschziel wäre genau eine Datei + exakt abgeleitete metadata.json (nie
+  Wildcards/Ordner). **Anders als beim Download ist Verify KEIN Blocker:** `verifyMismatch`/
+  `neverVerified`/`metadataMissing`/`checksumMissing`/`onlyBackup`/`serverArchived`/`largeFile`
+  sind **Warnungen** – auch defekte/alte Backups müssen löschbar bleiben. **Rotation nur als
+  Dry-Run:** Policy-Modell (keepLastCount/keepMinAgeDays/deleteOlderThanDays/
+  protectLastVerifiedBackup/protectOnlyBackup, `dryRun` immer true), eigener
+  Bestätigungssatz + getippt **`DELETE BACKUPS`**, Warnung `wouldDeleteAllBackups`; kein
+  automatisches Löschen, keine Scheduler/Background-Jobs. Audit `delete.*`/`rotation.*` bleibt
+  **ohne Dateinamen** (bestehende Linie).
+- **Begründung:** Bewährtes Muster „erst Blueprint, dann minimale Ausführung". Die Asymmetrie
+  Download (Verify-Pflicht) vs. Delete (Verify-Warnung) folgt dem Zweck: Download gibt sensible
+  Daten heraus (nur integritätsgeprüft), Delete räumt auf (muss auch Kaputtes entfernen können).
+- **Konsequenzen:** Der echte Einzel-Delete ist ein eigener, abgesicherter Step (erste destruktive
+  Dateioperation im Backup-Verzeichnis); danach Rotation-Dry-Run als Anzeige, Bulk-Ausführung und
+  Restore-Konzept je separat. Der Blueprint ändert am Laufzeitverhalten nichts.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

@@ -315,7 +315,8 @@
         "checksumHint": "SHA-256 prüft die Integrität – es ist keine Verschlüsselung und keine Signatur.",
         "checksumMissing": "Prüfsumme fehlt",
         "checksumShow": "Vollständige Prüfsumme anzeigen",
-        "downloadNotActiveHint": "Backup-Download ist noch nicht aktiv – ein späterer Download setzt eine gültig verifizierte Prüfsumme voraus und wird separat bestätigt und auditiert.",
+        "downloadHint": "Download nur nach gültiger Prüfsummen-Verifikation, mit Bestätigungen – jede Ausgabe wird auditiert.",
+        "deleteNotActiveHint": "Backup-Löschung ist noch nicht aktiv – spätere Löschung betrifft einzelne Backup-Dateien, ist unwiderruflich und wird vor Bulk-Rotation zuerst als Dry-Run-Konzept umgesetzt.",
         "verifyButton": "Prüfsumme prüfen",
         "verifyResult": {
           "valid": "Prüfung erfolgreich: Die Prüfsumme stimmt überein (Backup unverändert).",

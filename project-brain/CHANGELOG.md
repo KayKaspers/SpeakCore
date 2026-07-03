@@ -5,6 +5,53 @@
 
 ## [Unreleased]
 
+### NDF Step 039 – Backup Rotation & Delete Safety Blueprint (2026-07-02)
+
+> **Reines Sicherheits-/Planungskonzept** für spätere Backup-Löschung und Rotation
+> (`executable: false`, analog Steps 024/030/036). **Keine Datei wird gelöscht**: kein
+> unlink/rm, keine Agent-/Web-Route, keine Dateioperation, keine Scheduler/Background-Jobs.
+> Grundsatz: erst Löschsicherheit planen, dann Dateien entfernen.
+
+#### Added
+- **Blueprint `packages/shared/src/provisioning/backup-delete.ts`** (rein, testbar):
+  `validateBackupDeleteRequest`, `canDeleteManagedBackup`, `buildBackupDeletePlan`,
+  `buildBackupRotationPlan` (+ Typen `BackupDeleteState/Confirmations/Evaluation`,
+  `BackupRotationPolicy/Entry/Evaluation` u. a. in `@speakcore/types`).
+- **Einzel-Delete-Guards** (Blocker): managed + OWNER + striktes Instanz-Dateinamensmuster
+  (kein `/`/`\`/`..`, keine Wildcards/Ordner/fremden Instanzen) + Backup existiert +
+  3 Bestätigungen (`confirmBackupDeletion` + `confirmBackupMayBeOnlyCopy` +
+  `confirmNoRestoreWithoutBackup`) + getippt **`DELETE BACKUP`**. `dataLossRisk: 'irreversible'`;
+  Löschziel wäre genau eine Datei + ihre exakt abgeleitete metadata.json.
+- **Warnungen statt Blocker** (bewusst, Prompt-Empfehlung): `verifyMismatch`, `neverVerified`,
+  `metadataMissing/Invalid`, `checksumMissing`, `onlyBackup`, `serverArchived`, `largeFile` –
+  auch defekte/alte Backups müssen löschbar bleiben (anders als beim Download, wo Verify
+  `valid` Pflicht bleibt).
+- **Rotation nur als Dry-Run-Konzept:** Policy-Modell (`keepLastCount`, `keepMinAgeDays`,
+  `deleteOlderThanDays`, `protectLastVerifiedBackup`, `protectOnlyBackup`, `dryRun: true` –
+  immer); `buildBackupRotationPlan` berechnet Kandidaten/Geschützte (mit Schutzgrund) rein
+  deklarativ, Bestätigungen `confirmRotationPolicyReviewed` + `confirmBulkDeletionRisk` +
+  getippt **`DELETE BACKUPS`**; Warnung `wouldDeleteAllBackups`. Kein automatisches Löschen,
+  keine Scheduler.
+- **Audit-Konzept:** `backup.managedVolume.delete.requested/blocked/confirmed/started/`
+  `completed/failed` + `rotation.planCreated/blocked/confirmed` – weiterhin **ohne Dateinamen**,
+  ohne Inhalt/Host-Pfade.
+- **UI (nicht-ausführend):** Hinweis in der Backup-Karte „Backup-Löschung ist noch nicht aktiv …"
+  (DE/EN); dabei den seit Step 037 veralteten „Download noch nicht aktiv"-Hinweis durch einen
+  korrekten Download-Hinweis ersetzt. **Keine** Delete-/Rotation-Buttons.
+- **Tests:** `packages/shared/test/backup-delete.test.ts` (16): alle Blocker-/Bestätigungs-Pfade,
+  Warnungen blockieren nicht, Rotation-Dry-Run (Schutzregeln, notOldEnough,
+  wouldDeleteAllBackups), Pläne ohne Secrets/Host-Pfade, Audit ohne Dateinamen, Source-Scan
+  (kein fs/unlink/readdir/exec/prisma/agent/Scheduler).
+
+#### Nicht enthalten (bewusst)
+- Kein echtes Löschen, keine Rotation-Ausführung, keine Agent-/Web-Route, kein Restore/Import,
+  kein Hard-Delete/Unarchive. Nächste Schritte: echter Einzel-Delete-Step → Rotation-Dry-Run →
+  Restore-Konzept separat.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (470) · `prisma validate` n. z.
+  (kein Schema-Change). Siehe **ADR-0037**.
+
 ### NDF Step 038 – Checksum Backfill für bestehende Backups (2026-07-02)
 
 > Bewusste Owner-Aktion: bei **Step-032-Backups ohne Prüfsumme** wird eine SHA-256 in die

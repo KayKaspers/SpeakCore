@@ -91,6 +91,9 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   „Prüfsumme wurde nachgetragen …"; erneuter Klick wäre nicht mehr möglich (Button verschwindet),
   ein direkter zweiter Agent-Aufruf ergäbe `alreadyPresent`. Danach funktioniert „Prüfsumme
   prüfen" für dieses Backup.
+- **Kein Delete/Rotation (Step 039 ist nur Blueprint):** Die Backup-Karte zeigt den Hinweis
+  „Backup-Löschung ist noch nicht aktiv …" und enthält **keine** Delete-/Rotation-Buttons –
+  prüfen, dass keine solche Aktion angeboten wird.
 - **Backup-Download (Step 037, read-only – gefahrlos, aber Datei ist sensibel):** Nach einem
   Verify mit Ergebnis „gültig" erscheint am Eintrag die Download-Form. Ohne beide Checkboxen bzw.
   ohne getipptes `DOWNLOAD BACKUP` blockt die Route mit klarem Hinweis (Redirect zurück zur
@@ -103,7 +106,7 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 454 Tests |
+| lint/typecheck/test/build | ☐ | 470 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

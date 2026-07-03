@@ -474,6 +474,102 @@ export interface BackupVerifyResult {
   errors?: ValidationError[];
 }
 
+// --- Backup Delete/Rotation Blueprint (NDF Step 039: reine Planung, KEIN Löschen) ------------
+
+/** Ist-Zustand für die Delete-Guards (vom Aufrufer ermittelt; die Guards sind rein/DB-frei). */
+export interface BackupDeleteState {
+  mode: string;
+  instanceId: string;
+  archived: boolean;
+  actorRole: string;
+  fileName: string;
+  /** Existiert das Backup laut read-only Liste (Step 033)? */
+  backupExists: boolean;
+  metadataStatus: 'present' | 'missing' | 'invalid';
+  checksumPresent: boolean;
+  /** Verify-Zustand aus Step 035 – für Delete nur WARNUNG, kein Blocker. */
+  verifyStatus: BackupDownloadVerifyState;
+  sizeBytes: number | null;
+  createdAt: string | null;
+  /** Ist dies das letzte bekannte Backup der Instanz? (Warnung) */
+  isOnlyBackup: boolean;
+}
+
+/** Explizite Bestätigungen für das spätere Einzel-Delete (kein Vorab-Default). */
+export interface BackupDeleteConfirmations {
+  confirmBackupDeletion?: boolean;
+  confirmBackupMayBeOnlyCopy?: boolean;
+  confirmNoRestoreWithoutBackup?: boolean;
+  /** Getippte Bestätigung `DELETE BACKUP`. Wenn gesetzt, muss sie exakt passen. */
+  typedConfirmation?: string;
+}
+
+/** Geplante (spätere) Lösch-Aktion – deklarativ, wird in 0.1 NICHT ausgeführt. */
+export interface BackupDeletePlannedAction {
+  action: 'DELETE_MANAGED_BACKUP';
+  targetKind: 'backupFile';
+  /** Die zugehörige metadata.json wird mit entfernt (exakt abgeleitet, nie per Wildcard). */
+  deletesMetadataFile: true;
+  wildcardsAllowed: false;
+}
+
+/** Aufbewahrungs-/Rotation-Policy (0.1: NUR Dry-Run-Konzept, kein automatisches Löschen). */
+export interface BackupRotationPolicy {
+  keepLastCount?: number;
+  keepMinAgeDays?: number;
+  deleteOlderThanDays?: number;
+  protectLastVerifiedBackup: boolean;
+  protectOnlyBackup: boolean;
+  /** In 0.1 IMMER true – Rotation existiert nur als Plan. */
+  dryRun: true;
+}
+
+/** Ergebnis der reinen Delete-Guard-/Planungslogik. Enthält KEINE Secrets/Host-Pfade. */
+export interface BackupDeleteEvaluation {
+  decision: 'allowed' | 'blocked';
+  blockedReasons: string[];
+  requiredConfirmations: string[];
+  warnings: string[];
+  /** Backup-Löschung ist irreversibel. */
+  dataLossRisk: 'irreversible';
+  plannedActions: BackupDeletePlannedAction[];
+  retentionPolicy: BackupRotationPolicy | null;
+  auditEvents: string[];
+  nextRecommendedStep: string | null;
+  /** In 0.1 IMMER `false` – reines Konzept, kein Löschen. */
+  executable: false;
+}
+
+/** Bestätigungen für spätere Bulk-Rotation (in 0.1 nie ausführbar). */
+export interface BackupRotationConfirmations {
+  confirmRotationPolicyReviewed?: boolean;
+  confirmBulkDeletionRisk?: boolean;
+  /** Getippte Bestätigung `DELETE BACKUPS`. Wenn gesetzt, muss sie exakt passen. */
+  typedConfirmation?: string;
+}
+
+/** Ein bekanntes Backup als Rotations-Input (nur Name/Alter/Verify – keine Pfade/Inhalte). */
+export interface BackupRotationEntry {
+  fileName: string;
+  createdAt: string;
+  verified?: boolean;
+}
+
+/** Dry-Run-Ergebnis der Rotationsplanung. `executable` ist IMMER `false`. */
+export interface BackupRotationEvaluation {
+  decision: 'dryRun' | 'blocked';
+  blockedReasons: string[];
+  requiredConfirmations: string[];
+  warnings: string[];
+  /** Kandidaten, die eine spätere echte Rotation löschen WÜRDE (nur Dateinamen). */
+  deleteCandidates: string[];
+  /** Behaltene Backups inkl. Schutzgrund. */
+  kept: Array<{ fileName: string; protectedBy: string[] }>;
+  dryRun: true;
+  auditEvents: string[];
+  executable: false;
+}
+
 // --- Checksum-Backfill (NDF Step 038: fehlende Prüfsumme in metadata.json nachtragen) --------
 
 export type BackupChecksumBackfillStatus =

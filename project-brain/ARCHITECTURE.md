@@ -365,6 +365,17 @@ vorhandene Prüfsumme ⇒ `alreadyPresent` ohne Schreibaktion (idempotent). Web:
 „Prüfsumme nachtragen" nur bei gültigen Metadaten ohne Prüfsumme (auch archivierte Server); Audit
 `backup.managedVolume.checksumBackfill.*` ohne Dateiname/Prüfsumme.
 
+**Backup-Delete/Rotation-Blueprint (Step 039, [ADR-0037](DECISIONS.md)):** **reine, getestete
+Guard-/Planungslogik** (`backup-delete.ts` in `@speakcore/shared`, `executable: false`) – **kein
+Löschen, keine Route, keine Dateioperation**. Einzel-Delete-Guards: managed + OWNER + striktes
+Dateinamensmuster + Backup existiert + 3 Bestätigungen + getippt `DELETE BACKUP`
+(`dataLossRisk: irreversible`; Ziel wäre genau eine Datei + metadata.json, nie Wildcards/Ordner).
+**Verify ist für Delete nur Warnung** (verifyMismatch/neverVerified/metadataMissing/
+checksumMissing/onlyBackup/serverArchived/largeFile blockieren nicht). **Rotation nur als
+Dry-Run**: Policy-Modell + eigener Bestätigungssatz (`DELETE BACKUPS`), Kandidaten/Geschützte mit
+Schutzgrund, Warnung `wouldDeleteAllBackups`; keine Scheduler. Audit `delete.*`/`rotation.*` ohne
+Dateinamen. Echter Einzel-Delete, Rotation-Ausführung und Restore folgen je als eigene Steps.
+
 ## 7. Verwandte Dokumente
 
 [docs/architecture/overview.md](../docs/architecture/overview.md) ·

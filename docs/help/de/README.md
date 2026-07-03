@@ -93,7 +93,9 @@
   weiterhin nicht implementiert.** Ab Step 038 kannst du bei älteren Backups mit „Prüfsumme fehlt"
   auf **„Prüfsumme nachtragen"** klicken: Die Backup-Datei wird dabei **nicht verändert** – nur die
   Metadaten-Datei wird um eine SHA-256-Prüfsumme ergänzt; danach sind auch diese Backups prüf- und
-  downloadfähig.*
+  downloadfähig. **Backup-Löschung ist noch nicht aktiv** (Step 039 ist nur das Sicherheitskonzept):
+  Eine spätere Löschung betrifft **einzelne** Backup-Dateien, ist **unwiderruflich** und wird
+  mehrfach bestätigt; Bulk-Rotation startet zuerst als Dry-Run-Konzept.*
 - Logs lesen
 - Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
   Backups einsehbar; ab Step 034: SHA-256-Integritätsprüfsumme; ab Step 035: read-only

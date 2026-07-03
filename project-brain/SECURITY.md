@@ -339,6 +339,18 @@ werden **nie überschrieben** (`alreadyPresent`). Token-Gate + explizite Bestät
 keine Host-Pfade/Roh-Metadaten in Responses; Audit `checksumBackfill.*` ohne Dateiname/Prüfsumme.
 Hinweis: Der Backfill beweist Integrität nur **ab jetzt** – eine vor dem Backfill unbemerkt
 veränderte Datei erhält eine „gültige" Prüfsumme (keine rückwirkende Garantie, dokumentiert).
+
+**Backup-Delete/Rotation-Blueprint (Step 039, [ADR-0037](DECISIONS.md)):** reines Konzept
+(`executable: false`) – **keine Datei wird gelöscht**, kein unlink/rm, keine Route, keine
+Scheduler/Background-Jobs. Für das spätere Einzel-Delete gilt: OWNER-only, striktes
+Instanz-Dateinamensmuster (nie Wildcards/Ordner/freie Pfade), 3 Bestätigungen + getippt
+**`DELETE BACKUP`**, Einstufung **irreversibel**; gelöscht würde genau eine Datei + ihre exakt
+abgeleitete metadata.json. **Verify ist bewusst kein Blocker** (auch defekte Backups müssen
+löschbar bleiben) – Verify-/Metadaten-/Checksum-Probleme, „einziges Backup", archivierter Server
+und Dateigröße erscheinen als **Warnungen**. **Rotation ausschließlich als Dry-Run-Konzept**
+(Policy mit Schutzregeln inkl. `protectOnlyBackup`/`protectLastVerifiedBackup`, Bestätigungen +
+`DELETE BACKUPS`, Warnung `wouldDeleteAllBackups`) – kein automatisches Löschen. Audit
+`delete.*`/`rotation.*` ohne Dateinamen/Inhalt/Host-Pfade.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

@@ -85,7 +85,8 @@
   (SHA-256 nachtragen – beweist Integrität nur **ab** dem
   Backfill-Zeitpunkt); **Download seit Step 037** (Web-proxied Streaming, nur nach Verify `valid`
   + Bestätigungen, 5/h-Limit) – heruntergeladene Dateien sind **unverschlüsselt sensibel**
-  (Owner-Verantwortung); keine Rotation der Backup-Dateien; Aufbewahrung liegt beim
+  (Owner-Verantwortung); **Löschung/Rotation nur als Blueprint (Step 039)** – kein Delete-Endpunkt,
+  `AGENT_BACKUP_DIR` wächst weiter; Aufbewahrung liegt beim
   Betreiber (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen

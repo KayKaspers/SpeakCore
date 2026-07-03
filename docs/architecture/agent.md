@@ -383,6 +383,12 @@ abgelehnt), rate-limitiert; Ergebnis-Banner in der Backup-Liste. Audit:
 `backup.managedVolume.checksumBackfill.requested/completed/failed/alreadyPresent` – ohne
 Dateiname/Prüfsumme.
 
+> **Backup-Löschung/Rotation (Step 039): nur Blueprint.** Es gibt **keinen** Delete-Endpunkt –
+> keine Datei wird entfernt. Das Konzept für einen späteren Step: gezieltes Einzel-Delete (genau
+> eine strikt validierte Datei + ihre metadata.json, nie Wildcards/Ordner) mit 3 Bestätigungen +
+> getippt `DELETE BACKUP` (irreversibel; Verify-Probleme nur Warnung); Rotation zunächst
+> ausschließlich als **Dry-Run** – siehe [ADR-0037](../../project-brain/DECISIONS.md).
+
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 
 **Read-only** Healthcheck-Baustein (nur Token-Gate, **kein** Write-Flag):

@@ -86,7 +86,9 @@
   securely. **Restore is still not implemented.** From Step 038 you can click **"Add checksum"** on
   older backups showing "checksum missing": the backup file itself is **not modified** – only the
   metadata file is extended with a SHA-256 checksum; afterwards these backups can be verified and
-  downloaded too.*
+  downloaded too. **Backup deletion is not active yet** (Step 039 is only the security concept):
+  a later deletion targets **individual** backup files, is **irreversible** and requires multiple
+  confirmations; bulk rotation will start as a dry-run concept first.*
 - Reading logs
 - Backup & Restore — *from Step 032: backups exist (server-side, read-only source); from Step 033:
   backups are viewable; from Step 034: SHA-256 integrity checksum; from Step 035: read-only
