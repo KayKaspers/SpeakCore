@@ -31,6 +31,7 @@ import { removeTs3Network } from './docker-network-remove';
 import { backupTs3Volume, DEFAULT_BACKUP_IMAGE } from './docker-backup';
 import { listTs3VolumeBackups, METADATA_MAX_BYTES } from './backup-list';
 import { verifyTs3VolumeBackup } from './backup-verify';
+import { resolveBackupDownload } from './backup-download';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -133,6 +134,71 @@ async function handle(
     }
     const inventory = await gatherDockerInventory();
     sendJson(res, 200, inventory);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/docker/provision/download-backup') {
+    // READ-ONLY Backup-Download (Step 037): streamt GENAU EINE strikt validierte tar.gz aus
+    // AGENT_BACKUP_DIR. Token-Gate, KEIN Write-Flag (kein Docker, keine Schreibaktion, kein
+    // Entpacken, kein Directory Listing). Fehler nur als normalisierte Codes – keine Host-Pfade.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    const dlBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const resolved = await resolveBackupDownload(
+      {
+        instanceId: url.searchParams.get('instanceId') ?? '',
+        fileName: url.searchParams.get('fileName') ?? '',
+      },
+      {
+        dirAvailable: async () => {
+          try {
+            return (await stat(dlBackupDir)).isDirectory();
+          } catch {
+            return false;
+          }
+        },
+        statFile: async (fileName) => {
+          try {
+            const s = await stat(join(dlBackupDir, fileName));
+            return s.isFile() ? { sizeBytes: s.size } : null;
+          } catch {
+            return null;
+          }
+        },
+      },
+    );
+    if (resolved.status === 'invalid') {
+      sendJson(res, 400, { error: 'invalid' });
+      return;
+    }
+    if (resolved.status === 'backupDirUnavailable') {
+      sendJson(res, 503, { error: 'backupDirUnavailable' });
+      return;
+    }
+    if (resolved.status !== 'ok' || !resolved.fileName) {
+      sendJson(res, 404, { error: 'backupNotFound' });
+      return;
+    }
+    // Streaming ohne Komplett-Einlesen: ReadStream → Response (Backpressure via pipe).
+    const stream = createReadStream(join(dlBackupDir, resolved.fileName));
+    stream.on('error', () => {
+      if (!res.headersSent) {
+        sendJson(res, 500, { error: 'error' });
+      } else {
+        res.destroy();
+      }
+    });
+    stream.once('open', () => {
+      res.writeHead(200, {
+        'content-type': resolved.contentType ?? 'application/gzip',
+        'content-length': String(resolved.sizeBytes ?? 0),
+        'content-disposition': `attachment; filename="${resolved.fileName}"`,
+        'cache-control': 'no-store',
+      });
+      stream.pipe(res);
+    });
     return;
   }
 

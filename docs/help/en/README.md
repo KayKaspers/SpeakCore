@@ -76,15 +76,19 @@
   it verifies the file's **integrity** – it is **not encryption** and not a signature; backups can
   still contain sensitive TS3 data. From Step 035 you can click **"Verify checksum"** per backup:
   the SHA-256 is **recomputed** on the server and compared with the metadata – result "valid" or
-  "does not match" (then the file was modified or is corrupted). Nothing is **downloaded, restored
-  or deleted** in the process; older backups without a checksum show "checksum missing".
-  **Backup download is not active yet** (Step 036 is only the security concept): a later download
-  requires a **successfully verified checksum**, never runs directly from the browser to the agent,
-  and will be confirmed and audited separately.*
+  "does not match" (then the file was modified or is corrupted). Nothing is restored
+  or deleted in the process; older backups without a checksum show "checksum missing".
+  From Step 037 you can **download** a backup: after a successful verification ("valid") a download
+  form appears on the entry – 2 checkboxes (sensitive data / secure storage) + typing
+  **`DOWNLOAD BACKUP`**. Before the download the checksum is **re-verified server-side** (only
+  "valid" is delivered); the download never runs directly from the browser to the agent, is limited
+  to **5 per hour** and is audited. The downloaded file is **unencrypted and sensitive** – store it
+  securely. **Restore is still not implemented.***
 - Reading logs
 - Backup & Restore — *from Step 032: backups exist (server-side, read-only source); from Step 033:
   backups are viewable; from Step 034: SHA-256 integrity checksum; from Step 035: read-only
-  checksum verification; **restore follows later as its own hardened step**.*
+  checksum verification; from Step 037: verified, confirmed **download** via the web server;
+  **restore follows later as its own hardened step**.*
 - Security & Safe Defaults — *from Step 016: the encryption key for stored credentials
   (`SECRET_ENCRYPTION_KEY`) can be rotated. This is an **operator/CLI-only** task
   (`pnpm --filter @speakcore/web rotate-secrets`, with `--dry-run` for a safe preview) – **no

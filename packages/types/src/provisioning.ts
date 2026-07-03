@@ -474,6 +474,17 @@ export interface BackupVerifyResult {
   errors?: ValidationError[];
 }
 
+// --- Backup Download (NDF Step 037: Web-proxied Streaming eines verifizierten Backups) -------
+
+/**
+ * Download-Request an den Agent-Stream-Endpunkt: `instanceId` + **strikt validierter** Dateiname
+ * (exaktes Step-032-Muster, nur `.tar.gz` – nie `.metadata.json`, keine Pfade/Traversal).
+ */
+export interface Ts3BackupDownloadRequest {
+  instanceId: string;
+  fileName: string;
+}
+
 // --- Backup Download Blueprint (NDF Step 036: reine Planung, KEIN Download/Streaming) --------
 
 /** Verify-Zustand aus Step 035, wie ihn der Aufrufer für die Download-Guards ermittelt hat. */

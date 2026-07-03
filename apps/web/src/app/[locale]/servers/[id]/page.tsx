@@ -38,10 +38,16 @@ export default async function ServerDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ notice?: string; backups?: string; verify?: string; verifyFile?: string }>;
+  searchParams: Promise<{
+    notice?: string;
+    backups?: string;
+    verify?: string;
+    verifyFile?: string;
+    download?: string;
+  }>;
 }) {
   const { locale, id } = await params;
-  const { notice, backups: backupsParam, verify, verifyFile } = await searchParams;
+  const { notice, backups: backupsParam, verify, verifyFile, download } = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
     redirect(`/${locale}/login`);
@@ -142,6 +148,34 @@ export default async function ServerDetailPage({
               )}
             </div>
           )}
+        {backupList &&
+          download &&
+          [
+            'invalid',
+            'notManaged',
+            'sensitiveDataRequired',
+            'storageRequired',
+            'typedMismatch',
+            'rateLimited',
+            'mismatch',
+            'checksumMissing',
+            'metadataMissing',
+            'metadataInvalid',
+            'backupNotFound',
+            'backupDirUnavailable',
+            'unreachable',
+            'error',
+          ].includes(download) && (
+            <div
+              className={`mt-3 rounded-sc-sm px-3 py-2 text-sc-sm ${
+                download === 'mismatch'
+                  ? 'bg-sc-error/15 text-sc-error'
+                  : 'bg-sc-warning/15 text-sc-warning'
+              }`}
+            >
+              <p>{t(`managed.backupList.downloadResult.${download}`)}</p>
+            </div>
+          )}
         {!backupList && (
           <div className="mt-3">
             <Link
@@ -207,6 +241,51 @@ export default async function ServerDetailPage({
                           {t('managed.backupList.verifyButton')}
                         </button>
                       </form>
+                      {verify === 'valid' && verifyFile === b.fileName && (
+                        <form
+                          method="post"
+                          action={`/${locale}/servers/${server.id}/backups/download`}
+                          className="mt-2 space-y-2 rounded-sc-md border border-sc-border p-2"
+                        >
+                          <input type="hidden" name="fileName" value={b.fileName} />
+                          <ul className="space-y-1 text-sc-caption text-sc-text-muted">
+                            <li>• {t('managed.backupList.download.hintSensitive')}</li>
+                            <li>• {t('managed.backupList.download.hintReverify')}</li>
+                            <li>• {t('managed.backupList.download.hintNoRestore')}</li>
+                            <li>• {t('managed.backupList.download.hintAudited')}</li>
+                          </ul>
+                          <label className="flex items-start gap-2 text-sc-caption text-sc-text-secondary">
+                            <input type="checkbox" name="confirmBackupContainsSensitiveData" className="mt-0.5" />
+                            <span>{t('managed.backupList.download.confirmSensitiveLabel')}</span>
+                          </label>
+                          <label className="flex items-start gap-2 text-sc-caption text-sc-text-secondary">
+                            <input type="checkbox" name="confirmSecureStorageResponsibility" className="mt-0.5" />
+                            <span>{t('managed.backupList.download.confirmStorageLabel')}</span>
+                          </label>
+                          <div>
+                            <label
+                              htmlFor={`typed-${b.fileName}`}
+                              className="mb-1 block text-sc-caption text-sc-text-secondary"
+                            >
+                              {t('managed.backupList.download.typedLabel')}
+                            </label>
+                            <input
+                              id={`typed-${b.fileName}`}
+                              name="typedConfirmation"
+                              type="text"
+                              autoComplete="off"
+                              placeholder="DOWNLOAD BACKUP"
+                              className="w-full rounded-sc-md border border-sc-border bg-sc-background px-2 py-1 text-sc-caption text-sc-text-primary outline-none focus:border-sc-primary"
+                            />
+                          </div>
+                          <button
+                            type="submit"
+                            className="rounded-sc-md bg-sc-primary px-3 py-1.5 text-sc-caption font-medium text-white"
+                          >
+                            {t('managed.backupList.download.button')}
+                          </button>
+                        </form>
+                      )}
                     </li>
                   ))}
                 </ul>

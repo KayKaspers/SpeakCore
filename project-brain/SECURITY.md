@@ -311,14 +311,23 @@ Veränderung/Beschädigung, aber **keine Authentizität** (wer Datei + metadata.
 kann beide konsistent halten – keine Signatur).
 
 **Backup-Download-Blueprint (Step 036, [ADR-0035](DECISIONS.md)):** reines Konzept
-(`executable: false`) – **kein Byte verlässt das System**, keine Download-Route/-URL, kein
-Streaming. Für den späteren echten Download gilt: **nie Browser→Agent** (Web-proxied Streaming,
-Agent-Token bleibt serverseitig), OWNER-only, **Verify `valid` als harte Voraussetzung**
-(mismatch/nicht verifiziert/ohne Prüfsumme ⇒ blockiert), striktes Dateinamensmuster, 2
-Bestätigungen + getippt `DOWNLOAD BACKUP`, Rate-/Größen-Policies (5/h, 20/Tag, Warnung ab 1 GiB,
-Streaming statt Komplett-Einlesen, keine temporäre Kopie), Audit
-`backup.managedVolume.download.*` ohne Inhalt/Dateiname/Host-Pfad. Risiken des späteren Steps
-dokumentiert: Backpressure/Timeout/Abbruch im Web-Proxy; Audit darf nie Inhalte speichern.
+(`executable: false`) – definierte die Regeln, die Step 037 umsetzt: **nie Browser→Agent**
+(Web-proxied Streaming, Agent-Token bleibt serverseitig), OWNER-only, **Verify `valid` als harte
+Voraussetzung**, striktes Dateinamensmuster, 2 Bestätigungen + getippt `DOWNLOAD BACKUP`,
+Rate-/Größen-Policies, Audit ohne Inhalt/Dateiname/Host-Pfad.
+
+**Web-proxied Backup-Download (Step 037, [ADR-0036](DECISIONS.md)):** OWNER-only POST-Form-Route;
+Bestätigungen **ohne Defaults** (getippt `DOWNLOAD BACKUP` ist Pflicht); **Rate-Limit 5/h je
+Owner+Server** (bei Limit: kein Verify, kein Stream, Audit `download.blocked`); **Verify direkt
+vor jedem Download** (Option A – kein persistierter, potenziell veralteter Verify-State; nur
+`valid` streamt, `mismatch`/`checksumMissing`/… blockieren). Agent-Endpunkt streamt **genau eine**
+strikt validierte `tar.gz` (nie `.metadata.json`, kein Directory Listing, kein Entpacken, keine
+Host-Pfade/Roh-Fehler in Responses); der Web-Prozess reicht den Stream **ohne Komplett-Einlesen**
+durch (kein Memory-Buffering, keine temporäre Kopie, Gesamttimeout 600 s). Audit
+`download.requested/blocked/confirmed/started/failed` ohne Dateiname/Prüfsumme/Inhalt –
+**`started` ist der letzte zuverlässige Audit-Punkt** (ein `completed` wird nicht behauptet).
+Grenzen: keine Signatur/Verschlüsselung (die heruntergeladene Datei ist unverschlüsselt sensibel –
+Verantwortung beim Owner), kein Restore/Delete/Import, Tageslimit noch nicht durchgesetzt.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

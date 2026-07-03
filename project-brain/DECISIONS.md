@@ -546,6 +546,35 @@
   bleiben ausgeschlossen; keine Signatur ⇒ weiterhin keine Authentizitätsgarantie. Der Blueprint
   ändert am Laufzeitverhalten nichts.
 
+## ADR-0036 – Backup-Download-Umsetzung: Verify-on-Download, POST-Form-Streaming, `started` als letzter Audit-Punkt
+
+- **Status:** accepted (Step 037)
+- **Kontext:** Umsetzung des Download-Blueprints (ADR-0035). Drei Detailfragen waren zu
+  entscheiden: Wie wird „Verify `valid`" ohne persistierten Verify-State sichergestellt? Wie kommt
+  der Stream mit Bestätigungen zum Browser? Was darf das Audit über den Streamausgang behaupten?
+- **Entscheidung:** **(1) Verify-on-Download (Option A):** unmittelbar vor jedem Download führt der
+  Web-Server das Step-035-Verify serverseitig erneut aus; nur `valid` streamt. Kein Schema-Change,
+  kein veralteter Verify-State. **(2) POST-Form → Route Handler streamt:** die Bestätigungen
+  (2 Checkboxen + getippt `DOWNLOAD BACKUP`, keine Defaults) kommen als Form-POST an
+  `/[locale]/servers/[id]/backups/download`; die Route reicht den Agent-Stream (`GET
+  /docker/provision/download-backup`, Token-Gate, striktes Instanz-Muster, nie `.metadata.json`)
+  **ohne Komplett-Einlesen** durch (Web-Streams, Backpressure; Gesamttimeout 600 s). Blockierte
+  Anfragen ⇒ 303-Redirect mit generischem Statuskey. Kein Ticket-Mechanismus (Option B aus dem
+  Prompt) – einstufig reicht, solange die Route selbst streamen kann. **(3) Audit ehrlich:**
+  `requested/blocked/confirmed/started/failed` ohne Dateiname/Prüfsumme/Inhalt; **`started` ist
+  der letzte zuverlässige Audit-Punkt** – `completed` wird nicht geloggt, weil das Ende des
+  durchgereichten Streams im Web-Prozess nicht sicher erfassbar ist. **Rate-Limit:** 5/h je
+  Owner+Server durchgesetzt; das modellierte Tageslimit (20/Tag) bewusst noch nicht (MVP).
+  Die UI zeigt die Download-Form nur direkt nach einem bestätigten Verify-`valid`-Ergebnis
+  (Server prüft unabhängig davon erneut).
+- **Begründung:** Option A ist die sicherste Verify-Garantie (keine Race mit veraltetem State);
+  Web-proxied Streaming hält Agent-URL/Token vollständig serverseitig; das Audit lügt nicht über
+  Zustellung, die der Proxy nicht garantieren kann.
+- **Konsequenzen:** Downloads großer Dateien belasten den Web-Prozess als Durchleiter (dokumentiert;
+  Timeout 600 s begrenzt Hänger). Doppeltes Lesen der Datei (Verify-Hash + Stream) ist der Preis der
+  harten Verify-Regel. Tageslimit, Signatur/Verschlüsselung, Restore/Delete/Rotation bleiben offen
+  (je eigene Steps).
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

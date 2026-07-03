@@ -333,7 +333,33 @@
         },
         "dirUnavailable": "The backup directory is unavailable on the agent.",
         "unreachable": "Agent unreachable – backups cannot be listed.",
-        "error": "Backups could not be listed."
+        "error": "Backups could not be listed.",
+        "download": {
+          "hintSensitive": "Backup files can contain sensitive TS3 data – you are responsible for storing them securely.",
+          "hintReverify": "The checksum is re-verified server-side before the download.",
+          "hintNoRestore": "Restore is not implemented – this is only the file download.",
+          "hintAudited": "This action is audited.",
+          "confirmSensitiveLabel": "I understand the backup may contain sensitive TS3 data.",
+          "confirmStorageLabel": "I am responsible for storing the file securely.",
+          "typedLabel": "Type \"DOWNLOAD BACKUP\" to confirm.",
+          "button": "Download backup"
+        },
+        "downloadResult": {
+          "invalid": "Download rejected: invalid request.",
+          "notManaged": "Download is only available for managed servers.",
+          "sensitiveDataRequired": "Please confirm the backup may contain sensitive data.",
+          "storageRequired": "Please confirm responsibility for secure storage.",
+          "typedMismatch": "Please type the confirmation phrase exactly.",
+          "rateLimited": "Too many downloads – please try again later.",
+          "mismatch": "Download blocked: the checksum does NOT match – file modified or corrupted.",
+          "checksumMissing": "Download blocked: the metadata contains no checksum (older backup).",
+          "metadataMissing": "Download blocked: the metadata file is missing.",
+          "metadataInvalid": "Download blocked: the metadata is invalid.",
+          "backupNotFound": "Download blocked: the backup file was not found.",
+          "backupDirUnavailable": "The backup directory is unavailable on the agent.",
+          "unreachable": "Agent unreachable – download not possible.",
+          "error": "Download failed."
+        }
       },
       "deprovision": {
         "title": "Deprovisioning (not active yet)",

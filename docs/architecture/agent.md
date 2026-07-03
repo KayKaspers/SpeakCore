@@ -40,6 +40,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/backup-volume` | **write** (Flag-gated): managed **Volume-Backup** (read-only Quelle → serverseitiges `AGENT_BACKUP_DIR`, festes Image, nur ohne Container) |
 | POST | `/docker/provision/list-backups` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Liste** aus `AGENT_BACKUP_DIR` (kein Docker, kein execFile, kein Download/Restore/Delete) |
 | POST | `/docker/provision/verify-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Verify** – SHA-256 neu berechnen + mit metadata.json vergleichen (keine Schreibaktion) |
+| GET | `/docker/provision/download-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Stream** – genau eine strikt validierte tar.gz aus `AGENT_BACKUP_DIR` (nie metadata.json, kein Listing/Entpacken) |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -337,11 +338,26 @@ Nachträgliche **Integritätsprüfung** eines vorhandenen Backups (Token-Gate, *
 der Karte. Audit: `backup.managedVolume.verify.requested/completed/failed` + `verify.mismatch` –
 bewusst **ohne Dateinamen/Prüfsummenwerte**.
 
-> **Backup-Download (Step 036): nur Blueprint.** Es gibt **keinen** Download-Endpunkt – kein Byte
-> verlässt den Agent. Das Zielbild für einen späteren Step ist **Web-proxied Streaming** (Browser →
-> Web → serverseitiger Agent-Call mit Token → Streaming aus `AGENT_BACKUP_DIR` → Browser; nie
-> Browser→Agent, kein Buffering) mit **Verify-`valid`-Pflicht**, Bestätigungen (`DOWNLOAD BACKUP`)
-> und Rate-/Größen-Policies – siehe [ADR-0035](../../project-brain/DECISIONS.md).
+## `/docker/provision/download-backup` – kontrollierter Backup-Stream (Step 037)
+
+Umsetzung des Step-036-Blueprints ([ADR-0035/0036](../../project-brain/DECISIONS.md)):
+
+- **GET mit `instanceId` + `fileName`** (Token-Gate, **kein** Write-Flag). Beide strikt validiert:
+  exaktes Step-032-Muster der Instanz, **nur `.tar.gz`** (nie `.metadata.json`), kein `/`, kein
+  `\`, kein `..`, keine Subdirectories/fremden Instanzen. **Kein Directory Listing** – genau eine
+  konkret benannte Datei aus `AGENT_BACKUP_DIR`.
+- **Streaming ohne Komplett-Einlesen:** ReadStream → Response (Backpressure via pipe) mit
+  `application/gzip`, `content-length` und `content-disposition: attachment`. **Kein** Entpacken,
+  **kein** Docker/Prozessaufruf, **keine** Schreibaktion, **kein** Loggen von Inhalten.
+- Fehler nur als normalisierte Codes (400 `invalid` / 404 `backupNotFound` / 503
+  `backupDirUnavailable`) – **keine Host-Pfade, keine Roh-Fehler**.
+
+**Web-Auslösung (Step 037):** `POST /[locale]/servers/[id]/backups/download` (OWNER-only
+Route Handler): Bestätigungen ohne Defaults (2 Checkboxen + getippt **`DOWNLOAD BACKUP`**) →
+**Rate-Limit 5/h je Owner+Server** → **Verify direkt vor Download** (nur `valid` streamt) →
+Agent-Stream wird **ohne Buffering** an den Browser durchgereicht. **Nie Browser→Agent**;
+Agent-URL/Token bleiben serverseitig. Audit `backup.managedVolume.download.*` ohne Dateiname/
+Prüfsumme; `started` ist der letzte zuverlässige Audit-Punkt (kein behauptetes `completed`).
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

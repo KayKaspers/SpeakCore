@@ -84,13 +84,18 @@
   Server **neu berechnet** und mit den Metadaten verglichen – Ergebnis „gültig" oder „stimmt nicht
   überein" (dann wurde die Datei verändert oder ist beschädigt). Es wird dabei **nichts
   heruntergeladen, wiederhergestellt oder gelöscht**; ältere Backups ohne Prüfsumme zeigen
-  „Prüfsumme fehlt". **Backup-Download ist noch nicht aktiv** (Step 036 ist nur das
-  Sicherheitskonzept): Ein späterer Download setzt eine **gültig verifizierte Prüfsumme** voraus,
-  läuft nie direkt vom Browser zum Agent und wird separat bestätigt und auditiert.*
+  „Prüfsumme fehlt". Ab Step 037 kannst du ein Backup **herunterladen**: Nach einer erfolgreichen
+  Prüfung („gültig") erscheint am Eintrag eine Download-Form – 2 Checkboxen (sensible Daten /
+  sichere Speicherung) + getippt **`DOWNLOAD BACKUP`**. Vor dem Download wird die Prüfsumme
+  **serverseitig erneut geprüft** (nur „gültig" wird ausgeliefert); der Download läuft **nie direkt
+  vom Browser zum Agent**, ist auf **5 pro Stunde** begrenzt und wird auditiert. Die
+  heruntergeladene Datei ist **unverschlüsselt und sensibel** – sicher aufbewahren. **Restore ist
+  weiterhin nicht implementiert.***
 - Logs lesen
 - Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
   Backups einsehbar; ab Step 034: SHA-256-Integritätsprüfsumme; ab Step 035: read-only
-  Prüfsummen-Verifikation; **Restore folgt später als eigener, abgesicherter Schritt**.*
+  Prüfsummen-Verifikation; ab Step 037: verifizierter, bestätigter **Download** über den Web-Server;
+  **Restore folgt später als eigener, abgesicherter Schritt**.*
 - Sicherheit & Safe Defaults — *ab Step 016: Der Verschlüsselungsschlüssel für gespeicherte
   Zugangsdaten (`SECRET_ENCRYPTION_KEY`) kann rotiert werden. Reiner **Operator-/CLI-Vorgang**
   (`pnpm --filter @speakcore/web rotate-secrets`, mit `--dry-run` zum gefahrlosen Prüfen) – **keine

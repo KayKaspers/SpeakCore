@@ -5,6 +5,53 @@
 
 ## [Unreleased]
 
+### NDF Step 037 – Web-proxied Backup Download (2026-07-02)
+
+> Echte Umsetzung des Step-036-Blueprints: **verifizierte, bestätigte** Ausgabe eines managed
+> Backups über den Web-Server – **nie Browser→Agent**, kein Buffering ganzer Dateien, kein
+> Restore/Delete/Import, keine neue Docker-Aktion.
+
+#### Added
+- **Agent `GET /docker/provision/download-backup?instanceId=…&fileName=…`** (Token-Gate, **kein**
+  Write-Flag, `apps/agent/src/backup-download.ts`): streamt **genau eine** strikt validierte
+  `tar.gz` aus `AGENT_BACKUP_DIR` (exaktes Step-032-Muster; `.metadata.json` u. a. **nie**
+  streambar; kein `/`/`\`/`..`, keine fremden Instanzen, kein Directory Listing, kein Entpacken).
+  ReadStream → Response mit `application/gzip`, `content-length`, `content-disposition`
+  (Backpressure via pipe, kein Komplett-Einlesen). Fehler nur als normalisierte Codes
+  (400/404/503) ohne Host-Pfade/Roh-Fehler.
+- **Web-Download-Route `POST /[locale]/servers/[id]/backups/download`** (Route Handler,
+  OWNER-only): POST-Form mit Bestätigungen → Guards → Stream-Response. Blockierte Anfragen
+  redirecten (303) mit generischem Statuskey zurück zur Backup-Liste.
+- **Web-Service** `apps/web/src/core/backup-download.ts` (+ reine Helfer): managed-only,
+  strikte Dateinamen-Vorprüfung, Bestätigungen **ohne Defaults**
+  (`confirmBackupContainsSensitiveData` + `confirmSecureStorageResponsibility` + getippt
+  **`DOWNLOAD BACKUP`** als Pflicht), **Rate-Limit 5/h je Owner+Server**
+  (`BACKUP_DOWNLOAD_RATE_LIMIT`; Tageslimit 20/Tag bewusst noch nicht durchgesetzt, dokumentiert),
+  **Verify direkt vor Download (Option A)**: SHA-256 wird serverseitig erneut geprüft – **nur
+  `valid` streamt** (mismatch/checksumMissing/metadataMissing/… blockieren). Der Agent-Stream wird
+  **ohne Komplett-Einlesen** an den Browser durchgereicht (Gesamttimeout 600 s gemäß Policy).
+- **UI:** Download-Form erscheint pro Backup **nur nach frisch bestätigtem Verify-`valid`**
+  (Ergebnis-Banner-Zustand): 2 Checkboxen + Texteingabe `DOWNLOAD BACKUP` + „Backup
+  herunterladen"; Hinweise (sensibel / erneute Prüfung / kein Restore / auditiert); Fehler-Banner
+  für alle Blockier-Status (DE/EN). Weiterhin **keine** Restore-/Delete-/Rotate-/Import-Buttons.
+- **Audit:** `backup.managedVolume.download.requested/blocked/confirmed/started/failed` – bewusst
+  **ohne Dateinamen/Prüfsummen/Inhalt/Host-Pfade**. **`started` ist der letzte zuverlässige
+  Audit-Punkt**; ein `completed` wird ehrlich **nicht** geloggt (Stream-Ende im Web-Proxy nicht
+  sicher erfassbar – dokumentiert, ADR-0036).
+- **Tests:** `apps/agent/test/backup-download.test.ts` (6, inkl. HTTP-Streaming-Test: exakte
+  Bytes + Header gegen realen Temp-Ordner; 401; metadata.json/Traversal/fremde Instanz ⇒ 400;
+  fehlend ⇒ 404 ohne Host-Pfad) + `apps/web/test/backup-download.test.ts` (11: Bestätigungen ohne
+  Defaults, Rate-Limit-Policy, alle Audit-Outcomes ohne Dateiname/Checksum, Source-Scans: kein
+  fs/execFile/Docker in Core, Route ohne `AGENT_URL`/Token/Buffering-Muster).
+
+#### Nicht enthalten (bewusst)
+- Kein Restore, kein Import, kein Delete/Rotate, kein Hard-Delete, kein Unarchive; kein
+  Tageslimit (nur 5/h); keine Signatur/Verschlüsselung der Backups.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (439) · `prisma validate` n. z.
+  (kein Schema-Change). Siehe **ADR-0036**.
+
 ### NDF Step 036 – Backup Download Security Blueprint (2026-07-02)
 
 > **Reines Sicherheits-/Architekturkonzept** für spätere Backup-Downloads (`executable: false`,

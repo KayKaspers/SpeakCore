@@ -3,7 +3,7 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – interne Alpha / NDF Step 036 (Backup-Download-Blueprint)` — Details:
+**Status:** `0.1 – interne Alpha / NDF Step 037 (Web-proxied Backup-Download)` — Details:
 [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
@@ -145,10 +145,11 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   Ab **Step 034** erhalten neue Backups eine **SHA-256-Integritätsprüfsumme** (in `metadata.json` +
   Anzeige in der Liste) — **Integrität, keine Verschlüsselung/Signatur**. Ab **Step 035** lassen sich
   Backups **read-only verifizieren** („Prüfsumme prüfen": SHA-256 neu berechnen + vergleichen ⇒
-  gültig/stimmt nicht überein) — ohne Download/Restore/Delete, ohne Schreibaktion. **Step 036**
-  ergänzt ein getestetes **Download-Sicherheitskonzept** (reiner Blueprint, `executable: false`:
-  Web-proxied Streaming als Zielbild, Verify-`valid`-Pflicht, Bestätigungen + `DOWNLOAD BACKUP`) —
-  **es verlässt weiterhin kein Backup-Byte das System**.
+  gültig/stimmt nicht überein) — ohne Restore/Delete, ohne Schreibaktion. Ab **Step 037** ist der
+  **Web-proxied Backup-Download** aktiv (Blueprint aus Step 036 umgesetzt): OWNER-only mit 2
+  Bestätigungen + getippt `DOWNLOAD BACKUP`, **Verify direkt vor jedem Download** (nur „gültig"
+  streamt), Rate-Limit 5/h, Streaming ohne Buffering, **nie Browser→Agent** — die heruntergeladene
+  Datei ist **unverschlüsselt sensibel**.
 - **Kein** Restore/Import, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller

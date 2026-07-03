@@ -343,7 +343,18 @@ Backup existiert + Metadaten gültig + Checksum vorhanden + **Verify `valid` als
 Rate-Limit + 2 Bestätigungen + getippt `DOWNLOAD BACKUP`. **Zielbild Option A:** Web-proxied
 Streaming (Browser → Web → Agent → Browser; nie Browser→Agent, kein Buffering). Policies modelliert
 (5/h, 20/Tag, Timeout 600 s, Warnung ab 1 GiB); Audit `backup.managedVolume.download.*` ohne
-Inhalt/Dateiname. Der echte Streaming-Download folgt als eigener, abgesicherter Step.
+Inhalt/Dateiname.
+
+**Web-proxied Backup-Download (Step 037, [ADR-0036](DECISIONS.md)):** Umsetzung des Blueprints.
+Browser → `POST /[locale]/servers/[id]/backups/download` (OWNER-only, Bestätigungen ohne Defaults:
+2 Checkboxen + getippt `DOWNLOAD BACKUP`) → Rate-Limit **5/h je Owner+Server** → **Verify direkt
+vor Download** (Option A: SHA-256 serverseitig erneut geprüft, nur `valid` streamt) → serverseitiger
+Agent-Call `GET /docker/provision/download-backup` (Token-Gate, striktes Instanz-Muster, nur
+`tar.gz`, nie `.metadata.json`) → Stream wird **ohne Komplett-Einlesen** durchgereicht
+(Backpressure, Gesamttimeout 600 s). **Nie Browser→Agent.** Audit
+`download.requested/blocked/confirmed/started/failed` ohne Dateiname/Prüfsumme – **`started` ist
+der letzte zuverlässige Punkt**, `completed` wird ehrlich nicht geloggt. UI: Download-Form nur nach
+frisch bestätigtem Verify-`valid`.
 
 ## 7. Verwandte Dokumente
 

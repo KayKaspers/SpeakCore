@@ -333,7 +333,33 @@
         },
         "dirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
         "unreachable": "Agent nicht erreichbar – Backups können nicht gelistet werden.",
-        "error": "Backups konnten nicht gelistet werden."
+        "error": "Backups konnten nicht gelistet werden.",
+        "download": {
+          "hintSensitive": "Backup-Dateien können sensible TS3-Daten enthalten – du bist für die sichere Speicherung verantwortlich.",
+          "hintReverify": "Vor dem Download wird die Prüfsumme serverseitig erneut geprüft.",
+          "hintNoRestore": "Restore ist nicht implementiert – dies ist nur der Datei-Download.",
+          "hintAudited": "Diese Aktion wird auditiert.",
+          "confirmSensitiveLabel": "Mir ist bewusst, dass das Backup sensible TS3-Daten enthalten kann.",
+          "confirmStorageLabel": "Ich bin für die sichere Speicherung der Datei verantwortlich.",
+          "typedLabel": "Zum Bestätigen „DOWNLOAD BACKUP\" eingeben.",
+          "button": "Backup herunterladen"
+        },
+        "downloadResult": {
+          "invalid": "Download abgelehnt: Ungültige Anfrage.",
+          "notManaged": "Download ist nur für verwaltete Server verfügbar.",
+          "sensitiveDataRequired": "Bitte bestätigen, dass das Backup sensible Daten enthalten kann.",
+          "storageRequired": "Bitte die Verantwortung für die sichere Speicherung bestätigen.",
+          "typedMismatch": "Bitte die getippte Bestätigung exakt eingeben.",
+          "rateLimited": "Zu viele Downloads – bitte später erneut versuchen.",
+          "mismatch": "Download blockiert: Die Prüfsumme stimmt NICHT überein – Datei verändert oder beschädigt.",
+          "checksumMissing": "Download blockiert: Die Metadaten enthalten keine Prüfsumme (älteres Backup).",
+          "metadataMissing": "Download blockiert: Die Metadaten-Datei fehlt.",
+          "metadataInvalid": "Download blockiert: Die Metadaten sind ungültig.",
+          "backupNotFound": "Download blockiert: Die Backup-Datei wurde nicht gefunden.",
+          "backupDirUnavailable": "Backup-Verzeichnis ist auf dem Agent nicht verfügbar.",
+          "unreachable": "Agent nicht erreichbar – Download nicht möglich.",
+          "error": "Download fehlgeschlagen."
+        }
       },
       "deprovision": {
         "title": "Deprovisioning (noch nicht aktiv)",

@@ -16,6 +16,7 @@ import type {
   Ts3ContainerStartRequest,
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
+  Ts3BackupDownloadRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
@@ -304,6 +305,57 @@ export async function verifyManagedVolumeBackup(
     return null;
   } finally {
     clearTimeout(timer);
+  }
+}
+
+export interface AgentBackupDownloadStream {
+  /** Roh-Bytestream vom Agent – wird OHNE Komplett-Einlesen an den Browser weitergereicht. */
+  stream: ReadableStream<Uint8Array>;
+  contentType: string;
+  contentLength: string | null;
+  fileName: string;
+}
+
+/**
+ * Streamt ein **verifiziertes** Backup vom Agent – **ausschließlich serverseitig** (der Browser
+ * spricht den Agent nie direkt an; Agent-URL/Token bleiben in der Server-Umgebung). Kein
+ * Buffering: der Response-Body wird als Stream durchgereicht. Gesamttimeout 600 s gemäß
+ * Step-036-Policy (bricht auch hängende Streams ab). `null` bei Fehler/Nichterreichbarkeit.
+ */
+export async function downloadManagedVolumeBackup(
+  request: Ts3BackupDownloadRequest,
+  timeoutMs = 600_000,
+): Promise<AgentBackupDownloadStream | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  // Timer läuft bewusst über die gesamte Streamdauer (kein clearTimeout nach den Headern):
+  // ein Abort nach abgeschlossenem Stream ist ein No-op, ein hängender Stream wird beendet.
+  setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const params = new URLSearchParams({
+      instanceId: request.instanceId,
+      fileName: request.fileName,
+    });
+    const res = await fetch(
+      `${base.replace(/\/+$/, '')}/docker/provision/download-backup?${params.toString()}`,
+      {
+        method: 'GET',
+        headers: agentHeaders(),
+        signal: controller.signal,
+        cache: 'no-store',
+      },
+    );
+    if (!res.ok || !res.body) return null;
+    return {
+      stream: res.body,
+      contentType: res.headers.get('content-type') ?? 'application/octet-stream',
+      contentLength: res.headers.get('content-length'),
+      fileName: request.fileName,
+    };
+  } catch {
+    return null;
   }
 }
 

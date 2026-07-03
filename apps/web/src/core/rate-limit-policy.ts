@@ -46,5 +46,12 @@ export const LOGIN_RATE_LIMIT: RateLimitConfig = { windowMs: 15 * 60 * 1000, max
 /** Setup/Owner-Erstellung: max. 5 Versuche je IP in 15 Minuten. */
 export const SETUP_RATE_LIMIT: RateLimitConfig = { windowMs: 15 * 60 * 1000, max: 5 };
 
+/**
+ * Backup-Download (Step 037, gemäß Step-036-Blueprint): max. 5 Downloads je Owner+Server pro
+ * Stunde. Das zusätzlich modellierte Tageslimit (20/Tag) ist bewusst noch nicht durchgesetzt
+ * (MVP; dokumentiert in ADR-0035).
+ */
+export const BACKUP_DOWNLOAD_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, max: 5 };
+
 /** Aufbewahrungsdauer für Rate-Limit-Einträge (Cleanup-Schwelle). */
 export const RATE_LIMIT_RETENTION_MS = 24 * 60 * 60 * 1000;

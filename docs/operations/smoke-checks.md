@@ -86,16 +86,19 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   Eintrag auf **„Prüfsumme prüfen"** klicken. Erwartung: grünes Banner „Prüfung erfolgreich …"
   (bzw. „Prüfsumme fehlt" bei Step-032-Backups). Rotes „stimmt NICHT überein" nur, wenn die Datei
   tatsächlich verändert wurde. Es wird nichts geschrieben/geladen/gelöscht.
-- **Kein Download (Step 036 ist nur Blueprint):** Die Backup-Karte zeigt den Hinweis
-  „Backup-Download ist noch nicht aktiv …" und enthält **keine** Download-/Restore-/Delete-/
-  Rotate-Buttons – prüfen, dass keine solche Aktion angeboten wird.
+- **Backup-Download (Step 037, read-only – gefahrlos, aber Datei ist sensibel):** Nach einem
+  Verify mit Ergebnis „gültig" erscheint am Eintrag die Download-Form. Ohne beide Checkboxen bzw.
+  ohne getipptes `DOWNLOAD BACKUP` blockt die Route mit klarem Hinweis (Redirect zurück zur
+  Liste). Mit allen Bestätigungen liefert der Browser die tar.gz als Datei-Download (Prüfsumme
+  wird vorher serverseitig erneut geprüft; max. 5/h). **Keine** Restore-/Delete-/Rotate-/
+  Import-Buttons; die heruntergeladene Datei sicher aufbewahren oder nach dem Test löschen.
 
 ## 6. Ergebnisprotokoll (Vorlage)
 
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 422 Tests |
+| lint/typecheck/test/build | ☐ | 439 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |
