@@ -8,6 +8,7 @@ import { BrandMark } from '@/components/BrandMark';
 import {
   backfillChecksumAction,
   createContainerAction,
+  deleteBackupAction,
   healthcheckAction,
   prepareContainerAction,
   refreshServerAction,
@@ -46,6 +47,7 @@ export default async function ServerDetailPage({
     verifyFile?: string;
     download?: string;
     backfill?: string;
+    delete?: string;
   }>;
 }) {
   const { locale, id } = await params;
@@ -56,6 +58,7 @@ export default async function ServerDetailPage({
     verifyFile,
     download,
     backfill,
+    delete: deleteParam,
   } = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
@@ -125,7 +128,7 @@ export default async function ServerDetailPage({
           <li>• {t('managed.backupList.readOnlyHint')}</li>
           <li>• {t('managed.backupList.checksumHint')}</li>
           <li>• {t('managed.backupList.downloadHint')}</li>
-          <li>• {t('managed.backupList.deleteNotActiveHint')}</li>
+          <li>• {t('managed.backupList.deleteHint')}</li>
         </ul>
         {backupList &&
           verify &&
@@ -211,6 +214,34 @@ export default async function ServerDetailPage({
               <p>{t(`managed.backupList.backfillResult.${backfill}`)}</p>
             </div>
           )}
+        {backupList &&
+          deleteParam &&
+          [
+            'deleted',
+            'alreadyRemoved',
+            'metadataDeleteFailed',
+            'invalid',
+            'notManaged',
+            'deletionRequired',
+            'onlyCopyRequired',
+            'restoreWarnRequired',
+            'typedMismatch',
+            'rateLimited',
+            'backupDirUnavailable',
+            'unavailable',
+            'unreachable',
+            'error',
+          ].includes(deleteParam) && (
+            <div
+              className={`mt-3 rounded-sc-sm px-3 py-2 text-sc-sm ${
+                deleteParam === 'deleted'
+                  ? 'bg-sc-success/15 text-sc-success'
+                  : 'bg-sc-warning/15 text-sc-warning'
+              }`}
+            >
+              <p>{t(`managed.backupList.deleteResult.${deleteParam}`)}</p>
+            </div>
+          )}
         {!backupList && (
           <div className="mt-3">
             <Link
@@ -292,6 +323,68 @@ export default async function ServerDetailPage({
                           </button>
                         </form>
                       )}
+                      <details className="mt-2 rounded-sc-md border border-sc-error/30 p-2">
+                        <summary className="cursor-pointer text-sc-caption font-medium text-sc-error">
+                          {t('managed.backupList.delete.summary')}
+                        </summary>
+                        <form action={deleteBackupAction} className="mt-2 space-y-2">
+                          <input type="hidden" name="locale" value={locale} />
+                          <input type="hidden" name="id" value={server.id} />
+                          <input type="hidden" name="fileName" value={b.fileName} />
+                          <ul className="space-y-1 text-sc-caption text-sc-warning">
+                            <li>• {t('managed.backupList.delete.warnIrreversible')}</li>
+                            {(backupList.backups ?? []).length === 1 && (
+                              <li>• {t('managed.backupList.delete.warnOnlyBackup')}</li>
+                            )}
+                            {!(verify === 'valid' && verifyFile === b.fileName) && (
+                              <li>• {t('managed.backupList.delete.warnNotVerified')}</li>
+                            )}
+                            {b.metadataStatus !== 'present' && (
+                              <li>• {t('managed.backupList.delete.warnMetadata')}</li>
+                            )}
+                            {b.metadataStatus === 'present' && !b.metadata?.checksum && (
+                              <li>• {t('managed.backupList.delete.warnChecksumMissing')}</li>
+                            )}
+                            {server.archivedAt && (
+                              <li>• {t('managed.backupList.delete.warnArchived')}</li>
+                            )}
+                          </ul>
+                          <label className="flex items-start gap-2 text-sc-caption text-sc-text-secondary">
+                            <input type="checkbox" name="confirmBackupDeletion" className="mt-0.5" />
+                            <span>{t('managed.backupList.delete.confirmDeletionLabel')}</span>
+                          </label>
+                          <label className="flex items-start gap-2 text-sc-caption text-sc-text-secondary">
+                            <input type="checkbox" name="confirmBackupMayBeOnlyCopy" className="mt-0.5" />
+                            <span>{t('managed.backupList.delete.confirmOnlyCopyLabel')}</span>
+                          </label>
+                          <label className="flex items-start gap-2 text-sc-caption text-sc-text-secondary">
+                            <input type="checkbox" name="confirmNoRestoreWithoutBackup" className="mt-0.5" />
+                            <span>{t('managed.backupList.delete.confirmNoRestoreLabel')}</span>
+                          </label>
+                          <div>
+                            <label
+                              htmlFor={`delete-typed-${b.fileName}`}
+                              className="mb-1 block text-sc-caption text-sc-text-secondary"
+                            >
+                              {t('managed.backupList.delete.typedLabel')}
+                            </label>
+                            <input
+                              id={`delete-typed-${b.fileName}`}
+                              name="typedConfirmation"
+                              type="text"
+                              autoComplete="off"
+                              placeholder="DELETE BACKUP"
+                              className="w-full rounded-sc-md border border-sc-border bg-sc-background px-2 py-1 text-sc-caption text-sc-text-primary outline-none focus:border-sc-error"
+                            />
+                          </div>
+                          <button
+                            type="submit"
+                            className="rounded-sc-md bg-sc-error px-3 py-1.5 text-sc-caption font-medium text-white"
+                          >
+                            {t('managed.backupList.delete.button')}
+                          </button>
+                        </form>
+                      </details>
                       {verify === 'valid' && verifyFile === b.fileName && (
                         <form
                           method="post"

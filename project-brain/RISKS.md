@@ -85,9 +85,10 @@
   (SHA-256 nachtragen – beweist Integrität nur **ab** dem
   Backfill-Zeitpunkt); **Download seit Step 037** (Web-proxied Streaming, nur nach Verify `valid`
   + Bestätigungen, 5/h-Limit) – heruntergeladene Dateien sind **unverschlüsselt sensibel**
-  (Owner-Verantwortung); **Löschung/Rotation nur als Blueprint (Step 039)** – kein Delete-Endpunkt,
-  `AGENT_BACKUP_DIR` wächst weiter; Aufbewahrung liegt beim
-  Betreiber (Backup-Dateien sind **sensibel**).
+  (Owner-Verantwortung); **Einzel-Delete seit Step 040** (gezielt, irreversibel, 3 Bestätigungen +
+  `DELETE BACKUP`, 5/h-Limit – fremde Dateien nachweislich unberührt); **Rotation weiterhin nur
+  Blueprint** (kein Bulk-Delete, `AGENT_BACKUP_DIR` muss manuell rotiert werden); Aufbewahrung
+  liegt beim Betreiber (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen
 - **E:** hoch · **A:** mittel · **Risiko:** mittel
@@ -271,7 +272,7 @@ Status je Risiko für die **interne 0.1 Alpha**: **offen** · **mitigiert** · *
 | R-14 Secrets in Docker-Logs | **mitigiert (Step 017)** | Query-Passwort per ENV, kein Log-Lesen. |
 | R-13 SSRF (TS3-Host) | **akzeptiert (0.1)** | LAN/localhost erlaubt (Self-Hosting); Metadaten/Link-Local/unspez. blockiert; strengere Egress später. |
 | R-05 TS3-Lizenz | **akzeptiert (0.1)** | explizite Nutzerbestätigung beim Start; Verantwortung beim Betreiber. |
-| R-06 Backup/Restore | **teilweise mitigiert (Steps 032–038)** | Volume-Backup + Sichtbarkeit + SHA-256-Checksums (inkl. Backfill) + Verify + verifizierter Web-proxied Download; **Restore/Import fehlen bewusst**; heruntergeladene Dateien unverschlüsselt sensibel. |
+| R-06 Backup/Restore | **teilweise mitigiert (Steps 032–040)** | Backup-Lebenszyklus komplett bis auf Restore: erstellen, sehen, prüfen (inkl. Backfill), laden, gezielt löschen; **Restore/Import fehlen bewusst**; Rotation nur Blueprint. |
 | Hard-Delete / Unarchive | **bewusst nicht enthalten** | erst nach Backup-/Export-Konzept; Export ≠ TS3-Datenbackup. |
 | R-08 WebUI-Sicherheit | **mitigiert** | Auth-Härtung, Rate-Limit, Security-Header/CSP (R-11 offen: `'unsafe-inline'`). |
 

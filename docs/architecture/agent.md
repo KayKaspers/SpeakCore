@@ -42,6 +42,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | POST | `/docker/provision/verify-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Verify** – SHA-256 neu berechnen + mit metadata.json vergleichen (keine Schreibaktion) |
 | GET | `/docker/provision/download-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Stream** – genau eine strikt validierte tar.gz aus `AGENT_BACKUP_DIR` (nie metadata.json, kein Listing/Entpacken) |
 | POST | `/docker/provision/backfill-backup-checksum` | **metadata-write** (Token-gated, ohne Docker-Write-Flag): **SHA-256 nachtragen** – nur metadata.json wird normalisiert ergänzt, tar.gz bleibt unverändert |
+| POST | `/docker/provision/delete-backup` | **destruktiv** (Token-gated, ohne Docker-Write-Flag): **Einzel-Backup-Delete** – genau eine tar.gz + ihre metadata.json, irreversibel, alle Bestätigungen re-validiert |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)
@@ -383,11 +384,30 @@ abgelehnt), rate-limitiert; Ergebnis-Banner in der Backup-Liste. Audit:
 `backup.managedVolume.checksumBackfill.requested/completed/failed/alreadyPresent` – ohne
 Dateiname/Prüfsumme.
 
-> **Backup-Löschung/Rotation (Step 039): nur Blueprint.** Es gibt **keinen** Delete-Endpunkt –
-> keine Datei wird entfernt. Das Konzept für einen späteren Step: gezieltes Einzel-Delete (genau
-> eine strikt validierte Datei + ihre metadata.json, nie Wildcards/Ordner) mit 3 Bestätigungen +
-> getippt `DELETE BACKUP` (irreversibel; Verify-Probleme nur Warnung); Rotation zunächst
-> ausschließlich als **Dry-Run** – siehe [ADR-0037](../../project-brain/DECISIONS.md).
+## `/docker/provision/delete-backup` – Einzel-Backup-Delete (Step 040)
+
+Umsetzung des Step-039-Blueprints ([ADR-0037/0038](../../project-brain/DECISIONS.md)) – die erste
+**destruktive** Dateioperation im Backup-Verzeichnis, **irreversibel**:
+
+- **Agentseitige Re-Validierung ALLER Guards** (Token-Gate; kein Docker-Write-Flag, weil keine
+  Docker-Aktion): `instanceId` + exaktes Instanz-Dateinamensmuster (metadata.json ist **nie**
+  primäres Ziel; kein `/`/`\`/`..`, keine fremden Instanzen) + 3 Bestätigungen
+  (`confirmBackupDeletion`/`confirmBackupMayBeOnlyCopy`/`confirmNoRestoreWithoutBackup`) +
+  getippt **`DELETE BACKUP`** – ohne Defaults.
+- **Gezieltes unlink:** genau die benannte tar.gz + die intern abgeleitete metadata.json –
+  **kein Directory Listing, keine Rekursion, keine Wildcards, keine Ordner**; die tar.gz wird nie
+  gelesen/entpackt. Fremde Dateien/Subdirectories bleiben unberührt (HTTP-Test).
+- **Idempotent:** fehlende tar.gz ⇒ `alreadyRemoved` (eine verwaiste metadata.json wird bewusst
+  nicht mitgelöscht); nur metadata-Löschung fehlgeschlagen ⇒ `metadataDeleteFailed`. Fehler ohne
+  Host-Pfade/Roh-Ausgaben.
+
+**Web-Auslösung (Step 040):** OWNER-only Gefahrenbereich „Backup löschen …" pro Backup-Eintrag
+(Warnanzeige: einziges Backup / nicht aktuell verifiziert / Metadaten fehlen / archiviert), 3
+Checkboxen + Texteingabe + roter Bestätigungs-Button; Rate-Limit 5/h je Owner+Server; auch für
+**archivierte** managed Server. Audit: `backup.managedVolume.delete.requested/blocked/confirmed/`
+`started/completed/failed` – **ohne Dateinamen**.
+
+> **Rotation (Step 039): weiterhin nur Blueprint** – kein Bulk-Delete, zunächst Dry-Run-Konzept.
 
 ## `/docker/provision/container-status` – read-only Laufzeitstatus (Step 019)
 

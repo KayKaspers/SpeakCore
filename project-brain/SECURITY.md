@@ -351,6 +351,19 @@ und Dateigröße erscheinen als **Warnungen**. **Rotation ausschließlich als Dr
 (Policy mit Schutzregeln inkl. `protectOnlyBackup`/`protectLastVerifiedBackup`, Bestätigungen +
 `DELETE BACKUPS`, Warnung `wouldDeleteAllBackups`) – kein automatisches Löschen. Audit
 `delete.*`/`rotation.*` ohne Dateinamen/Inhalt/Host-Pfade.
+
+**Echtes Einzel-Backup-Delete (Step 040):** erste destruktive Dateioperation im
+Backup-Verzeichnis – **irreversibel** und entsprechend eingehegt: Token-Gate + agentseitige
+**Re-Validierung aller Guards** (striktes Instanz-Muster – metadata.json nie primäres Ziel, kein
+`/`/`\`/`..`, keine fremden Instanzen; 3 Bestätigungen + getippt **`DELETE BACKUP`**, keine
+Defaults). Gelöscht wird per gezieltem unlink **genau** die tar.gz + die intern abgeleitete
+metadata.json – **kein Directory Listing, keine Rekursion, keine Wildcards, keine Ordner**;
+fremde Dateien/Subdirectories bleiben nachweislich unberührt (HTTP-Test). Idempotent:
+fehlende tar.gz ⇒ `alreadyRemoved` (verwaiste metadata.json wird bewusst nicht aufgeräumt).
+Web: OWNER-only, Warnanzeige vor dem Absenden, **Rate-Limit 5/h je Owner+Server**; keine
+Host-Pfade/Roh-Fehler in Responses; Audit `delete.*` ohne Dateinamen. **Keine** Rotation/
+Bulk-Löschung – die bleibt Blueprint (Dry-Run zuerst); die tar.gz wird beim Löschen **nie**
+gelesen/entpackt.
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

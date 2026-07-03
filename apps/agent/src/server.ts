@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
@@ -13,6 +13,7 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3BackupChecksumBackfillRequest,
+  Ts3BackupDeleteRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
@@ -34,6 +35,7 @@ import { listTs3VolumeBackups, METADATA_MAX_BYTES } from './backup-list';
 import { verifyTs3VolumeBackup } from './backup-verify';
 import { resolveBackupDownload } from './backup-download';
 import { backfillBackupChecksum } from './backup-checksum-backfill';
+import { deleteTs3BackupFile } from './backup-file-delete';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -456,6 +458,50 @@ async function handle(
       writeMetadataFile: async (fileName, content) => {
         try {
           await writeFile(join(bfBackupDir, fileName), content, 'utf8');
+          return true;
+        } catch {
+          return false;
+        }
+      },
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/delete-backup') {
+    // Einzel-Backup-Delete (Step 040): entfernt GENAU EINE strikt validierte tar.gz + ihre exakt
+    // abgeleitete metadata.json. Token-Gate; KEIN Docker-Write-Flag (keine Docker-Aktion) – aber
+    // agentseitige Re-Validierung ALLER Bestätigungen. Irreversibel; keine Wildcards/Ordner.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const delBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const result = await deleteTs3BackupFile(body as Ts3BackupDeleteRequest, {
+      dirAvailable: async () => {
+        try {
+          return (await stat(delBackupDir)).isDirectory();
+        } catch {
+          return false;
+        }
+      },
+      fileExists: async (fileName) => {
+        try {
+          return (await stat(join(delBackupDir, fileName))).isFile();
+        } catch {
+          return false;
+        }
+      },
+      deleteFile: async (fileName) => {
+        try {
+          await unlink(join(delBackupDir, fileName));
           return true;
         } catch {
           return false;

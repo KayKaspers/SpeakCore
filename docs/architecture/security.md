@@ -80,9 +80,11 @@ validierte tar.gz, nie metadata.json; Web reicht den Stream ohne Komplett-Einles
 **nie Browser→Agent**, keine Host-Pfade, Audit ohne Dateiname/Inhalt). **Step 038** ergänzt den
 **Checksum-Backfill** für alte Step-032-Backups (nur metadata.json wird normalisiert um eine
 SHA-256 ergänzt – kein Blind-Merge, tar.gz bleibt unverändert, vorhandene Prüfsummen werden nie
-überschrieben); **Step 039** plant Löschung/Rotation als **reinen Blueprint** (`executable: false`:
-kein Delete-Endpunkt, keine Dateioperation; Einzel-Delete später mit 3 Bestätigungen + `DELETE
-BACKUP`, irreversibel, nie Wildcards; Rotation zunächst nur Dry-Run). **Kein Log-Lesen**, kein Inspect,
+überschrieben); **Step 039** plante Löschung/Rotation als Blueprint;
+**Step 040** setzt das **Einzel-Delete** um (irreversibel: genau eine strikt validierte tar.gz +
+ihre metadata.json per gezieltem unlink; 3 Bestätigungen + `DELETE BACKUP`, agentseitig
+re-validiert; Rate-Limit 5/h; keine Wildcards/Ordner/Rekursion; fremde Dateien nachweislich
+unberührt; Rotation bleibt Blueprint). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

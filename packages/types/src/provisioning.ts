@@ -570,6 +570,42 @@ export interface BackupRotationEvaluation {
   executable: false;
 }
 
+// --- Einzel-Backup-Delete (NDF Step 040: genau EINE tar.gz + ihre metadata.json) -------------
+
+export type BackupFileDeleteStatus =
+  | 'deleted'
+  | 'alreadyRemoved'
+  | 'metadataAlreadyRemoved'
+  | 'metadataDeleteFailed'
+  | 'backupNotFound'
+  | 'metadataMissing'
+  | 'invalid'
+  | 'backupDirUnavailable'
+  | 'error'
+  | 'unavailable';
+
+/**
+ * Delete-Request: `instanceId` + strikt validierter Dateiname + 3 Pflichtbestätigungen +
+ * getippt `DELETE BACKUP`. Gelöscht wird NUR die exakte tar.gz + ihre intern abgeleitete
+ * metadata.json – nie Wildcards, nie Ordner, nie fremde Dateien. **Irreversibel.**
+ */
+export interface Ts3BackupDeleteRequest {
+  instanceId: string;
+  fileName: string;
+  confirmBackupDeletion?: boolean;
+  confirmBackupMayBeOnlyCopy?: boolean;
+  confirmNoRestoreWithoutBackup?: boolean;
+  typedConfirmation?: string;
+}
+
+/** Delete-Ergebnis: nur Status + Dateiname – keine Host-Pfade, keine Inhalte. */
+export interface BackupFileDeleteResult {
+  status: BackupFileDeleteStatus;
+  fileName?: string;
+  /** Wurde die zugehörige metadata.json mit entfernt? (false z. B., wenn sie nicht existierte) */
+  metadataRemoved?: boolean;
+}
+
 // --- Checksum-Backfill (NDF Step 038: fehlende Prüfsumme in metadata.json nachtragen) --------
 
 export type BackupChecksumBackfillStatus =

@@ -24,6 +24,7 @@ import { removeManagedNetworkForServer } from '@/core/network-remove';
 import { backupManagedVolumeForServer } from '@/core/volume-backup';
 import { verifyManagedVolumeBackupForServer } from '@/core/backup-verify';
 import { backfillBackupChecksumForServer } from '@/core/backup-backfill';
+import { deleteManagedBackupForServer } from '@/core/backup-file-delete';
 import { archiveManagedServer, type CredentialDecision } from '@/core/server-archive';
 import { runManagedHealthcheck } from '@/core/managed-health';
 import { updateManagedQueryAddress } from '@/core/managed-query';
@@ -403,6 +404,34 @@ export async function backupVolumeAction(formData: FormData): Promise<void> {
   //   | typedMismatch | containerStillExists | volumeNotFound | volumeNotManaged | backupDirUnavailable
   //   | imageUnavailable | writeDisabled | unavailable | unreachable | error
   redirect(`/${locale}/servers/${id}?notice=${result.status}`);
+}
+
+/**
+ * Einzel-Backup-Delete (Step 040): löscht GENAU EIN Backup (tar.gz + metadata.json) –
+ * **irreversibel**. OWNER-only; 3 Bestätigungen + getippt `DELETE BACKUP`; Rate-Limit im Service
+ * (5/h je Owner+Server). Auch archivierte managed Server dürfen löschen. Keine Rotation/Bulk.
+ */
+export async function deleteBackupAction(formData: FormData): Promise<void> {
+  const locale = String(formData.get('locale') ?? 'de');
+  const id = String(formData.get('id') ?? '');
+  const fileName = String(formData.get('fileName') ?? '');
+  const confirmations = {
+    confirmBackupDeletion: formData.get('confirmBackupDeletion') === 'on',
+    confirmBackupMayBeOnlyCopy: formData.get('confirmBackupMayBeOnlyCopy') === 'on',
+    confirmNoRestoreWithoutBackup: formData.get('confirmNoRestoreWithoutBackup') === 'on',
+    typedConfirmation: String(formData.get('typedConfirmation') ?? ''),
+  };
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'OWNER') {
+    redirect(`/${locale}/login`);
+  }
+
+  const result = await deleteManagedBackupForServer(id, user.email, user.id, fileName, confirmations);
+  if (result.status === 'notFound') {
+    redirect(`/${locale}/servers`);
+  }
+  redirect(`/${locale}/servers/${id}?backups=1&delete=${result.status}`);
 }
 
 /**

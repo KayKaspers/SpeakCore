@@ -1,6 +1,7 @@
 import 'server-only';
 import type {
   BackupChecksumBackfillResult,
+  BackupFileDeleteResult,
   BackupListResult,
   BackupVerifyResult,
   ContainerCreateResult,
@@ -18,6 +19,7 @@ import type {
   Ts3ContainerStatusRequest,
   Ts3ContainerStopRequest,
   Ts3BackupChecksumBackfillRequest,
+  Ts3BackupDeleteRequest,
   Ts3BackupDownloadRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
@@ -335,6 +337,38 @@ export async function backfillBackupChecksum(
     });
     if (!res.ok) return null;
     return (await res.json()) as BackupChecksumBackfillResult;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Löscht beim Agent **genau ein** Backup (tar.gz + exakt abgeleitete metadata.json) –
+ * **serverseitig, irreversibel**. Übergibt `instanceId` + strikt validierten Dateinamen + alle
+ * Bestätigungen (der Agent re-validiert vollständig). Keine Wildcards, keine Ordner. `null`,
+ * wenn der Agent nicht erreichbar ist.
+ */
+export async function deleteManagedBackup(
+  request: Ts3BackupDeleteRequest,
+  timeoutMs = 30000,
+): Promise<BackupFileDeleteResult | null> {
+  const base = process.env.AGENT_URL;
+  if (!base) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/docker/provision/delete-backup`, {
+      method: 'POST',
+      headers: { ...agentHeaders(), 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as BackupFileDeleteResult;
   } catch {
     return null;
   } finally {

@@ -600,6 +600,29 @@
   Dateioperation im Backup-Verzeichnis); danach Rotation-Dry-Run als Anzeige, Bulk-Ausführung und
   Restore-Konzept je separat. Der Blueprint ändert am Laufzeitverhalten nichts.
 
+## ADR-0038 – Einzel-Backup-Delete: gezieltes unlink, idempotentes alreadyRemoved, kein Waisen-Aufräumen
+
+- **Status:** accepted (Step 040)
+- **Kontext:** Umsetzung des Delete-Blueprints (ADR-0037) – die **erste destruktive
+  Dateioperation** im Backup-Verzeichnis. Drei Detailfragen: Braucht der Endpunkt das
+  Docker-Write-Flag? Was passiert bei bereits fehlender Datei? Wird eine verwaiste metadata.json
+  mit aufgeräumt?
+- **Entscheidung:** **(1) Kein `AGENT_DOCKER_WRITE_ENABLED`** (keine Docker-Aktion) – stattdessen
+  Token-Gate + agentseitige **Re-Validierung aller Guards** (striktes Instanz-Muster, 3
+  Bestätigungen + getippt `DELETE BACKUP` ohne Defaults) + OWNER-only-Web-Flow mit Rate-Limit
+  (5/h je Owner+Server) und Warnanzeige (Step-039-Warnungen). **(2) Fehlende tar.gz ⇒
+  `alreadyRemoved`** (idempotent, wie `docker volume rm` in Step 025 – wiederholte Aufrufe sind
+  gefahrlos). **(3) Eine verwaiste metadata.json wird bewusst NICHT automatisch mitgelöscht** –
+  ohne primäres Ziel wird nichts aufgeräumt (kein implizites Löschen); schlägt nur die
+  metadata-Löschung fehl ⇒ ehrlicher Teilstatus `metadataDeleteFailed`. Gelöscht wird
+  ausschließlich per gezieltem unlink der exakt benannten tar.gz + intern abgeleiteter
+  metadata.json – kein Listing, keine Rekursion, keine Wildcards; Audit `delete.*` ohne Dateinamen.
+- **Begründung:** Minimale destruktive Oberfläche: jeder Lösch-Pfad ist explizit, deterministisch
+  und testbar (HTTP-Test verifiziert, dass fremde Dateien/Subdirectories unberührt bleiben).
+- **Konsequenzen:** Rotation bleibt Blueprint (Dry-Run-Anzeige als nächster Schritt, Bulk-Ausführung
+  separat); verwaiste metadata.json-Dateien können sich ansammeln (bewusst; späterer Aufräum-Step
+  denkbar). Restore bleibt nicht implementiert – gelöschte Backups sind endgültig verloren.
+
 ---
 
 ## Offene Entscheidungen (proposed / TODO)

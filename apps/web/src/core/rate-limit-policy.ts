@@ -53,5 +53,8 @@ export const SETUP_RATE_LIMIT: RateLimitConfig = { windowMs: 15 * 60 * 1000, max
  */
 export const BACKUP_DOWNLOAD_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, max: 5 };
 
+/** Einzel-Backup-Delete (Step 040): max. 5 Löschaktionen je Owner+Server pro Stunde. */
+export const BACKUP_DELETE_RATE_LIMIT: RateLimitConfig = { windowMs: 60 * 60 * 1000, max: 5 };
+
 /** Aufbewahrungsdauer für Rate-Limit-Einträge (Cleanup-Schwelle). */
 export const RATE_LIMIT_RETENTION_MS = 24 * 60 * 60 * 1000;

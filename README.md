@@ -3,7 +3,7 @@
 > Eine moderne, selbsthostbare Plattform zur Installation, Verwaltung und Überwachung
 > von Voice- und Community-Servern.
 
-**Status:** `0.1 – interne Alpha / NDF Step 039 (Delete/Rotation-Blueprint)` — Details:
+**Status:** `0.1 – interne Alpha / NDF Step 040 (Einzel-Backup-Delete)` — Details:
 [RELEASE_READINESS.md](project-brain/RELEASE_READINESS.md). Nicht für öffentliche/exponierte Produktion.
 **Lizenz:** Open Source (Lizenz noch festzulegen – siehe [offene Punkte](project-brain/DECISIONS.md))
 
@@ -151,10 +151,11 @@ Docker (Skeleton): `docker compose up --build` (web + agent; Agent ohne Host-/Do
   streamt), Rate-Limit 5/h, Streaming ohne Buffering, **nie Browser→Agent** — die heruntergeladene
   Datei ist **unverschlüsselt sensibel**. Ab **Step 038** lassen sich alte Step-032-Backups per
   **Checksum-Backfill** nachrüsten (nur `metadata.json` wird normalisiert ergänzt, tar.gz bleibt
-  unverändert) — damit sind auch sie prüf- und downloadfähig. **Step 039** ergänzt ein getestetes
-  **Delete-/Rotation-Sicherheitskonzept** (reiner Blueprint, `executable: false`: Einzel-Delete mit
-  3 Bestätigungen + `DELETE BACKUP`, Verify nur Warnung; Rotation nur als Dry-Run) — **es wird
-  weiterhin keine Backup-Datei gelöscht**.
+  unverändert) — damit sind auch sie prüf- und downloadfähig. **Step 039** plante das
+  Delete-/Rotation-Sicherheitskonzept; ab **Step 040** ist das **Einzel-Backup-Delete** aktiv:
+  gezielt genau eine tar.gz + ihre metadata.json, **irreversibel**, mit Warnanzeige, 3
+  Bestätigungen + getippt `DELETE BACKUP`, Rate-Limit 5/h — **keine Rotation, kein Bulk-Delete,
+  keine Wildcards**.
 - **Kein** Restore/Import, kein Unarchive, keine finale Hard-Delete-Policy,
   kein Agent-vermittelter Query-Proxy.
 - **Secret-Rotation (Step 016):** Grundlage zum Wechsel von `SECRET_ENCRYPTION_KEY` – Re-Encrypt aller

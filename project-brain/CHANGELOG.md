@@ -5,6 +5,51 @@
 
 ## [Unreleased]
 
+### NDF Step 040 – Echtes Einzel-Backup-Delete (2026-07-02)
+
+> Umsetzung des Step-039-Blueprints: löscht **genau eine** strikt validierte Backup-Datei + ihre
+> **exakt abgeleitete** metadata.json. **Irreversibel.** Keine Rotation, kein Bulk-Delete, keine
+> Wildcards, keine Ordnerlöschung, kein Docker, kein Restore/Import.
+
+#### Added
+- **Agent `POST /docker/provision/delete-backup`** (Token-Gate, **kein** Docker-Write-Flag –
+  keine Docker-Aktion; `apps/agent/src/backup-file-delete.ts`): agentseitige **Re-Validierung
+  aller Step-039-Guards** (`instanceId`, exaktes Dateinamensmuster – metadata.json nie primäres
+  Ziel, kein `/`/`\`/`..`, keine fremden Instanzen; 3 Bestätigungen + getippt **`DELETE BACKUP`**
+  ohne Defaults). Löscht per gezieltem unlink **nur** die tar.gz + die intern abgeleitete
+  metadata.json – kein Directory Listing, keine Rekursion. Status: `deleted/alreadyRemoved/`
+  `metadataDeleteFailed/backupNotFound/metadataMissing/invalid/backupDirUnavailable/error/`
+  `unavailable`; fehlende tar.gz ⇒ **`alreadyRemoved`** (idempotent; eine verwaiste metadata.json
+  wird bewusst NICHT mitgelöscht – dokumentiert). Keine Host-Pfade/Roh-Fehler in Responses.
+- **Web-Service** `apps/web/src/core/backup-file-delete.ts` (+ reine Helfer): managed-only
+  (External ⇒ `notManaged`), **auch archivierte** Server dürfen löschen; Dateinamen-Vorprüfung;
+  Bestätigungen ohne Defaults; **Rate-Limit 5/h je Owner+Server** (`BACKUP_DELETE_RATE_LIMIT`).
+  **Keine DB-Schreiboperation außer Audit + Rate-Limit-Treffer.**
+- **OWNER-only UI:** aufklappbarer **Gefahrenbereich „Backup löschen …"** pro Backup-Eintrag mit
+  Step-039-Warnungen (unwiderruflich, einziges Backup, nicht aktuell verifiziert, Metadaten
+  fehlen/ungültig, Prüfsumme fehlt, Server archiviert), 3 Checkboxen + Texteingabe
+  `DELETE BACKUP` + rotem Button „Backup endgültig löschen"; Ergebnis-Banner
+  (`deleted` grün, `alreadyRemoved`/Fehler als Hinweis) in DE/EN. Der Step-039-Hinweis
+  „Löschung noch nicht aktiv" wurde durch den korrekten Hinweis ersetzt. Weiterhin **keine**
+  Rotation-/Bulk-/Restore-/Import-Buttons.
+- **Audit:** `backup.managedVolume.delete.requested/blocked/confirmed/started/completed/failed` –
+  **ohne Dateinamen** (bestehende Linie); `alreadyRemoved` = idempotent completed ohne started.
+- **Tests:** `apps/agent/test/backup-file-delete.test.ts` (10, inkl. HTTP-Test gegen realen
+  Temp-Ordner: genau tar.gz + metadata.json entfernt, **fremde Instanz-Dateien/unrelated/Subdir
+  unberührt**, zweiter Aufruf ⇒ `alreadyRemoved`) + `apps/web/test/backup-file-delete.test.ts`
+  (10: Bestätigungen ohne Defaults, Rate-Limit-Policy, alle Audit-Outcomes ohne Dateiname,
+  Source-Scans: kein fs/Docker/execFile/Rekursion/Wildcards in Web-Core, kein
+  readdir/rmdir/recursive im Agent-Modul).
+
+#### Nicht enthalten (bewusst)
+- Keine Rotation (auch kein Dry-Run in der UI – nächster Step), kein Bulk-Delete, kein
+  automatisches Löschen/Scheduler, kein Restore/Import, kein Hard-Delete/Unarchive; keine
+  Löschung von Volumes/Networks/Containern/ServerRecords.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (490) · `prisma validate` n. z.
+  (kein Schema-Change). Siehe **ADR-0038**.
+
 ### NDF Step 039 – Backup Rotation & Delete Safety Blueprint (2026-07-02)
 
 > **Reines Sicherheits-/Planungskonzept** für spätere Backup-Löschung und Rotation

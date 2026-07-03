@@ -374,7 +374,18 @@ Dateinamensmuster + Backup existiert + 3 Bestätigungen + getippt `DELETE BACKUP
 checksumMissing/onlyBackup/serverArchived/largeFile blockieren nicht). **Rotation nur als
 Dry-Run**: Policy-Modell + eigener Bestätigungssatz (`DELETE BACKUPS`), Kandidaten/Geschützte mit
 Schutzgrund, Warnung `wouldDeleteAllBackups`; keine Scheduler. Audit `delete.*`/`rotation.*` ohne
-Dateinamen. Echter Einzel-Delete, Rotation-Ausführung und Restore folgen je als eigene Steps.
+Dateinamen.
+
+**Echtes Einzel-Backup-Delete (Step 040):** `POST /docker/provision/delete-backup` (Token-Gate,
+kein Docker-Write-Flag – keine Docker-Aktion). Agentseitige **Re-Validierung aller
+Step-039-Guards** (striktes Instanz-Muster, metadata.json nie primäres Ziel, 3 Bestätigungen +
+getippt `DELETE BACKUP`); gezieltes unlink von **genau einer** tar.gz + intern abgeleiteter
+metadata.json (kein Listing, keine Rekursion, keine Wildcards). Fehlende tar.gz ⇒ `alreadyRemoved`
+(idempotent, verwaiste metadata.json bleibt bewusst stehen). Web: OWNER-only Gefahrenbereich pro
+Backup-Eintrag mit Warnanzeige (einziges Backup / nicht verifiziert / Metadaten / archiviert),
+Rate-Limit 5/h je Owner+Server, auch für archivierte Server; Audit
+`backup.managedVolume.delete.*` ohne Dateinamen. **Rotation bleibt Blueprint** – Dry-Run-Anzeige
+und Restore folgen als eigene Steps.
 
 ## 7. Verwandte Dokumente
 
