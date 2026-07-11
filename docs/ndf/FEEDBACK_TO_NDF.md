@@ -6,6 +6,11 @@
 > **Grenzen:** Dies ist reine Sammlung/Dokumentation. **Keine** direkten Änderungen am
 > NDF-Repository, **keine** automatische Upstream-Übernahme. Eine tatsächliche NDF-Rückführung ist
 > ein eigener, von Kay/Nova freigegebener Schritt. **Keine Secrets/privaten Daten** in Einträgen.
+>
+> **Abgrenzung:** Diese Datei = **Kandidaten** für eine mögliche NDF-Rückführung.
+> [../../project-brain/NDF_LESSONS_LEARNED.md](../../project-brain/NDF_LESSONS_LEARNED.md) =
+> **interne, bestätigte** SpeakCore-Erfahrungen (kompakte SSOT). Ausführliche Kandidaten-Felder hier,
+> nicht dort doppeln.
 
 ## Erfassungsschema
 

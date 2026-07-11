@@ -5,11 +5,13 @@
 > Stand der Adoption: 2026-07-11 (NDF Step 042). Diese Datei ist praktische Anweisung, kein
 > allgemeiner NDF-Fließtext.
 
-Maßgebliche Begleitdokumente:
+Maßgebliche Begleitdokumente (SSOT):
+[project-brain/CONTEXT_PACK_SPEAKCORE_CURRENT.md](project-brain/CONTEXT_PACK_SPEAKCORE_CURRENT.md) ·
+[project-brain/NDF_LESSONS_LEARNED.md](project-brain/NDF_LESSONS_LEARNED.md) ·
+[project-system/WORK_PACKAGE_QUEUE.md](project-system/WORK_PACKAGE_QUEUE.md) ·
 [docs/ndf/NDF_V1_ADOPTION.md](docs/ndf/NDF_V1_ADOPTION.md) ·
 [docs/ndf/SKILL_INVENTORY.md](docs/ndf/SKILL_INVENTORY.md) ·
 [docs/ndf/FEEDBACK_TO_NDF.md](docs/ndf/FEEDBACK_TO_NDF.md) ·
-[project-brain/CONTEXT_PACK.md](project-brain/CONTEXT_PACK.md) ·
 [project-brain/WORKFLOW.md](project-brain/WORKFLOW.md).
 
 ---
@@ -87,7 +89,9 @@ Diese beiden Blöcke sind **Pflicht** und dürfen nicht zur Kompression weggelas
 
 ## 6. Feedback-to-NDF-Loop
 
-SpeakCore-Erfahrungen werden strukturiert in
+Bestätigte SpeakCore-Erfahrungen liegen kompakt in
+[project-brain/NDF_LESSONS_LEARNED.md](project-brain/NDF_LESSONS_LEARNED.md) (interne SSOT).
+**Kandidaten** für eine mögliche NDF-Rückführung werden in
 [docs/ndf/FEEDBACK_TO_NDF.md](docs/ndf/FEEDBACK_TO_NDF.md) gesammelt (Beobachtung → Kandidat →
 akzeptiert/verworfen, mit Maintainer-Entscheidung). **Keine** direkten Änderungen am NDF-Repository,
 **keine** automatische Upstream-Übernahme. NDF-Updates sind ein eigener, kontrollierter Step.

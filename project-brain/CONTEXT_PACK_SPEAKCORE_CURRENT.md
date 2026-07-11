@@ -1,7 +1,10 @@
-# CONTEXT_PACK.md – SpeakCore Suite
+# CONTEXT_PACK_SPEAKCORE_CURRENT.md – SpeakCore Suite
 
-> NDF Project Brain · Stand: 2026-07-11 · Kompaktes Context Pack für token-arme Übergabe.
-> **Keine Secrets/privaten Zugangsdaten.** Pflege via Skill `ndf-context-pack-maintainer`.
+> NDF Project Brain · Stand: 2026-07-11 · **Verbindliches, aktuelles Context Pack** (SSOT) für
+> token-arme Übergabe. **Keine Secrets/privaten Zugangsdaten.** Pflege via Skill
+> `ndf-context-pack-maintainer`. Erfahrungen:
+> [NDF_LESSONS_LEARNED.md](NDF_LESSONS_LEARNED.md) · Arbeitspakete:
+> [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Projektziel
 
@@ -12,12 +15,16 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 ## Aktueller Entwicklungsstand
 
 - **Phase:** 0.1 – interne Alpha. Nicht für öffentliche/exponierte Produktion.
-- **Letzter Produkt-Step:** 041 – read-only Rotation-Dry-Run-Vorschau in der Backup-Karte.
+- **Letzter Produkt-Step:** **041** – read-only Rotation-Dry-Run-Vorschau in der Backup-Karte.
 - **Backup-Lebenszyklus (Steps 032–041) vollständig bis auf Restore:** Erstellen (032), Sichtbarkeit
   (033), SHA-256-Prüfsummen (034) + Backfill (038), read-only Verify (035), Web-proxied Download
   (037), gezieltes Einzel-Delete (040), Rotation-Dry-Run-Vorschau (041). **Restore/Import fehlen
   bewusst.**
-- **Aktueller Step:** **042 – NDF-v1.0-Adoption & Skills-Enablement** (docs-/workflow-only).
+- **Abgeschlossene Governance-Steps:** **042** – NDF-v1.0-Adoption & Skills-Enablement (docs-only);
+  **042a** – Context- & Work-Package-SSOT-Alignment (docs-only, dieser Stand).
+- **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
+- **Nächster Produkt-/Blueprint-Step:** **043 – Managed Backup Restore Blueprint** (`executable:
+  false`, geplant).
 
 ## Architektur in Kurzform
 
@@ -54,12 +61,20 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 
 015–016 Secret-Rotation · 017–023 Container-Lifecycle (create/start/stop/remove/restart/status) ·
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
-031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption**.
+031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
+**042a SSOT-Alignment**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
+[../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- Empfehlung: **Restore-Konzept-Blueprint** (`executable: false`) als letztes Backup-Lebenszyklus-
-  Stück, ODER editierbare Rotation-Policy + echter Bulk-Rotation-Step. Entscheidung liegt bei Nova.
+- **Nächster Step 043 – Managed Backup Restore Blueprint** (`executable: false`, geplant): letztes
+  fehlendes Backup-Lebenszyklus-Stück. Alternativ (Backlog): editierbare Rotation-Policy + echter
+  Bulk-Rotation-Step. Priorisierung/Freigabe durch Nova.
+
+## Git-/Push-Status
+
+- Letzte lokale Commits: `997b3ec` (Step 042) und der Step-042a-Alignment-Commit. **Kein Push**
+  erfolgt (Freigabe durch Kay/Nova ausstehend).
 
 ## Verbotene Aktionen (Dauerregeln)
 

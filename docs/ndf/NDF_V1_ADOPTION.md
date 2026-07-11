@@ -37,7 +37,8 @@ Maintainer-Grenzen haben Vorrang. Details und die zehn verbindlichen Regeln:
 ## 4. Context-Pack-Prinzip
 
 - Ein kompaktes SpeakCore **Context Pack** liegt unter
-  [project-brain/CONTEXT_PACK.md](../../project-brain/CONTEXT_PACK.md) und trägt Projektziel,
+  [project-brain/CONTEXT_PACK_SPEAKCORE_CURRENT.md](../../project-brain/CONTEXT_PACK_SPEAKCORE_CURRENT.md)
+  und trägt Projektziel,
   Stand, Architektur-Kurzform, Sicherheitsgrenzen, aktuellen NDF-Standard, Rollenmodell, aktuellen
   Step, offene Arbeit und verbotene Aktionen.
 - Pflege gezielt und token-arm (Skill `ndf-context-pack-maintainer`); gültige Projektinfos werden

@@ -17,6 +17,7 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | 002 | Tech-Grundgerüst (Scaffolding, noch eng gefasst) | offen |
 | 003–041 | Produkt-Steps (siehe [CHANGELOG.md](CHANGELOG.md); zuletzt 041 Rotation-Dry-Run-Vorschau) | **abgeschlossen** |
 | 042 | NDF-v1.0-Adoption & Skills-first Operating Mode (docs-only) | **abgeschlossen** |
+| 042a | Context- & Work-Package-SSOT-Alignment (docs-only) | **abgeschlossen** |
 
 ## 2. Single Source of Truth
 
@@ -32,7 +33,10 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | NDF-Standard & Adoptionsstatus | [../docs/ndf/NDF_V1_ADOPTION.md](../docs/ndf/NDF_V1_ADOPTION.md) |
 | Claude-Arbeitsanweisung (Skills-first) | [../CLAUDE.md](../CLAUDE.md) |
 | Skill-Inventar (38 docs-only) | [../docs/ndf/SKILL_INVENTORY.md](../docs/ndf/SKILL_INVENTORY.md) |
-| Context Pack (kompakt) | [CONTEXT_PACK.md](CONTEXT_PACK.md) |
+| Context Pack (aktuell, SSOT) | [CONTEXT_PACK_SPEAKCORE_CURRENT.md](CONTEXT_PACK_SPEAKCORE_CURRENT.md) |
+| NDF-Lessons-Learned (intern, bestätigt) | [NDF_LESSONS_LEARNED.md](NDF_LESSONS_LEARNED.md) |
+| Work-Package-Queue | [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md) |
+| Feedback-to-NDF (Kandidaten) | [../docs/ndf/FEEDBACK_TO_NDF.md](../docs/ndf/FEEDBACK_TO_NDF.md) |
 
 Tech-Stack-Änderungen **nur** per neuem/aktualisiertem ADR in [DECISIONS.md](DECISIONS.md).
 

@@ -5,6 +5,27 @@
 
 ## [Unreleased]
 
+### NDF Step 042a – Context & Work-Package SSOT Alignment (2026-07-11)
+
+> **Docs-only Governance-Korrektur – keine Runtime-Auswirkung.** Vereinheitlicht die verbindlichen
+> SpeakCore-SSOTs für Context Pack, Lessons Learned und Work-Package-Planung. Kein Push.
+
+#### Changed / Added
+- **Rename (Git):** `project-brain/CONTEXT_PACK.md` → `project-brain/CONTEXT_PACK_SPEAKCORE_CURRENT.md`
+  (verbindliches, aktuelles Context Pack; keine konkurrierende Zweitfassung). Inhalt aktualisiert
+  (Steps 042/042a abgeschlossen, letzter Produktstand 041, nächster Step 043 Restore Blueprint,
+  Commit `997b3ec`, kein Push).
+- **Neu:** `project-brain/NDF_LESSONS_LEARNED.md` (interne, bestätigte SpeakCore-NDF-Erfahrungen,
+  SSOT; abgegrenzt von `docs/ndf/FEEDBACK_TO_NDF.md` = Rückführungs-Kandidaten).
+- **Neu:** `project-system/WORK_PACKAGE_QUEUE.md` (verbindliche WP-Queue: Statuslegende,
+  NDF-Standard, zuletzt abgeschlossen, aktueller Korrekturschritt, nächste Steps, Abhängigkeiten,
+  Risiken, Push-Status).
+- **Referenzen aktualisiert:** `CLAUDE.md`, `WORKFLOW.md` (SSOT-Tabelle + 042a-Zeile),
+  `docs/ndf/NDF_V1_ADOPTION.md`, `docs/ndf/FEEDBACK_TO_NDF.md`, `STEP-042-NDF-ADOPTION.md`.
+
+#### Unverändert
+- `.claude/skills/**` gegenüber Commit `997b3ec` unverändert (38 Skills + Pack-README).
+
 ### NDF Step 042 – NDF v1.0 Adoption & Claude Skills Enablement (2026-07-11)
 
 > **Workflow-/Skills-/Dokumentationsadoption – keine Runtime-Auswirkung.** Führt den verbindlichen
@@ -22,9 +43,9 @@
 - **`docs/ndf/`** (neu): `SKILL_INVENTORY.md` (Inventar + Kategorien), `NDF_V1_ADOPTION.md`
   (Adoptionsstatus, Update-/Drift-Verfahren, Grenzen), `FEEDBACK_TO_NDF.md` (Feedback-to-NDF-Loop
   inkl. bekannter SpeakCore-Learnings L1–L9).
-- **`project-brain/`**: `CONTEXT_PACK.md` (kompaktes Context Pack) und
-  `STEP-042-NDF-ADOPTION.md` (Step-Notiz) neu; `WORKFLOW.md` um Step-042-Zeile + NDF-Verweise
-  ergänzt.
+- **`project-brain/`**: `CONTEXT_PACK.md` (kompaktes Context Pack; in Step 042a →
+  `CONTEXT_PACK_SPEAKCORE_CURRENT.md` umbenannt) und `STEP-042-NDF-ADOPTION.md` (Step-Notiz) neu;
+  `WORKFLOW.md` um Step-042-Zeile + NDF-Verweise ergänzt.
 
 #### Verifiziert
 - NDF-Quelle lokal ohne Netzwerk verifiziert (Tag `v1.0.0` → Commit `9dcadc1`); 38 Skills, 0 Drift;

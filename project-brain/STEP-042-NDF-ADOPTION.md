@@ -39,8 +39,9 @@ NDF-Repository. `project-system/` bewusst **nicht** angelegt – bestehende Spea
   Guard-/Owner-/Audit-Prinzipien, Rückmeldung + Compact Context Summary, Feedback-Loop,
   Validierungsbefehle.
 - **`docs/ndf/`** neu: `SKILL_INVENTORY.md`, `NDF_V1_ADOPTION.md`, `FEEDBACK_TO_NDF.md`.
-- **`project-brain/`**: `CONTEXT_PACK.md` neu, diese `STEP-042-NDF-ADOPTION.md` neu; `WORKFLOW.md`
-  (Step-Tabelle + NDF-Verweise) und `CHANGELOG.md` (Step-042-Eintrag) fortgeschrieben.
+- **`project-brain/`**: `CONTEXT_PACK.md` neu (in **Step 042a** → `CONTEXT_PACK_SPEAKCORE_CURRENT.md`
+  umbenannt), diese `STEP-042-NDF-ADOPTION.md` neu; `WORKFLOW.md` (Step-Tabelle + NDF-Verweise) und
+  `CHANGELOG.md` (Step-042-Eintrag) fortgeschrieben.
 
 ## Skill-Quelle
 
