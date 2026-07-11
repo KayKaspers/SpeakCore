@@ -5,6 +5,37 @@
 
 ## [Unreleased]
 
+### NDF Step 043 – Managed Backup Restore Blueprint (2026-07-11)
+
+> **Docs-only Sicherheits-Blueprint – keine Runtime-Auswirkung, kein Restore implementiert.**
+> Implementierungsreifes, ausdrücklich **`executable: false`** Konzept für das Wiederherstellen
+> genau eines managed Backups (1 Backup → 1 managed Instanz).
+
+#### Added
+- **`docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md`** (neu): Ist-Zustand (nur Repo-Befund),
+  Restore-Scope, Trust Boundaries, Bedrohungsmodell (Traversal/Symlink/Hardlink/Special-Files/
+  Archive-Bomb/TOCTOU/Replay/Konkurrenz …), read-only Planungsphase, Autorisierung/Bestätigung,
+  22 Preflight-Gates, sicheres Staging, Manifest-/Legacy-Bewertung, Pflicht-Pre-Restore-
+  Sicherungspunkt, Prozesssteuerung, Apply-Strategie-Vergleich, Restore-State-Modell, Rollback,
+  Locks, Audit-Felder, API-/UI-Konzept, Fehler-/Recovery-Matrix, Teststrategie,
+  Implementierungszerlegung (15 Folge-WPs), ADR-Kandidaten & offene Fragen.
+
+#### Changed
+- `RISKS.md` (R-06) um den Restore-Blueprint-Stand ergänzt (Restore weiterhin NICHT implementiert;
+  destructive Operation; Produktlücke bis Umsetzung; Rotation fehlt weiter).
+- SSOTs aktualisiert: `CONTEXT_PACK_SPEAKCORE_CURRENT.md` (043 abgeschlossen, nächster WP, offene
+  ADRs, Push-Status), `project-system/WORK_PACKAGE_QUEUE.md` (043 „abgeschlossen, lokal"; 044
+  Restore-Datenmodell & ADR geplant), `NDF_LESSONS_LEARNED.md` (L11–L15), `docs/ndf/FEEDBACK_TO_NDF.md`
+  (Kandidaten K1–K3), `WORKFLOW.md` (Step-Zeile + SSOT-Verweis).
+
+#### Nicht enthalten (bewusst)
+- Keine Restore-Implementierung, keine Archiv-Extraktion, kein Dienst-Stop/-Start, keine
+  Änderung an `apps/**`, `packages/**`, `.claude/skills/**`, Prisma/Docker/CI/Dependencies.
+
+#### Verifiziert
+- `git diff --check` sauber; alle Änderungen in `docs/**`/`project-brain/**`/`project-system/**`.
+  Kein `pnpm`-Lint/Build/Test nötig (docs-only, kein Produktcode berührt).
+
 ### NDF Step 042a – Context & Work-Package SSOT Alignment (2026-07-11)
 
 > **Docs-only Governance-Korrektur – keine Runtime-Auswirkung.** Vereinheitlicht die verbindlichen

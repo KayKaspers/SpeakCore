@@ -49,4 +49,30 @@ NDF-Änderungen):
 
 ## Neue Einträge
 
-> Neue Beobachtungen unterhalb dieser Zeile im obigen Erfassungsschema ergänzen.
+### K1 – Wiederverwendbarer Restore-/Recovery-Blueprint (Step 043)
+- **Work Package / Step:** 043 (Managed Backup Restore Blueprint)
+- **Möglicher neuer Skill:** ein NDF-Skill für **destructive/zustandsersetzende Recovery-Aktionen**
+  (Restore/Migrate/Rollback), der Trust-Boundary-, Preflight-Gate-, Staging- und State-Machine-
+  Struktur standardisiert.
+- **Sicherheits-/Governance-Erkenntnis:** Restore-artige Aktionen folgen einem generischen
+  Sicherheitsmuster (read-only Plan → gebundene Bestätigung → Preflight-Gates → Staging →
+  Pflicht-Sicherungspunkt → Apply → Rollback → Audit), das über SpeakCore hinaus nützlich ist.
+- **Status:** Kandidat · **Maintainer-Entscheidung:** offen
+
+### K2 – Archive-/Import-Trust-Boundary-Checkliste
+- **Work Package / Step:** 043
+- **Mögliche Verbesserung eines bestehenden Skills:** die vorhandenen Review-Skills (z. B.
+  `ndf-privacy-data-minimization-reviewer`, `ndf-validation-evidence-reviewer`) um eine
+  **Archive-/Untrusted-Input-Checkliste** ergänzen (Traversal, Symlink/Hardlink, Special Files,
+  Archive-Bomb, absolute/Windows-Pfade).
+- **Status:** Kandidat · **Maintainer-Entscheidung:** offen
+
+### K3 – State Machine + Rollback-Gates für destructive Aktionen
+- **Work Package / Step:** 043
+- **Vorgeschlagene NDF-Rückführung:** ein dokumentiertes Muster „State Machine mit sicheren
+  Übergängen + Pflicht-Rollback-Quelle + kritischem `ROLLBACK_FAILED`/`CLEANUP_REQUIRED`-Zustand"
+  für alle irreversiblen Operationen (nicht nur Backups).
+- **Status:** Kandidat · **Maintainer-Entscheidung:** offen
+
+> **Keine** Rückführung ins NDF-Repository in diesem Step. Weitere Beobachtungen im obigen
+> Erfassungsschema ergänzen.

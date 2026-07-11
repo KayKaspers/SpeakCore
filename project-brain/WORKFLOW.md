@@ -18,6 +18,7 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | 003–041 | Produkt-Steps (siehe [CHANGELOG.md](CHANGELOG.md); zuletzt 041 Rotation-Dry-Run-Vorschau) | **abgeschlossen** |
 | 042 | NDF-v1.0-Adoption & Skills-first Operating Mode (docs-only) | **abgeschlossen** |
 | 042a | Context- & Work-Package-SSOT-Alignment (docs-only) | **abgeschlossen** |
+| 043 | Managed Backup Restore Blueprint (docs-only, `executable: false`) | **abgeschlossen** |
 
 ## 2. Single Source of Truth
 
@@ -37,6 +38,7 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | NDF-Lessons-Learned (intern, bestätigt) | [NDF_LESSONS_LEARNED.md](NDF_LESSONS_LEARNED.md) |
 | Work-Package-Queue | [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md) |
 | Feedback-to-NDF (Kandidaten) | [../docs/ndf/FEEDBACK_TO_NDF.md](../docs/ndf/FEEDBACK_TO_NDF.md) |
+| Restore-Konzept (Blueprint, `executable: false`) | [../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md) |
 
 Tech-Stack-Änderungen **nur** per neuem/aktualisiertem ADR in [DECISIONS.md](DECISIONS.md).
 

@@ -20,11 +20,15 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
   (033), SHA-256-Prüfsummen (034) + Backfill (038), read-only Verify (035), Web-proxied Download
   (037), gezieltes Einzel-Delete (040), Rotation-Dry-Run-Vorschau (041). **Restore/Import fehlen
   bewusst.**
-- **Abgeschlossene Governance-Steps:** **042** – NDF-v1.0-Adoption & Skills-Enablement (docs-only);
-  **042a** – Context- & Work-Package-SSOT-Alignment (docs-only, dieser Stand).
+- **Abgeschlossene Governance-/Blueprint-Steps:** **042** – NDF-v1.0-Adoption & Skills-Enablement;
+  **042a** – Context-/WP-SSOT-Alignment; **043** – **Managed Backup Restore Blueprint**
+  ([docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md),
+  `executable: false`) — **Restore weiterhin NICHT implementiert.**
 - **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
-- **Nächster Produkt-/Blueprint-Step:** **043 – Managed Backup Restore Blueprint** (`executable:
-  false`, geplant).
+- **Nächster empfohlener Schritt:** erster Umsetzungs-WP aus der Restore-Zerlegung —
+  **Restore-Datenmodell & ADR** bzw. **read-only Restore-Inspection** (reine Guard-Logik). Offene
+  ADR-Kandidaten: Restore-Vertrauensmodell · Manifest/Kompatibilität · Apply-/Rollback-Strategie ·
+  Pflicht-Pre-Restore-Sicherungspunkt · Restore-State-/Lock-Persistenz (+ Audit-Schema).
 
 ## Architektur in Kurzform
 
@@ -62,19 +66,21 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 015–016 Secret-Rotation · 017–023 Container-Lifecycle (create/start/stop/remove/restart/status) ·
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
 031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
-**042a SSOT-Alignment**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
+**042a SSOT-Alignment** · **043 Restore-Blueprint** (`executable: false`). Vollständige Historie:
+[CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
 [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- **Nächster Step 043 – Managed Backup Restore Blueprint** (`executable: false`, geplant): letztes
-  fehlendes Backup-Lebenszyklus-Stück. Alternativ (Backlog): editierbare Rotation-Policy + echter
-  Bulk-Rotation-Step. Priorisierung/Freigabe durch Nova.
+- **Restore-Umsetzung** in kleinen Folge-WPs gemäß Blueprint §5.21 (zuerst **Restore-Datenmodell &
+  ADR** / **read-only Restore-Inspection**), erst nach ADR-Klärung und Human-Maintainer-Freigabe.
+  Alternativ (Backlog): editierbare Rotation-Policy + echter Bulk-Rotation-Step. Priorisierung durch Nova.
 
 ## Git-/Push-Status
 
-- Letzte lokale Commits: `997b3ec` (Step 042) und der Step-042a-Alignment-Commit. **Kein Push**
-  erfolgt (Freigabe durch Kay/Nova ausstehend).
+- **Gepusht auf `origin/main`:** `98af8a0` (041) · `997b3ec` (042) · `40404a2` (042a).
+- **Lokal, noch nicht gepusht:** Step-043-Blueprint-Commit (`docs(backup): add managed restore
+  security blueprint`) — Push-Freigabe durch Kay/Nova ausstehend.
 
 ## Verbotene Aktionen (Dauerregeln)
 

@@ -17,25 +17,29 @@
 ## Rahmen
 
 - **NDF-Standard:** v1.0.0 (Tag `v1.0.0`, Commit `9dcadc1`), **Skills-first**.
-- **Zuletzt abgeschlossen:** Produkt-Step **041**; Governance-Steps **042** (lokal) und **042a** (lokal).
-- **Aktueller Korrekturschritt:** **042a** – Context- & Work-Package-SSOT-Alignment (docs-only).
-- **Push-Status:** **kein Push** erfolgt; letzte lokale Commits `997b3ec` (042) + 042a-Commit.
+- **Zuletzt abgeschlossen:** Produkt-Step **041**; Governance **042** + **042a**; Blueprint **043**.
+- **Aktueller Schritt:** **043** – Managed Backup Restore Blueprint (docs-only, `executable: false`).
+- **Push-Status:** `98af8a0`/`997b3ec`/`40404a2` **gepusht** (`origin/main`); **043-Commit lokal,
+  noch nicht gepusht**.
 
 ## Queue
 
 | Step | Titel | Status |
 |------|-------|--------|
 | 041 | Letzter Produktstand vor NDF-v1-Adoption (Rotation-Dry-Run-Vorschau) | abgeschlossen |
-| 042 | NDF v1.0 Adoption & Claude Skills Enablement | abgeschlossen, lokal |
-| 042a | Context & Work-Package SSOT Alignment | abgeschlossen, lokal |
-| 043 | Managed Backup Restore Blueprint (`executable: false`) | geplant |
+| 042 | NDF v1.0 Adoption & Claude Skills Enablement | abgeschlossen |
+| 042a | Context & Work-Package SSOT Alignment | abgeschlossen |
+| 043 | Managed Backup Restore Blueprint (`executable: false`) | abgeschlossen, lokal |
+| 044 | Restore-Datenmodell & ADR (Typen + State-/Audit-/Lock-Persistenzentscheidung) | geplant |
+| später | read-only Restore-Inspection → Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
 | später | Editable Rotation Policy / Bulk Rotation | Backlog |
 
 ## Abhängigkeiten
 
-- **043** setzt den bestehenden Backup-Lebenszyklus (032–041, insb. Verify 035) voraus und bleibt
-  zunächst reiner Blueprint (`executable: false`), bevor Backup-Bytes zurück in ein Volume
-  geschrieben werden.
+- **043** (abgeschlossen) ist reiner Blueprint auf Basis des Backup-Lebenszyklus 032–041; kein
+  Restore-Code. Siehe [Restore-Blueprint](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md).
+- **044** (Restore-Datenmodell & ADR) setzt Step 043 voraus und ist selbst überwiegend Design/ADR
+  (`executable: false` für die ADR-Teile); erst danach folgen ausführbare Restore-WPs (§5.21).
 - **Editable Rotation Policy / Bulk Rotation** setzt die Rotation-Dry-Run-Vorschau (041) voraus.
 
 ## Offene Risiken
@@ -48,6 +52,7 @@
 ## Hinweise
 
 - **Keine** noch nicht getroffenen Implementierungsentscheidungen als beschlossen darstellen:
-  043 ist als **Blueprint** geplant; die eigentliche Restore-Ausführung ist noch **nicht**
-  entschieden. Rotation-Ausführung ist **Backlog**, nicht zugesagt.
+  043 ist ein **Blueprint**; die eigentliche Restore-Ausführung ist noch **nicht** entschieden
+  (mehrere ADR-Kandidaten offen, siehe Blueprint §5.22/§6). Rotation-Ausführung ist **Backlog**,
+  nicht zugesagt.
 - Genau **ein** Work Package pro Claude-Ausführung ([../CLAUDE.md](../CLAUDE.md)).

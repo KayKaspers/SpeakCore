@@ -90,6 +90,14 @@
   als read-only Dry-Run-Vorschau** sichtbar (kein Bulk-Delete, keine Ausführung – Kandidaten müssen
   manuell einzeln gelöscht werden, `AGENT_BACKUP_DIR` wächst sonst weiter); Aufbewahrung
   liegt beim Betreiber (Backup-Dateien sind **sensibel**).
+- **Restore-Sicherheitskonzept seit Step 043** ([Restore-Blueprint](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md),
+  `executable: false`): Trust Boundaries, Bedrohungsmodell (Traversal/Symlink/Hardlink/Archive-Bomb/
+  TOCTOU/Replay …), Preflight-Gates, Staging, Pflicht-Pre-Restore-Sicherungspunkt, Rollback,
+  State-Modell, Locks, Audit-Felder, ADR-Kandidaten. **Restore ist weiterhin NICHT implementiert.**
+  Kernaussagen als Risiko: Restore ist eine **destructive/zustandsersetzende** Operation; **fehlender
+  Restore bleibt bis zur Umsetzung eine Produktlücke**; **Backup-Rotation fehlt weiterhin**
+  (Speicherwachstum); ein Backup ist erst nach **verifiziertem Restore-Prozess** als belastbare
+  Recovery-Grundlage zu betrachten (aktuell nur Erstellung/Integrität geprüft, nicht Wiederherstellung).
 
 ## R-07 – Komplexität der Installationsumgebungen
 - **E:** hoch · **A:** mittel · **Risiko:** mittel

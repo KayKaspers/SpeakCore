@@ -34,6 +34,25 @@
     erforderlichen genutzt; Skills sind docs-only Governance-Hilfen, keine Entscheidungsinstanz
     ([../CLAUDE.md](../CLAUDE.md), [../docs/ndf/SKILL_INVENTORY.md](../docs/ndf/SKILL_INVENTORY.md)).
 
+## Neu aus der Restore-Analyse (Step 043)
+
+11. **Archiv-Inhalt ist eine eigene Trust Boundary.** Ein von SpeakCore erzeugtes Backup ist beim
+    Zurückspielen genauso misstrauisch zu behandeln wie Fremd-Input: Traversal/Symlink/Hardlink/
+    Sonderdateien/Archive-Bomb müssen vor jeder Extraktion geprüft werden — Extraktion nie direkt
+    ins Live-Ziel (Staging + Containment-Prüfung).
+12. **Vorhandene Integrität ≠ Wiederherstellbarkeit.** SHA-256 über die tar.gz belegt Integrität,
+    aber ein Backup ist erst nach einem **verifizierten Restore-Prozess** eine belastbare
+    Recovery-Grundlage. Das gehört explizit ins Risiko (R-06).
+13. **Destructive/zustandsersetzende Aktionen brauchen ein State-Modell + Locks + Pflicht-Rollback-
+    Quelle.** Pre-Restore-Sicherungspunkt, Restore-Lock und ein Zustandsautomat mit sicheren
+    Übergängen (inkl. `ROLLBACK_FAILED`/`CLEANUP_REQUIRED`) sind Teil der Sicherheit, nicht optional.
+14. **Read-only Plan mit Fingerprint-Bindung vor der Ausführung** schließt das TOCTOU-Fenster
+    (Backup-/Instanz-Austausch zwischen Plan und Apply) und ermöglicht Replay-Schutz über eine
+    verbrauchbare, ablaufende Plan-/Operation-ID.
+15. **Bestehende flache Audit-/Statusstrukturen stoßen an Grenzen.** Der Restore braucht deutlich
+    mehr strukturierte Audit-Felder als `action/actor/target/result` — bewusst als ADR-/Migration-
+    Kandidat markieren statt still zu erweitern.
+
 ## Verwendung
 
 - Neue **bestätigte** Learnings hier kompakt ergänzen (eine Zeile pro Punkt, mit Step-Bezug).
