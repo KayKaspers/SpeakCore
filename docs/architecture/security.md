@@ -84,7 +84,9 @@ SHA-256 ergänzt – kein Blind-Merge, tar.gz bleibt unverändert, vorhandene Pr
 **Step 040** setzt das **Einzel-Delete** um (irreversibel: genau eine strikt validierte tar.gz +
 ihre metadata.json per gezieltem unlink; 3 Bestätigungen + `DELETE BACKUP`, agentseitig
 re-validiert; Rate-Limit 5/h; keine Wildcards/Ordner/Rekursion; fremde Dateien nachweislich
-unberührt; Rotation bleibt Blueprint). **Kein Log-Lesen**, kein Inspect,
+unberührt); **Step 041** zeigt eine **read-only Rotation-Dry-Run-Vorschau** (welche Backups eine
+spätere Rotation nach der Default-Policy löschen würde – keine Ausführung, kein Endpunkt, kein
+Audit). **Kein Log-Lesen**, kein Inspect,
 **keine Portscans/externen IP-Checks**, keine Reparatur, kein Secret in Logs. Details:
 [project-brain/SECURITY.md](../../project-brain/SECURITY.md), [agent.md](agent.md).
 

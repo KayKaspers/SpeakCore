@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 041 – Backup Rotation Dry-Run Anzeige (2026-07-02)
+
+> **Read-only Rotation-Vorschau** in der Backup-Karte: zeigt über die Step-039-Planungslogik,
+> welche Backups eine spätere Rotation nach der Default-Policy löschen WÜRDE. **Es wird nichts
+> gelöscht** – keine Datei-/DB-/Agent-Operation, kein neuer Endpunkt, keine Scheduler.
+
+#### Added
+- **Reiner Vorschau-Helfer** `apps/web/src/core/backup-rotation-preview.ts`:
+  `mapBackupListEntryToRotationEntry` (Step-033-Listeneintrag → Rotations-Input; `createdAt` aus
+  Metadaten bevorzugt, sonst Datei-Zeitstempel) und `buildRotationPreview` (ruft
+  `buildBackupRotationPlan` mit `DEFAULT_BACKUP_ROTATION_POLICY`). **`dryRun` bleibt true,
+  `executable` bleibt false.** Kein Hashing, kein Verify, kein Download, kein Delete.
+- **UI:** Abschnitt „Rotation-Vorschau" in der Backup-Karte (nur wenn die Liste geladen ist,
+  `?backups=1`): Hinweis „nur Vorschau – es wird nichts gelöscht", Default-Policy
+  (3 behalten / min. 7 Tage / einziges + letztes verifiziertes geschützt), Kandidaten
+  („Würde gelöscht werden") und behaltene Backups mit **Schutzgrund** („Würde behalten werden").
+  Keine „Rotation ausführen"-/Bulk-/Alle-löschen-Buttons. DE/EN.
+- **Konservative Verify-Behandlung:** da kein persistenter Verify-State existiert, gelten für die
+  Vorschau alle Backups als **nicht verifiziert** (`verified: false`) – `protectLastVerifiedBackup`
+  greift in der Vorschau nie; entspricht dem realen Kenntnisstand einer späteren Rotation.
+- **Tests:** `apps/web/test/backup-rotation-preview.test.ts` (8): nutzt `buildBackupRotationPlan`,
+  Default-Policy, Kandidaten/Geschützte + Schutzgründe, einziges/neueste 3/Mindestalter geschützt,
+  leere Liste ⇒ leere Vorschau, keine Secrets/Host-Pfade, Source-Scan (kein fs/agent/db/docker/
+  exec/scheduler).
+
+#### Entscheidung: kein Audit (dokumentiert)
+- Die Vorschau entsteht beim normalen Rendern ohne Side Effect (kein Agent-Call, keine
+  DB-Schreiboperation, keine sicherheitsrelevante Aktion) ⇒ **kein Audit** in Step 041. Ein
+  `rotation.planCreated`-Event wäre erst bei einem bewussten Klick / echter Rotation sinnvoll.
+
+#### Nicht enthalten (bewusst)
+- Keine echte Rotation, kein Bulk-Delete, keine editierbare Policy, keine Scheduler/Background-Jobs,
+  kein neuer Endpunkt, kein Restore/Import.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (498) · `prisma validate` n. z.
+  (kein Schema-Change).
+
 ### NDF Step 040 – Echtes Einzel-Backup-Delete (2026-07-02)
 
 > Umsetzung des Step-039-Blueprints: löscht **genau eine** strikt validierte Backup-Datei + ihre

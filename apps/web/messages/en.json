@@ -331,6 +331,24 @@
           "typedLabel": "Type \"DELETE BACKUP\" to confirm.",
           "button": "Delete backup permanently"
         },
+        "rotation": {
+          "title": "Rotation preview",
+          "previewOnly": "This is a preview only – nothing is deleted.",
+          "intro": "This preview shows which backups would be candidates for a later rotation under the current default policy.",
+          "policyLabel": "Policy",
+          "policySummary": "keep {keepLastCount}, protect at least {keepMinAgeDays} days; only and last verified backup protected",
+          "wouldDelete": "Would be deleted",
+          "wouldKeep": "Would be kept",
+          "noCandidates": "No deletion candidates.",
+          "protectedByLabel": "Protection reason",
+          "reasons": {
+            "onlyBackup": "only backup protected",
+            "keepLastCount": "newest backups protected",
+            "keepMinAgeDays": "minimum age not reached",
+            "lastVerifiedBackup": "last verified backup protected",
+            "notOldEnough": "not old enough for the delete rule"
+          }
+        },
         "deleteResult": {
           "deleted": "Backup was deleted.",
           "alreadyRemoved": "Backup was already removed.",

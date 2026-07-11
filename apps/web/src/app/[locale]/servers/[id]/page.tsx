@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getServer } from '@/core/servers';
 import { formatBackupSize, listManagedVolumeBackupsForServer, shortChecksum } from '@/core/backup-list';
+import { DEFAULT_BACKUP_ROTATION_POLICY, buildRotationPreview } from '@/core/backup-rotation-preview';
 import { BrandMark } from '@/components/BrandMark';
 import {
   backfillChecksumAction,
@@ -433,6 +434,71 @@ export default async function ServerDetailPage({
                     </li>
                   ))}
                 </ul>
+                {(() => {
+                  // Rotation-Dry-Run (Step 041): reine Vorschau über die Step-039-Planungslogik –
+                  // es wird NICHTS gelöscht (dryRun/executable sind typ-erzwungen).
+                  const preview = buildRotationPreview(backupList.backups ?? []);
+                  return (
+                    <div className="mt-4 rounded-sc-md border border-sc-border p-3">
+                      <h3 className="text-sc-sm font-medium text-sc-text-primary">
+                        {t('managed.backupList.rotation.title')}
+                      </h3>
+                      <ul className="mt-1 space-y-1 text-sc-caption text-sc-text-muted">
+                        <li>• {t('managed.backupList.rotation.previewOnly')}</li>
+                        <li>• {t('managed.backupList.rotation.intro')}</li>
+                        <li>
+                          • {t('managed.backupList.rotation.policyLabel')}:{' '}
+                          {t('managed.backupList.rotation.policySummary', {
+                            keepLastCount: DEFAULT_BACKUP_ROTATION_POLICY.keepLastCount ?? 0,
+                            keepMinAgeDays: DEFAULT_BACKUP_ROTATION_POLICY.keepMinAgeDays ?? 0,
+                          })}
+                        </li>
+                      </ul>
+                      <div className="mt-2">
+                        <p className="text-sc-caption font-medium text-sc-text-secondary">
+                          {t('managed.backupList.rotation.wouldDelete')}
+                        </p>
+                        {preview.deleteCandidates.length === 0 ? (
+                          <p className="text-sc-caption text-sc-text-muted">
+                            {t('managed.backupList.rotation.noCandidates')}
+                          </p>
+                        ) : (
+                          <ul className="mt-1 space-y-0.5">
+                            {preview.deleteCandidates.map((fileName) => (
+                              <li
+                                key={fileName}
+                                className="break-all font-mono text-sc-caption text-sc-warning"
+                              >
+                                {fileName}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      {preview.kept.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sc-caption font-medium text-sc-text-secondary">
+                            {t('managed.backupList.rotation.wouldKeep')}
+                          </p>
+                          <ul className="mt-1 space-y-0.5">
+                            {preview.kept.map((k) => (
+                              <li key={k.fileName} className="text-sc-caption text-sc-text-muted">
+                                <span className="break-all font-mono">{k.fileName}</span>
+                                {' — '}
+                                {t('managed.backupList.rotation.protectedByLabel')}:{' '}
+                                {k.protectedBy
+                                  .map((reason) =>
+                                    t(`managed.backupList.rotation.reasons.${reason}`),
+                                  )
+                                  .join(', ')}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </>
             )}
           </div>

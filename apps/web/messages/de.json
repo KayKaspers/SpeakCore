@@ -331,6 +331,24 @@
           "typedLabel": "Zum Bestätigen „DELETE BACKUP\" eingeben.",
           "button": "Backup endgültig löschen"
         },
+        "rotation": {
+          "title": "Rotation-Vorschau",
+          "previewOnly": "Dies ist nur eine Vorschau – es wird nichts gelöscht.",
+          "intro": "Diese Vorschau zeigt, welche Backups nach der aktuellen Standard-Policy Kandidaten für eine spätere Rotation wären.",
+          "policyLabel": "Policy",
+          "policySummary": "{keepLastCount} behalten, mindestens {keepMinAgeDays} Tage schützen; einziges und letztes verifiziertes Backup geschützt",
+          "wouldDelete": "Würde gelöscht werden",
+          "wouldKeep": "Würde behalten werden",
+          "noCandidates": "Keine Löschkandidaten.",
+          "protectedByLabel": "Schutzgrund",
+          "reasons": {
+            "onlyBackup": "einziges Backup geschützt",
+            "keepLastCount": "neueste Backups geschützt",
+            "keepMinAgeDays": "Mindestalter nicht erreicht",
+            "lastVerifiedBackup": "letztes verifiziertes Backup geschützt",
+            "notOldEnough": "nicht alt genug für die Löschregel"
+          }
+        },
         "deleteResult": {
           "deleted": "Backup wurde gelöscht.",
           "alreadyRemoved": "Backup war bereits entfernt.",

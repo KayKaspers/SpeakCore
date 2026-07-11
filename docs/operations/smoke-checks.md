@@ -96,6 +96,10 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
   `DELETE BACKUP` blockt die Aktion mit klarem Hinweis. Mit allen Bestätigungen verschwinden
   genau die tar.gz + metadata.json (Liste neu laden); andere Dateien bleiben unberührt.
   **Keine** Rotation-/Bulk-Buttons – prüfen, dass nur Einzel-Delete angeboten wird.
+- **Rotation-Vorschau (Step 041, read-only – gefahrlos):** In der Backup-Karte (nach „Backups
+  anzeigen") den Abschnitt „Rotation-Vorschau" prüfen: zeigt Default-Policy, Kandidaten
+  („Würde gelöscht werden") und Geschützte mit Schutzgrund. **Kein** „Rotation ausführen"-Button;
+  es wird nichts gelöscht.
 - **Backup-Download (Step 037, read-only – gefahrlos, aber Datei ist sensibel):** Nach einem
   Verify mit Ergebnis „gültig" erscheint am Eintrag die Download-Form. Ohne beide Checkboxen bzw.
   ohne getipptes `DOWNLOAD BACKUP` blockt die Route mit klarem Hinweis (Redirect zurück zur
@@ -108,7 +112,7 @@ curl -fsS -X POST -H "authorization: Bearer $TOKEN" -H "content-type: applicatio
 | Check | Ergebnis | Notiz |
 |---|---|---|
 | install/validate/migrate | ☐ | |
-| lint/typecheck/test/build | ☐ | 490 Tests |
+| lint/typecheck/test/build | ☐ | 498 Tests |
 | web+agent start | ☐ | |
 | agent /health,/version | ☐ | |
 | snapshot+inventory (Token) | ☐ | read-only |

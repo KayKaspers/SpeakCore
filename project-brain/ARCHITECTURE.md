@@ -384,8 +384,14 @@ metadata.json (kein Listing, keine Rekursion, keine Wildcards). Fehlende tar.gz 
 (idempotent, verwaiste metadata.json bleibt bewusst stehen). Web: OWNER-only Gefahrenbereich pro
 Backup-Eintrag mit Warnanzeige (einziges Backup / nicht verifiziert / Metadaten / archiviert),
 Rate-Limit 5/h je Owner+Server, auch für archivierte Server; Audit
-`backup.managedVolume.delete.*` ohne Dateinamen. **Rotation bleibt Blueprint** – Dry-Run-Anzeige
-und Restore folgen als eigene Steps.
+`backup.managedVolume.delete.*` ohne Dateinamen.
+
+**Rotation-Dry-Run-Anzeige (Step 041):** read-only Vorschau in der Backup-Karte
+(`core/backup-rotation-preview.ts` → `buildBackupRotationPlan` mit `DEFAULT_BACKUP_ROTATION_POLICY`)
+auf Basis der bereits geladenen Step-033-Liste – **kein neuer Endpunkt, keine Datei-/DB-/Agent-
+Operation, kein Audit, keine Scheduler**. Zeigt Kandidaten (würde gelöscht) und Geschützte (mit
+Schutzgrund); `dryRun`/`executable` typ-erzwungen. Verify konservativ als „nicht verifiziert"
+(kein persistenter State). Echte Bulk-Rotation und Restore folgen als eigene Steps.
 
 ## 7. Verwandte Dokumente
 

@@ -364,6 +364,13 @@ Web: OWNER-only, Warnanzeige vor dem Absenden, **Rate-Limit 5/h je Owner+Server*
 Host-Pfade/Roh-Fehler in Responses; Audit `delete.*` ohne Dateinamen. **Keine** Rotation/
 Bulk-Löschung – die bleibt Blueprint (Dry-Run zuerst); die tar.gz wird beim Löschen **nie**
 gelesen/entpackt.
+
+**Rotation-Dry-Run-Anzeige (Step 041):** rein anzeigend, **ohne jede Ausführung/Side-Effect** –
+kein Delete, keine Datei-/DB-/Agent-Operation, kein neuer Endpunkt, kein Scheduler, **kein Audit**
+(bewusst, da beim normalen Rendern entstehend). Nutzt die bereits geladene Backup-Liste + die
+Step-039-Planungslogik (Default-Policy, `dryRun`/`executable` typ-erzwungen); keine editierbare
+Policy (keine missverständlichen Nutzerwerte); keine Host-Pfade/Secrets/Dateiinhalte in der
+Ausgabe. Verify wird konservativ als „nicht verifiziert" behandelt (kein persistenter State).
 - **Secrets bei Provisionierung:** generieren + verschlüsselt speichern ([ADR-0018](DECISIONS.md));
   nie in Docker-Logs/Audit/Client. Beim Container-Create per **ENV** vorgegeben statt aus Logs gelesen
   (RISKS R-14 geschlossen). Container-**Start**/Betrieb: kein ungefiltertes Log-Handling (späterer Step).

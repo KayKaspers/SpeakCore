@@ -90,7 +90,9 @@
   "Delete backup" on the entry): the action is **irreversible**, shows warnings first (e.g. only
   backup, not verified, server archived) and requires 3 checkboxes + typing **`DELETE BACKUP`**.
   Exactly the backup file and its metadata file are removed – nothing else. **No bulk deletion**;
-  rotation will start later as a dry-run concept first.*
+  **No bulk deletion.** From Step 041 the backup card also shows a **rotation preview**: it shows
+  purely informationally which backups a later rotation under the default policy (keep 3, protect
+  at least 7 days) would delete and which are protected and why – **nothing is deleted**.*
 - Reading logs
 - Backup & Restore — *from Step 032: backups exist (server-side, read-only source); from Step 033:
   backups are viewable; from Step 034: SHA-256 integrity checksum; from Step 035: read-only

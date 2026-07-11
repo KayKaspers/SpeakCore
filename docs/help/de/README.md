@@ -97,7 +97,10 @@
   „Backup löschen" am Eintrag): Die Aktion ist **unwiderruflich**, zeigt vorher Warnungen (z. B.
   einziges Backup, nicht verifiziert, Server archiviert) und verlangt 3 Checkboxen + getippt
   **`DELETE BACKUP`**. Gelöscht werden genau die Backup-Datei und ihre Metadaten-Datei – nichts
-  anderes. **Keine Bulk-Löschung**; Rotation startet später zuerst als Dry-Run-Konzept.*
+  anderes. **Keine Bulk-Löschung.** Ab Step 041 zeigt die Backup-Karte zusätzlich eine
+  **Rotation-Vorschau**: Sie zeigt rein informativ, welche Backups eine spätere Rotation nach der
+  Standard-Policy (3 behalten, mindestens 7 Tage schützen) löschen würde und welche mit welchem
+  Grund geschützt bleiben – **es wird dabei nichts gelöscht**.*
 - Logs lesen
 - Backup & Restore — *ab Step 032: Backup vorhanden (serverseitig, read-only Quelle); ab Step 033:
   Backups einsehbar; ab Step 034: SHA-256-Integritätsprüfsumme; ab Step 035: read-only

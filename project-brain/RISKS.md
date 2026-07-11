@@ -86,8 +86,9 @@
   Backfill-Zeitpunkt); **Download seit Step 037** (Web-proxied Streaming, nur nach Verify `valid`
   + Bestätigungen, 5/h-Limit) – heruntergeladene Dateien sind **unverschlüsselt sensibel**
   (Owner-Verantwortung); **Einzel-Delete seit Step 040** (gezielt, irreversibel, 3 Bestätigungen +
-  `DELETE BACKUP`, 5/h-Limit – fremde Dateien nachweislich unberührt); **Rotation weiterhin nur
-  Blueprint** (kein Bulk-Delete, `AGENT_BACKUP_DIR` muss manuell rotiert werden); Aufbewahrung
+  `DELETE BACKUP`, 5/h-Limit – fremde Dateien nachweislich unberührt); **Rotation seit Step 041 nur
+  als read-only Dry-Run-Vorschau** sichtbar (kein Bulk-Delete, keine Ausführung – Kandidaten müssen
+  manuell einzeln gelöscht werden, `AGENT_BACKUP_DIR` wächst sonst weiter); Aufbewahrung
   liegt beim Betreiber (Backup-Dateien sind **sensibel**).
 
 ## R-07 – Komplexität der Installationsumgebungen
