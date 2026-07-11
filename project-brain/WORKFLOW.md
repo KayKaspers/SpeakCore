@@ -15,6 +15,8 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 |------|--------|--------|
 | 001 | Projektinitialisierung ohne App-Code (Struktur, Doku, Branding-Tokens) | **abgeschlossen** |
 | 002 | Tech-Grundgerüst (Scaffolding, noch eng gefasst) | offen |
+| 003–041 | Produkt-Steps (siehe [CHANGELOG.md](CHANGELOG.md); zuletzt 041 Rotation-Dry-Run-Vorschau) | **abgeschlossen** |
+| 042 | NDF-v1.0-Adoption & Skills-first Operating Mode (docs-only) | **abgeschlossen** |
 
 ## 2. Single Source of Truth
 
@@ -27,6 +29,10 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | Sicherheit | [SECURITY.md](SECURITY.md) |
 | Branding | [BRANDING.md](BRANDING.md) + `branding/design-tokens/` |
 | Historie | [CHANGELOG.md](CHANGELOG.md) |
+| NDF-Standard & Adoptionsstatus | [../docs/ndf/NDF_V1_ADOPTION.md](../docs/ndf/NDF_V1_ADOPTION.md) |
+| Claude-Arbeitsanweisung (Skills-first) | [../CLAUDE.md](../CLAUDE.md) |
+| Skill-Inventar (38 docs-only) | [../docs/ndf/SKILL_INVENTORY.md](../docs/ndf/SKILL_INVENTORY.md) |
+| Context Pack (kompakt) | [CONTEXT_PACK.md](CONTEXT_PACK.md) |
 
 Tech-Stack-Änderungen **nur** per neuem/aktualisiertem ADR in [DECISIONS.md](DECISIONS.md).
 

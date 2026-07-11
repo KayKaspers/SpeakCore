@@ -5,6 +5,32 @@
 
 ## [Unreleased]
 
+### NDF Step 042 – NDF v1.0 Adoption & Claude Skills Enablement (2026-07-11)
+
+> **Workflow-/Skills-/Dokumentationsadoption – keine Runtime-Auswirkung.** Führt den verbindlichen
+> Projektstandard **NDF v1.0.0** (Tag `v1.0.0`, Commit `9dcadc1`) ein und aktiviert den
+> **Skills-first Operating Mode**. Kein Produktcode, keine Datenbank/Docker/Agent/Backup-/Restore-/
+> Delete-Änderung, kein CI/Release, kein Push.
+
+#### Added
+- **38 docs-only NDF-Skills** unter `.claude/skills/` (+ kanonischer Pack-`README.md`),
+  byte-identisch aus dem getaggten NDF-`v1.0.0`-Baum übernommen (0 Drift; alle `.md`, Modus
+  `100644`, keine Scripts/Symlinks/Secrets).
+- **`CLAUDE.md`** (neu): verbindliche Skills-first-Arbeitsanweisung – ein WP pro Ausführung,
+  10 Skills-first-Regeln, Rollenmodell (Kay/Nova/Claude), Blueprint-/Guard-/Owner-/Audit-Prinzipien,
+  Pflicht-Rückmeldung an Nova + Compact Context Summary, Feedback-Loop, Validierungsbefehle.
+- **`docs/ndf/`** (neu): `SKILL_INVENTORY.md` (Inventar + Kategorien), `NDF_V1_ADOPTION.md`
+  (Adoptionsstatus, Update-/Drift-Verfahren, Grenzen), `FEEDBACK_TO_NDF.md` (Feedback-to-NDF-Loop
+  inkl. bekannter SpeakCore-Learnings L1–L9).
+- **`project-brain/`**: `CONTEXT_PACK.md` (kompaktes Context Pack) und
+  `STEP-042-NDF-ADOPTION.md` (Step-Notiz) neu; `WORKFLOW.md` um Step-042-Zeile + NDF-Verweise
+  ergänzt.
+
+#### Verifiziert
+- NDF-Quelle lokal ohne Netzwerk verifiziert (Tag `v1.0.0` → Commit `9dcadc1`); 38 Skills, 0 Drift;
+  `git diff --check` sauber; alle Änderungen innerhalb `.claude/skills/**`, `CLAUDE.md`,
+  `docs/ndf/**`, `project-brain/**`. Kein `pnpm`-Build/Test nötig (docs-only, kein Codepfad berührt).
+
 ### NDF Step 041 – Backup Rotation Dry-Run Anzeige (2026-07-02)
 
 > **Read-only Rotation-Vorschau** in der Backup-Karte: zeigt über die Step-039-Planungslogik,
