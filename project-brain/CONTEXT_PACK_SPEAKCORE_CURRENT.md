@@ -20,15 +20,17 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
   (033), SHA-256-Prüfsummen (034) + Backfill (038), read-only Verify (035), Web-proxied Download
   (037), gezieltes Einzel-Delete (040), Rotation-Dry-Run-Vorschau (041). **Restore/Import fehlen
   bewusst.**
-- **Abgeschlossene Governance-/Blueprint-Steps:** **042** – NDF-v1.0-Adoption & Skills-Enablement;
-  **042a** – Context-/WP-SSOT-Alignment; **043** – **Managed Backup Restore Blueprint**
+- **Abgeschlossene Governance-/Blueprint-Steps:** **042** NDF-Adoption · **042a** SSOT-Alignment ·
+  **043** **Restore-Blueprint**
   ([docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md),
-  `executable: false`) — **Restore weiterhin NICHT implementiert.**
+  `executable: false`) · **044** **Restore-Foundation-ADR-Paket** (ADR-0039–0041 **Proposed**,
+  [docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md)).
+  **Restore weiterhin NICHT implementiert; Proposed ≠ Accepted.**
 - **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
-- **Nächster empfohlener Schritt:** erster Umsetzungs-WP aus der Restore-Zerlegung —
-  **Restore-Datenmodell & ADR** bzw. **read-only Restore-Inspection** (reine Guard-Logik). Offene
-  ADR-Kandidaten: Restore-Vertrauensmodell · Manifest/Kompatibilität · Apply-/Rollback-Strategie ·
-  Pflicht-Pre-Restore-Sicherungspunkt · Restore-State-/Lock-Persistenz (+ Audit-Schema).
+- **Nächster Schritt:** **045 – Read-only Restore Inspection** (geplant, **blockiert bis
+  Human-Maintainer-Freigabe der ADR-0039–0041**): reine Analyse/Guard-Logik, **keine** Extraktion/
+  Write/Apply. Vertagte Folge-ADRs: Apply/Rollback · Portabilität · State-/Lock-Persistenz ·
+  Audit-Datenmodell · Wiederanlauf · Diagnose-Retention (OPEN-6…OPEN-12 in DECISIONS.md).
 
 ## Architektur in Kurzform
 
@@ -66,21 +68,22 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 015–016 Secret-Rotation · 017–023 Container-Lifecycle (create/start/stop/remove/restart/status) ·
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
 031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
-**042a SSOT-Alignment** · **043 Restore-Blueprint** (`executable: false`). Vollständige Historie:
-[CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
+**042a SSOT-Alignment** · **043 Restore-Blueprint** · **044 Restore-Foundation-ADRs (Proposed)**.
+Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
 [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- **Restore-Umsetzung** in kleinen Folge-WPs gemäß Blueprint §5.21 (zuerst **Restore-Datenmodell &
-  ADR** / **read-only Restore-Inspection**), erst nach ADR-Klärung und Human-Maintainer-Freigabe.
-  Alternativ (Backlog): editierbare Rotation-Policy + echter Bulk-Rotation-Step. Priorisierung durch Nova.
+- **Human-Maintainer-Freigabe** von ADR-0039–0041 (Proposed) einholen; danach **Step 045 –
+  read-only Restore Inspection** (reine Guard-/Analyse-Logik, keine Write/Apply). Weitere
+  Restore-WPs (Blueprint §5.21) und die vertagten Folge-ADRs (OPEN-6…OPEN-12) danach.
+  Alternativ (Backlog): editierbare Rotation-Policy + Bulk-Rotation. Priorisierung durch Nova.
 
 ## Git-/Push-Status
 
-- **Gepusht auf `origin/main`:** `98af8a0` (041) · `997b3ec` (042) · `40404a2` (042a).
-- **Lokal, noch nicht gepusht:** Step-043-Blueprint-Commit (`docs(backup): add managed restore
-  security blueprint`) — Push-Freigabe durch Kay/Nova ausstehend.
+- **Gepusht auf `origin/main`:** … `40404a2` (042a) · `7f29b2a` (043).
+- **Lokal, noch nicht gepusht:** Step-044-ADR-Commit (`docs(backup): propose restore foundation
+  decisions`) — Push-Freigabe durch Kay/Nova ausstehend.
 
 ## Verbotene Aktionen (Dauerregeln)
 

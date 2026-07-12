@@ -5,6 +5,44 @@
 
 ## [Unreleased]
 
+### NDF Step 044 – Restore Foundation ADR Decision Package (2026-07-11)
+
+> **Docs-only, `executable: false` – kein Restore, kein Code.** Legt die Grundlagen für einen
+> späteren read-only Restore-Inspection-Step als **Proposed** ADRs fest. **Proposed ≠ Accepted:**
+> keine Freigabe ohne Human-Maintainer-Entscheidung (Kay).
+
+#### Added
+- **ADR-0039 – Restore Authorization and Confirmation Model** (Proposed): OWNER-only; UI nur
+  Bestätigungsfaktor; serverseitige Re-Prüfung bei Plan+Ausführung; Bestätigung gebunden an
+  Benutzer+Instanz+Backup+Fingerprint+Plan-ID+Ablauf, einmalig; geänderter Zustand ⇒ Plan ungültig;
+  kein Cross-Instance/Fremd-/Upload-Restore, keine freien Hostpfade.
+- **ADR-0040 – Restore Manifest and Legacy Backup Policy** (Proposed): versioniertes Manifest
+  zwingend (beim Erstellen); SHA-256 = Integrität, keine Herkunft/Signatur; Legacy ohne Manifest
+  zunächst nicht restorefähig (Inspection darf anzeigen, nicht freigeben); Backfill = separates WP;
+  vier getrennte Eigenschaften Integrität/Herkunft/Instanzbindung/Versionskompatibilität.
+- **ADR-0041 – Mandatory Pre-Restore Safety Backup** (Proposed): vor jedem Restore verpflichtender,
+  validierter Sicherungspunkt; Stop bei Fehlschlag; kein Owner-Override in v1; Kennzeichnung;
+  kein sofortiges Rotations-Löschen; Speicher-Preflight = harter Blocker; bevorzugte Rollback-Quelle.
+- **`docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md`** (neu): kompakte Entscheidungsübersicht
+  (Status/Empfehlung/Alternativen/Sicherheitsauswirkung/benötigte Human-Maintainer-Entscheidung/
+  Abhängigkeit), mit den verbindlichen Klarstellungen (Proposed ≠ Accepted; Restore nicht
+  implementiert; Step 045 nur read-only Inspection).
+
+#### Changed
+- `DECISIONS.md`: ADR-0039–0041 eingefügt; OPEN-6…OPEN-12 (vertagte Folge-ADRs: Apply/Rollback,
+  Portabilität, State-/Lock-Persistenz, Audit-Datenmodell, Wiederanlauf, Diagnose-Retention).
+- SSOTs aktualisiert: `CONTEXT_PACK_SPEAKCORE_CURRENT.md`, `project-system/WORK_PACKAGE_QUEUE.md`
+  (045 „geplant, blockiert bis ADR-Freigabe"), `NDF_LESSONS_LEARNED.md` (L16),
+  `docs/ndf/FEEDBACK_TO_NDF.md` (K4), `WORKFLOW.md`.
+
+#### Nicht enthalten (bewusst)
+- Keine Accepted-ADR, keine Restore-/Runtime-/Typ-/DB-/API-/Agent-Änderung, keine `packages/**`,
+  `apps/**`, `.claude/skills/**`. Restore bleibt nicht implementiert.
+
+#### Verifiziert
+- `git diff --check` sauber; alle Änderungen in `docs/**`/`project-brain/**`/`project-system/**`.
+  Kein `pnpm`-Lint/Build/Test (docs-only, kein Produktcode berührt).
+
 ### NDF Step 043 – Managed Backup Restore Blueprint (2026-07-11)
 
 > **Docs-only Sicherheits-Blueprint – keine Runtime-Auswirkung, kein Restore implementiert.**

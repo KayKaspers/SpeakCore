@@ -17,10 +17,11 @@
 ## Rahmen
 
 - **NDF-Standard:** v1.0.0 (Tag `v1.0.0`, Commit `9dcadc1`), **Skills-first**.
-- **Zuletzt abgeschlossen:** Produkt-Step **041**; Governance **042** + **042a**; Blueprint **043**.
-- **Aktueller Schritt:** **043** – Managed Backup Restore Blueprint (docs-only, `executable: false`).
-- **Push-Status:** `98af8a0`/`997b3ec`/`40404a2` **gepusht** (`origin/main`); **043-Commit lokal,
-  noch nicht gepusht**.
+- **Zuletzt abgeschlossen:** Governance **042**/**042a**; Blueprint **043**; ADR-Paket **044**.
+- **Aktueller Schritt:** **044** – Restore Foundation ADR Decision Package (docs-only,
+  ADR-0039–0041 **Proposed**, `executable: false`).
+- **Push-Status:** `40404a2` (042a) · `7f29b2a` (043) **gepusht** (`origin/main`); **044-Commit
+  lokal, noch nicht gepusht**.
 
 ## Queue
 
@@ -29,17 +30,21 @@
 | 041 | Letzter Produktstand vor NDF-v1-Adoption (Rotation-Dry-Run-Vorschau) | abgeschlossen |
 | 042 | NDF v1.0 Adoption & Claude Skills Enablement | abgeschlossen |
 | 042a | Context & Work-Package SSOT Alignment | abgeschlossen |
-| 043 | Managed Backup Restore Blueprint (`executable: false`) | abgeschlossen, lokal |
-| 044 | Restore-Datenmodell & ADR (Typen + State-/Audit-/Lock-Persistenzentscheidung) | geplant |
-| später | read-only Restore-Inspection → Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
+| 043 | Managed Backup Restore Blueprint | abgeschlossen |
+| 044 | Restore Foundation ADR Decision Package | abgeschlossen, lokal |
+| 045 | Read-only Restore Inspection | geplant, blockiert bis ADR-Freigabe |
+| später | Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
 | später | Editable Rotation Policy / Bulk Rotation | Backlog |
 
 ## Abhängigkeiten
 
 - **043** (abgeschlossen) ist reiner Blueprint auf Basis des Backup-Lebenszyklus 032–041; kein
   Restore-Code. Siehe [Restore-Blueprint](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md).
-- **044** (Restore-Datenmodell & ADR) setzt Step 043 voraus und ist selbst überwiegend Design/ADR
-  (`executable: false` für die ADR-Teile); erst danach folgen ausführbare Restore-WPs (§5.21).
+- **044** (abgeschlossen) legt die Restore-Grundlagen als **Proposed** ADRs 0039–0041 fest
+  (`executable: false`); siehe [Decision Summary](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md).
+- **045** (read-only Restore Inspection) setzt 043+044 voraus und ist **blockiert, bis der Human
+  Maintainer ADR-0039–0041 (bzw. die für 045 relevanten Teile) freigibt**; reine Guard-/Analyse-
+  Logik, keine Write/Apply. Vertagte Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
 - **Editable Rotation Policy / Bulk Rotation** setzt die Rotation-Dry-Run-Vorschau (041) voraus.
 
 ## Offene Risiken

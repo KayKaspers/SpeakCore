@@ -52,6 +52,12 @@
 15. **Bestehende flache Audit-/Statusstrukturen stoßen an Grenzen.** Der Restore braucht deutlich
     mehr strukturierte Audit-Felder als `action/actor/target/result` — bewusst als ADR-/Migration-
     Kandidat markieren statt still zu erweitern.
+16. **ADR-Entscheidungspaket als Freigabe-Gate (Step 044).** Vor riskanter Implementierung ein
+    Bündel **Proposed** ADRs anlegen, die Empfehlung strikt von der Human-Maintainer-Entscheidung
+    trennen (`Proposed ≠ Accepted`), Folge-Entscheidungen **ausdrücklich vertagen** (OPEN-Liste)
+    und den nächsten Step bis zur Freigabe **blockieren**. Vermeidet, dass Implementierung an
+    ungeklärten Sicherheitsentscheidungen vorbeiläuft. Ergänzend: die vier Eigenschaften
+    **Integrität / Herkunft / Instanzbindung / Versionskompatibilität** nie vermischen.
 
 ## Verwendung
 

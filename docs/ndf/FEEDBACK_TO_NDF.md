@@ -74,5 +74,15 @@ NDF-Änderungen):
   für alle irreversiblen Operationen (nicht nur Backups).
 - **Status:** Kandidat · **Maintainer-Entscheidung:** offen
 
+### K4 – „ADR Decision Package" als Freigabe-Gate vor riskanter Umsetzung (Step 044)
+- **Work Package / Step:** 044 (Restore Foundation ADR Decision Package)
+- **Möglicher neuer Skill / Verbesserung:** ein NDF-Muster/Skill für ein **Bündel Proposed ADRs**,
+  das eine riskante Fähigkeit gated: strikte Trennung Empfehlung ↔ Human-Maintainer-Entscheidung
+  (`Proposed ≠ Accepted`), explizite Vertagung von Folge-ADRs (OPEN-Liste) und Blockade des
+  nächsten Steps bis zur Freigabe. Ergänzt `ndf-adr-governance-review`.
+- **Sicherheits-/Governance-Erkenntnis:** verhindert, dass Implementierung an ungeklärten
+  Sicherheitsentscheidungen vorbeiläuft; hält die Autorität beim Human Maintainer.
+- **Status:** Kandidat · **Maintainer-Entscheidung:** offen
+
 > **Keine** Rückführung ins NDF-Repository in diesem Step. Weitere Beobachtungen im obigen
 > Erfassungsschema ergänzen.

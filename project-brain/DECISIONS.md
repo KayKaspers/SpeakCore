@@ -625,6 +625,106 @@
 
 ---
 
+> **Restore-Foundation ADR-Paket (Step 044).** Die folgenden drei ADRs (0039–0041) sind
+> **`status: Proposed` / `executable: false`** und legen die Grundlagen für einen späteren
+> read-only Restore-Inspection-Step (045) fest. **Proposed ist NICHT Accepted:** keine dieser
+> Entscheidungen ist ohne ausdrückliche Human-Maintainer-Freigabe (Kay) beschlossen; es wird
+> **kein Restore, keine Write-/Apply-Funktion** freigegeben. Übersicht:
+> [../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md);
+> Basis: [../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md).
+
+## ADR-0039 – Restore Authorization and Confirmation Model
+
+- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **executable:** false
+- **Kontext:** Der Restore ist eine destructive, zustandsersetzende Operation (Blueprint §5.4/§5.7).
+  Zu klären ist, **wer** ihn auslösen darf und **wie** die Bestätigung so gebunden wird, dass sie
+  nicht wiederverwendet oder aus der UI vorgetäuscht werden kann.
+- **Entscheidung (Empfehlung):** **(1)** Erste Restore-Version **ausschließlich `OWNER`** (RBAC wie
+  alle sensiblen Backup-Aktionen; eine eigene Restore-Rolle bleibt spätere Option). **(2)** **Keine**
+  Berechtigungsentscheidung allein im Browser — die UI-Eingabe ist nur **Bestätigungsfaktor, keine
+  Autorität**. **(3)** **Serverseitige erneute Berechtigungsprüfung** sowohl bei der Planerstellung
+  als auch bei der Ausführung. **(4)** Die Bestätigung wird **serverseitig gebunden** an: Benutzer +
+  Instanz + Backup + **Backup-Fingerprint** (Größe+mtime+SHA-256) + **Plan-ID** + **Ablaufzeit**;
+  sie ist **einmalig/nicht wiederverwendbar** (Replay-Schutz). **(5)** Ein seit Planerstellung
+  **veränderter Backup- oder Instanzzustand macht den Plan ungültig** (neuer Plan nötig).
+  **(6)** **Kein** Cross-Instance-Restore, **kein** Restore fremder/hochgeladener Archive, **keine**
+  frei eingebbaren Hostpfade.
+- **Alternativen (Bestätigungsform):** einfache Ja/Nein-Bestätigung *(zu schwach)* · Eingabe des
+  Backup-Dateinamens · Eingabe des Instanznamens · feste Restore-Phrase (z. B. `RESTORE BACKUP`) ·
+  serverseitiges Einmal-Token. **Empfohlen:** **sichtbare starke Eingabe** (Kombination aus exaktem
+  Backup-Dateinamen und/oder Instanznamen **plus** fester Phrase, konsistent mit `CREATE BACKUP`/
+  `DELETE BACKUP`) **plus** serverseitige **Plan-/Fingerprint-Bindung + Einmal-Token**. Die exakte
+  Phrase/Kombination ist eine Human-Maintainer-Entscheidung.
+- **Sicherheitsauswirkung:** verhindert UI-Autoritäts-Spoofing, Replay alter Anforderungen und
+  TOCTOU-Backup-Austausch zwischen Plan und Apply; hält das Vertrauensmodell serverseitig.
+- **Konsequenzen:** Der spätere Plan-Endpunkt erzeugt Plan-ID + Fingerprint; der Execute-Endpunkt
+  revalidiert Rolle/Instanz/Backup/Bestätigung. **Human-Maintainer-Entscheidung offen:** genaue
+  Bestätigungsphrase/-kombination; ob Restore eine eigene Rolle/Recht erhält.
+
+---
+
+## ADR-0040 – Restore Manifest and Legacy Backup Policy
+
+- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **executable:** false
+- **Kontext:** Aktuelle Backups sind gzip-Tar des Volume-Inhalts **ohne eingebettetes Manifest**;
+  der Sidecar `.metadata.json` (unsigniert) trägt Basisfelder + optionale SHA-256 über die gesamte
+  tar.gz. Für sicheren Restore fehlen erwartete Struktur/Größen/Dateizahl/Per-Datei-Integrität und
+  Kompatibilitätsinfo (Blueprint §5.10).
+- **Entscheidung (Empfehlung):** **(1)** Restore-fähige Backups benötigen ein **versioniertes
+  Manifest**. **(2)** Das Manifest wird **beim Erstellen** des Backups erzeugt und ist **Bestandteil
+  der vertrauenswürdig validierten Backup-Struktur**. **(3)** **SHA-256 belegt nur Integrität** gegen
+  zufällige Veränderung — **keine Herkunft/Authentizität** (keine Signatur; wird nicht als vorhanden
+  dargestellt). **(4)** **Legacy-Backups ohne Manifest sind zunächst NICHT restorefähig.** **(5)**
+  **Keine** automatische Vertrauensableitung allein aus Dateiname oder Sidecar. **(6)** Die
+  Restore-Inspection (Step 045) **darf** Legacy-Backups **erkennen und als inkompatibel anzeigen**,
+  aber **nicht freigeben**. **(7)** Eine spätere **Legacy-Migration/Backfill** ist ein **separates
+  Work Package**.
+- **Vorgeschlagene Pflichtfelder:** Manifest-Schema-Version · Backup-ID · Instanz-ID ·
+  Erstellungszeitpunkt · Backup-Typ · SpeakCore-Version · Agent-Version · erwartete Archivstruktur ·
+  komprimierte Größe · erwartete unkomprimierte Größe · Dateianzahl · Inhalts-/Dateiprüfsummen ·
+  Kompatibilitätsinformationen. **Vier getrennte Eigenschaften nicht vermischen:** **Integrität**
+  (SHA-256) · **Herkunft** (derzeit nicht kryptografisch belegbar) · **Instanzbindung** (instanceId
+  in Name **und** Manifest) · **Versionskompatibilität** (Schema-/SpeakCore-/TS3-Version).
+- **Alternativen:** (a) kein Manifest, Vertrauen aus Sidecar *(abgelehnt: kein Herkunftsnachweis,
+  manipulierbar)*; (b) Manifest optional *(abgelehnt: uneinheitliche Restore-Sicherheit)*;
+  (c) Manifest zwingend + Legacy fail-closed *(empfohlen)*.
+- **Sicherheitsauswirkung:** verhindert Restore aus unvollständig verifizierbaren/manipulierten
+  Backups; macht Bomb-/Größen-/Struktur-Gates (Blueprint §5.8) überhaupt belastbar.
+- **Konsequenzen:** Die Manifest-Erzeugung berührt einen **späteren** Backup-Erstellungs-WP
+  (nicht hier); Legacy-Backups bleiben bis zu einem optionalen Backfill nicht restorefähig.
+  **Human-Maintainer-Entscheidung offen:** endgültige Pflicht-/Optionalfelder; ob/wann ein
+  Legacy-Backfill kommt.
+
+---
+
+## ADR-0041 – Mandatory Pre-Restore Safety Backup
+
+- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **executable:** false
+- **Kontext:** Restore überschreibt den Live-Volume-Zustand. Ohne eine unmittelbar vorher erstellte,
+  validierte Sicherung gibt es keine verlässliche Rollback-Quelle (Blueprint §5.11/§5.15).
+- **Entscheidung (Empfehlung):** **(1)** Vor **jedem** Restore ist ein **neuer managed
+  Sicherungspunkt verpflichtend**. **(2)** Der Restore **stoppt**, wenn dessen Erstellung **oder**
+  Validierung (SHA-256) fehlschlägt — **kein stilles Überspringen**. **(3)** Für die **erste**
+  Restore-Version **kein Owner-Override**. **(4)** Der Sicherungspunkt erhält eine **eindeutige
+  Kennzeichnung** (Pre-Restore-Marker). **(5)** Er darf **nicht unmittelbar durch Rotation entfernt**
+  werden. **(6)** Sein **Speicherbedarf** wird bereits in der **Planungsphase** berücksichtigt;
+  **fehlender Speicherplatz ist ein harter Blocker**. **(7)** Der Sicherungspunkt ist die
+  **bevorzugte Rollback-Quelle**. **(8)** Aufbewahrungs-/Rotationseinbindung wird **später separat**
+  entschieden.
+- **Alternativen:** (a) verpflichtende Sicherung **ohne Override** *(empfohlen für v1)*;
+  (b) Owner-Override mit zusätzlicher Bestätigung *(nur nach eigener späterer ADR)*;
+  (c) Restore ohne Sicherung *(abgelehnt: kein sicherer Rollback)*.
+- **Sicherheitsauswirkung:** garantiert eine Rollback-Grundlage; verwandelt einen fehlgeschlagenen
+  Apply von „Datenverlust" in „rücksicherbar"; koppelt Speicher-Preflight an die Sicherheit.
+- **Konsequenzen:** zusätzlicher Speicherbedarf (Staging + Pre-Restore + Rollback) im Space-Gate;
+  Rotation muss den Marker respektieren. **Human-Maintainer-Entscheidung offen:** ob je ein
+  Override erlaubt wird; Retention-Politik des Pre-Restore-Backups.
+
+---
+
 ## Offene Entscheidungen (proposed / TODO)
 
 | ID | Thema | Status | Anmerkung |
@@ -634,3 +734,10 @@
 | OPEN-3 | Monorepo-Struktur (pnpm workspaces) für Web + Agent | **entschieden → ADR-0009** | umgesetzt in Step 002 |
 | OPEN-4 | UI-Komponentenbasis (shadcn/ui vs. eigenes Set auf Tokens) | proposed | später (Step 003+) |
 | OPEN-5 | Tailwind v3 vs. v4 | proposed | Step 002 nutzt Tailwind v3 (stabile Config-Datei); v4-Migration später prüfen |
+| OPEN-6 | Restore Apply-/Rollback-Strategie & Verzeichnis-Swap | Folge-ADR (vertagt, Step 044) | Plattform-Atomarität offen; erst nach Repo-/Plattform-Klärung |
+| OPEN-7 | Linux-/Windows-/Docker-Volume-Portabilität des Apply | Folge-ADR (vertagt) | mit OPEN-6 gekoppelt |
+| OPEN-8 | Restore-State-Persistenz (DB vs. agent-lokal) | Folge-ADR (vertagt) | State-Modell Blueprint §5.14 |
+| OPEN-9 | Restore-Lock-Persistenz & Lease-Modell | Folge-ADR (vertagt) | Blueprint §5.16 |
+| OPEN-10 | Restore-Audit-Datenmodell (flaches AuditLog erweitern?) | Folge-ADR (vertagt) | Blueprint §5.17; ggf. Migration |
+| OPEN-11 | Wiederanlauf nach Agent-Neustart während Restore | Folge-ADR (vertagt) | Blueprint §5.14/§5.19 |
+| OPEN-12 | Diagnoseartefakt-Retention bei Fehler/Rollback | Folge-ADR (vertagt) | Blueprint §5.15 |
