@@ -84,5 +84,16 @@ NDF-Änderungen):
   Sicherheitsentscheidungen vorbeiläuft; hält die Autorität beim Human Maintainer.
 - **Status:** Kandidat · **Maintainer-Entscheidung:** offen
 
+### K5 – Atomare Veröffentlichung + Snapshot-Konsistenz als generisches Muster (Step 046)
+- **Work Package / Step:** 046 (Restore Manifest Format/Placement/Binding)
+- **Sicherheits-/Governance-Erkenntnis:** „deterministisches Format" allein garantiert keine
+  Integrität — Manifest und Archiv müssen aus **derselben eingefrorenen Struktur** stammen und
+  **atomar veröffentlicht** werden (Temp-Namen + atomarer Rename; unvollständige Artefakte nie
+  listbar). Dasselbe Muster gilt für jede erzeugte-und-referenzierte Artefaktkombination.
+- **Möglicher neuer Skill / Verbesserung:** ein NDF-Checkpunkt „Snapshot-Konsistenz & atomare
+  Veröffentlichung" für Format-/Artefakt-Blueprints (ergänzt `ndf-architecture-blueprint-runner`/
+  `ndf-validation-evidence-reviewer`).
+- **Status:** Kandidat · **Maintainer-Entscheidung:** offen
+
 > **Keine** Rückführung ins NDF-Repository in diesem Step. Weitere Beobachtungen im obigen
 > Erfassungsschema ergänzen.

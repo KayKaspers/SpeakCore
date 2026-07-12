@@ -767,6 +767,65 @@
 
 ---
 
+## ADR-0042 – Restore Manifest Format, Placement and Binding
+
+- **Status:** **Proposed** (Step 046) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **executable:** false
+- **Kontext:** ADR-0040 (Accepted) verlangt für restorefähige Backups ein **versioniertes Manifest**.
+  Zu klären sind Format, Dateiname, Ablage im Archiv, optionale externe Sidecar-Kopie, die Bindung
+  zwischen Archiv/Manifest/bestehender `.metadata.json`, deterministische Serialisierung sowie
+  Snapshot-Konsistenz und atomare Veröffentlichung. Volles Format:
+  [../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md](../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md).
+- **Befund (nur Repo, `apps/agent/src/docker-backup.ts`):** Das Backup wird per gelabeltem
+  Hilfscontainer erzeugt, der das Volume **read-only** mountet und `tar -czf /backup/<finaler-Name>
+  -C /data .` ausführt — **direkt unter dem finalen Namen in `AGENT_BACKUP_DIR`**, **ohne** temporären
+  Namen, **ohne** Staging-Kopie, **ohne** atomaren Rename; die `.metadata.json` wird **danach**
+  separat geschrieben; SHA-256 über die fertige tar.gz. ⇒ Die aktuelle Erzeugung liefert **weder** eine
+  unveränderliche Staging-Struktur **noch** eine atomare Veröffentlichung.
+- **Entscheidung (Empfehlung):**
+  - **Schema-Version:** `schemaVersion` als **ganze Zahl**, strikt versioniert; unbekannte
+    Major-Version ⇒ **fail-closed**; keine implizite Abwärtskompatibilität.
+  - **Manifest-Datei im Archiv:** exakt **`speakcore-backup-manifest.json`**, **genau einmal**, im
+    **Archiv-Root**; **kein** benutzerdefinierter Name, **kein** Pfad aus Request/Konfiguration, keine
+    alternativen Fundstellen. Das Manifest beschreibt die **Nutzdaten**, nicht sich selbst.
+  - **Externe Kopie (bewertet 1 nur Archiv · 2 nur Sidecar · 3 identisch in beiden):** **Option 3** —
+    **identische Manifest-Bytes** im Archiv **und** als managed Sidecar `<backup-file-name>.manifest.json`.
+    Der Sidecar dient der schnellen read-only Inspection; die spätere **Restore-Referenz** ist das
+    Manifest **im Archiv**. Der Sidecar allein erzeugt **keine** Restore-Freigabe.
+  - **Bindung:** die bestehende `.metadata.json` trägt künftig zusätzlich `manifestFileName`,
+    `manifestSchemaVersion`, `manifestSha256` (neben `backupId`/`instanceId`/`archiveFileName`/
+    `archiveSizeBytes`/`archiveSha256`). **Sicherheitsmodell:** Archiv-Hash bindet Metadata↔Archiv;
+    Manifest-Hash bindet Metadata↔exakte Manifest-Bytes; der Sidecar muss denselben Manifest-Hash
+    haben; **vor Restore-Apply** muss das Manifest **im Archiv** denselben Hash besitzen; Sidecar +
+    Metadata ersetzen **keine** spätere Archivvalidierung; SHA-256 = Integrität, **keine** Signatur/
+    Herkunftsgarantie.
+  - **Deterministische Serialisierung:** UTF-8, **kein BOM**, **LF**, stabile Feldreihenfolge, nach
+    `path` lexikalisch sortierte `entries`, ISO-8601-UTC-Zeiten, SHA-256 als **lowercase Hex**,
+    **normalisierte POSIX-relative Pfade** (kein führendes `/`, kein `.`/`..`, keine Backslashes,
+    keine doppelten Separatoren). **Empfehlung: projektspezifische, dokumentierte deterministische
+    Serialisierung** (stabile Key-Reihenfolge + sortierte Einträge) — **kein** externer
+    Canonical-JSON-Standard und **keine neue Dependency**.
+  - **Pflichtfelder / Entry-Regeln / Kompatibilität:** siehe Schema-Dokument. Nur reguläre Dateien +
+    Verzeichnisse; **Symlinks/Hardlinks/Device/Pipes/Special Files in v1 unzulässig**; `sha256` nur
+    für reguläre Dateien; keine doppelten Pfade; Manifest-Datei und externe Sidecars **nicht** in
+    `entries`.
+  - **Snapshot-Konsistenz (Grundsatz):** Manifest und Archiv **müssen aus derselben
+    agent-kontrollierten, unveränderlichen Staging-Struktur** erzeugt werden. Ein Manifest aus einem
+    früheren/parallelen Live-Zustand ist **unzulässig**.
+- **Alternativen (Serialisierung):** projektspezifisch-deterministisch *(empfohlen)* vs. formaler
+  Canonical-JSON-Standard *(nicht gewählt: neue Dependency/Komplexität, für v1 unnötig)*.
+- **Sicherheitsauswirkung:** ermöglicht belastbare Bomb-/Größen-/Struktur-/Per-Datei-Gates beim
+  späteren Restore; trennt Integrität/Herkunft/Instanzbindung/Versionskompatibilität sauber.
+- **Konsequenzen / BLOCKER:** Die aktuelle Backup-Erzeugung bietet die geforderte
+  **Staging-/Snapshot-Konsistenz** und **atomare Veröffentlichung nicht** ⇒ die Manifest-**Integration**
+  in die Backup-Erstellung ist **blockiert**, bis ein **Staging-/Atomic-Publish-WP** (vorgeschlagen
+  als Step 049 bzw. Backup-Erzeugungs-Umbau) umgesetzt ist. **Keine schwächere Konsistenzbehauptung**
+  wird akzeptiert. Reihenfolge: 047 Typen/Validator → 048 read-only Builder (Test-/Staging) → 049
+  Staging/Snapshot (nach ADR-Freigabe) → später Backup-Integration. **Restore bleibt nicht
+  implementiert.** Legacy-Backups ohne Manifest bleiben nicht restorefähig (ADR-0040/Step 045).
+
+---
+
 ## Offene Entscheidungen (proposed / TODO)
 
 | ID | Thema | Status | Anmerkung |
@@ -783,3 +842,5 @@
 | OPEN-10 | Restore-Audit-Datenmodell (flaches AuditLog erweitern?) | Folge-ADR (vertagt) | Blueprint §5.17; ggf. Migration |
 | OPEN-11 | Wiederanlauf nach Agent-Neustart während Restore | Folge-ADR (vertagt) | Blueprint §5.14/§5.19 |
 | OPEN-12 | Diagnoseartefakt-Retention bei Fehler/Rollback | Folge-ADR (vertagt) | Blueprint §5.15 |
+| OPEN-13 | Staging-/Snapshot-Konsistenz der Backup-Erzeugung (Manifest+Archiv aus einer Struktur) | Folge-ADR/WP (vertagt, Step 046) | aktuelle Erzeugung tart Live-Volume direkt; **Manifest-Integration blockiert** bis Staging (Step 049) |
+| OPEN-14 | Atomare Veröffentlichung eines Backups (Temp-Namen + atomarer Rename) | Folge-ADR/WP (vertagt, Step 046) | aktuell direkter finaler Name, kein atomarer Publish; unvollständiges Backup könnte listbar sein |

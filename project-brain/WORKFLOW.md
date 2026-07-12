@@ -22,7 +22,8 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | 044 | Restore Foundation ADR Decision Package (ADR-0039–0041, docs-only) | **abgeschlossen** |
 | 044a | Accept Restore Foundation ADRs (ADR-0039–0041 **Accepted** 2026-07-12, docs-only) | **abgeschlossen** |
 | 045 | Agent Read-only Managed Backup Inspection (`executable: true`, strikt read-only) | **abgeschlossen** |
-| 046 | Restore Manifest Creation Foundation | geplant nach Nova-Review |
+| 046 | Restore Manifest Format, Placement & Binding Decision Package (Proposed ADR-0042, docs-only) | **abgeschlossen** |
+| 047 | Manifest v1 Types and Pure Validation | geplant, **blockiert bis ADR-0042-Acceptance** |
 
 ## 2. Single Source of Truth
 
@@ -44,6 +45,7 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | Feedback-to-NDF (Kandidaten) | [../docs/ndf/FEEDBACK_TO_NDF.md](../docs/ndf/FEEDBACK_TO_NDF.md) |
 | Restore-Konzept (Blueprint, `executable: false`) | [../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md) |
 | Read-only Backup-Inspection (Step 045) | [../docs/backup/READ_ONLY_BACKUP_INSPECTION.md](../docs/backup/READ_ONLY_BACKUP_INSPECTION.md) |
+| Restore-Manifest v1 Schema (Step 046, Proposed) | [../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md](../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md) |
 
 Tech-Stack-Änderungen **nur** per neuem/aktualisiertem ADR in [DECISIONS.md](DECISIONS.md).
 

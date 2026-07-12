@@ -17,24 +17,24 @@
 ## Rahmen
 
 - **NDF-Standard:** v1.0.0 (Tag `v1.0.0`, Commit `9dcadc1`), **Skills-first**.
-- **Zuletzt abgeschlossen:** ADR-Paket **044**; **044a ADRs Accepted (2026-07-12)**; **045 Read-only
-  Backup-Inspection** (Agent, `executable: true`, strikt read-only).
-- **Aktueller Schritt:** **045** – Agent Read-only Managed Backup Inspection (kein Restore, keine
-  Extraktion; Legacy-Backups nicht restorefähig).
-- **Push-Status:** `2ce4e6c` (044) · `c86c0a8` (044a) **gepusht** (`origin/main`); **045-Commit
+- **Zuletzt abgeschlossen:** **044a ADRs Accepted**; **045 Read-only Backup-Inspection**; **046
+  Manifest-v1-Decision-Package** (docs-only, **Proposed ADR-0042**, `executable: false`).
+- **Aktueller Schritt:** **046** – Restore Manifest Format, Placement & Binding Decision Package
+  (kein Code, keine Backup-Erzeugung geändert; Integration blockiert bis Staging).
+- **Push-Status:** `c86c0a8` (044a) · `7ec9f32` (045) **gepusht** (`origin/main`); **046-Commit
   lokal, noch nicht gepusht**.
 
 ## Queue
 
 | Step | Titel | Status |
 |------|-------|--------|
-| 042a | Context & Work-Package SSOT Alignment | abgeschlossen |
 | 043 | Managed Backup Restore Blueprint | abgeschlossen |
 | 044 | Restore Foundation ADR Decision Package | abgeschlossen |
 | 044a | Accept Restore Foundation ADRs | abgeschlossen |
-| 045 | Agent Read-only Managed Backup Inspection | abgeschlossen, lokal |
-| 046 | Restore Manifest Creation Foundation | geplant nach Nova-Review |
-| später | Restore-Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
+| 045 | Agent Read-only Managed Backup Inspection | abgeschlossen |
+| 046 | Restore Manifest Format, Placement & Binding Decision Package | abgeschlossen, lokal |
+| 047 | Manifest v1 Types and Pure Validation | geplant, blockiert bis ADR-0042-Acceptance |
+| später | 048 Read-only Manifest Builder · 049 Staging & Snapshot Consistency · Backup Creation Integration (Blueprint §5.21) | Backlog |
 | später | Editable Rotation Policy / Bulk Rotation | Backlog |
 
 ## Abhängigkeiten
@@ -46,10 +46,14 @@
   [Decision Summary](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md).
 - **045** (abgeschlossen) liefert die strikt read-only Agent-Backup-Inspection
   ([Doku](../docs/backup/READ_ONLY_BACKUP_INSPECTION.md)); Legacy-Backups nicht restorefähig.
-- **046** (Restore Manifest Creation Foundation) setzt ADR-0040 + 045 voraus; erzeugt beim
-  Backup-Erstellen ein versioniertes Manifest (inkl. Per-Datei-SHA-256) — Voraussetzung, damit
-  Backups überhaupt restorefähig werden. Danach Restore-Plan/-Apply/-Rollback (Backlog).
-  Vertagte Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
+- **046** (abgeschlossen) entscheidet Manifest-v1-Format/Ablage/Bindung als **Proposed ADR-0042** +
+  [Schema](../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md); **kein Code**. Befund: aktuelle
+  Backup-Erzeugung ohne Staging/atomaren Publish ⇒ **Integration blockiert** (OPEN-13/14).
+- **047** (Manifest v1 Types & Pure Validation) setzt ADR-0042-Acceptance voraus → **blockiert bis
+  Freigabe**; reine Typen/Validator/Serialisierung, keine Backup-Integration, keine FS-Änderung
+  außerhalb Tests.
+- **Manifest-Integration in die Backup-Erzeugung** setzt zusätzlich ein Staging-/Atomic-Publish-WP
+  (049) voraus (OPEN-13/14). Vertagte Restore-Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
 - **Editable Rotation Policy / Bulk Rotation** setzt die Rotation-Dry-Run-Vorschau (041) voraus.
 
 ## Offene Risiken

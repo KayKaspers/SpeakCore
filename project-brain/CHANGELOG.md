@@ -5,6 +5,41 @@
 
 ## [Unreleased]
 
+### NDF Step 046 – Restore Manifest Format, Placement & Binding Decision Package (2026-07-12)
+
+> **Docs-only Entscheidungs-Step, `executable: false` – kein Code, keine Manifest-Erzeugung, keine
+> Änderung an der Backup-Erstellung.** Definiert das Manifest-v1-Format als **Proposed**.
+
+#### Added
+- **Proposed ADR-0042 – Restore Manifest Format, Placement and Binding** (`DECISIONS.md`):
+  Schema-Version (integer, fail-closed), Manifest-Datei **`speakcore-backup-manifest.json`** genau
+  einmal im Archiv-Root + **identischer** managed Sidecar `<backup>.manifest.json` (Archiv-Manifest
+  = spätere Restore-Referenz; Sidecar nur für schnelle Inspection), Bindung Metadata↔Archiv↔Manifest
+  über SHA-256, **projektspezifische deterministische Serialisierung** (UTF-8/kein BOM/LF/sortierte
+  Einträge, **keine neue Dependency**), Per-Datei-SHA-256, Symlink/Hardlink/Special-Files in v1
+  unzulässig.
+- **`docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md`** (neu): vollständiges Schema (Beispiel, Feldtabelle,
+  Entry-/Pfad-Regeln, Bindung, Snapshot-Konsistenz, atomare Veröffentlichung, Fehler/Cleanup,
+  Legacy, Auswirkung auf Step-045-Inspection [`missing/invalid/unsupported/present_unverified/
+  verified`], Folge-WPs, spätere Testanforderungen).
+- **Befund/BLOCKER:** die aktuelle Backup-Erzeugung (`docker-backup.ts`) tart das Volume read-only
+  **direkt unter dem finalen Namen** (kein Staging/Snapshot, kein atomarer Rename) ⇒ die
+  Manifest-**Integration** ist **blockiert** bis zu einem Staging-/Atomic-Publish-WP; als
+  **OPEN-13/OPEN-14** vermerkt. Keine schwächere Konsistenzbehauptung akzeptiert.
+
+#### Changed
+- SSOTs: `CONTEXT_PACK_SPEAKCORE_CURRENT.md`, `project-system/WORK_PACKAGE_QUEUE.md` (047 „geplant,
+  blockiert bis ADR-0042-Acceptance"; 048/049/Integration Backlog), `WORKFLOW.md`,
+  `NDF_LESSONS_LEARNED.md` (L17), `docs/ndf/FEEDBACK_TO_NDF.md` (K5).
+
+#### Nicht enthalten (bewusst)
+- Keine Accepted-ADR, keine Manifest-/Backup-Code-Änderung, keine `apps/**`/`packages/**`/
+  `.claude/skills/**`. ADR-0040 bleibt unverändert Accepted. Restore nicht implementiert.
+
+#### Verifiziert
+- `git diff --check` sauber; alle Änderungen in `docs/**`/`project-brain/**`/`project-system/**`.
+  Kein `pnpm`-Lint/Build/Test (docs-only).
+
 ### NDF Step 045 – Agent Read-only Managed Backup Inspection (2026-07-12)
 
 > Erster ausführbarer Baustein des Restore-Strangs: eine **strikt read-only** Agent-Prüfung genau

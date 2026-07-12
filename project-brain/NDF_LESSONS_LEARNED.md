@@ -59,6 +59,14 @@
     ungeklärten Sicherheitsentscheidungen vorbeiläuft. Ergänzend: die vier Eigenschaften
     **Integrität / Herkunft / Instanzbindung / Versionskompatibilität** nie vermischen.
 
+17. **Format-Entscheidung deckt fehlende Ausführungsgarantien auf (Step 046).** Beim Festlegen des
+    Manifest-Formats zeigte der Repo-Befund, dass die aktuelle Backup-Erzeugung **weder eine
+    unveränderliche Staging-Struktur noch eine atomare Veröffentlichung** bietet (tar direkt unter
+    finalem Namen). Konsequenz: Format entscheiden, aber die **Integration ehrlich als blockiert**
+    markieren (eigener Staging-/Atomic-Publish-WP) statt eine schwächere Konsistenz zu behaupten —
+    „deterministisches Manifest" ist wertlos, wenn Manifest und Archiv nicht dieselbe eingefrorene
+    Struktur beschreiben.
+
 ## Verwendung
 
 - Neue **bestätigte** Learnings hier kompakt ergänzen (eine Zeile pro Punkt, mit Step-Bezug).
