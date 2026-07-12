@@ -625,17 +625,19 @@
 
 ---
 
-> **Restore-Foundation ADR-Paket (Step 044).** Die folgenden drei ADRs (0039–0041) sind
-> **`status: Proposed` / `executable: false`** und legen die Grundlagen für einen späteren
-> read-only Restore-Inspection-Step (045) fest. **Proposed ist NICHT Accepted:** keine dieser
-> Entscheidungen ist ohne ausdrückliche Human-Maintainer-Freigabe (Kay) beschlossen; es wird
-> **kein Restore, keine Write-/Apply-Funktion** freigegeben. Übersicht:
+> **Restore-Foundation ADR-Paket (Step 044, akzeptiert in Step 044a am 2026-07-12).** Die drei
+> ADRs (0039–0041) sind **`Accepted`** (Entscheider Kay / Human Maintainer), bleiben aber
+> **`executable: false`**: **Acceptance erlaubt KEINE Restore-Ausführung** — es ist **kein Restore,
+> keine Write-/Apply-Funktion** freigegeben. Step 045 darf **ausschließlich** eine **read-only
+> Restore-Inspection** behandeln. Übersicht:
 > [../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md);
 > Basis: [../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md).
 
 ## ADR-0039 – Restore Authorization and Confirmation Model
 
-- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **Status:** **Accepted** (Step 044a, **2026-07-12**) — Entscheider: **Kay / Human Maintainer**;
+  Grundlage: ausdrückliche Freigabe gemäß Nova-Empfehlung. **Acceptance erlaubt noch KEINE
+  Restore-Ausführung** (Restore bleibt nicht implementiert).
 - **executable:** false
 - **Kontext:** Der Restore ist eine destructive, zustandsersetzende Operation (Blueprint §5.4/§5.7).
   Zu klären ist, **wer** ihn auslösen darf und **wie** die Bestätigung so gebunden wird, dass sie
@@ -654,19 +656,32 @@
   Backup-Dateinamens · Eingabe des Instanznamens · feste Restore-Phrase (z. B. `RESTORE BACKUP`) ·
   serverseitiges Einmal-Token. **Empfohlen:** **sichtbare starke Eingabe** (Kombination aus exaktem
   Backup-Dateinamen und/oder Instanznamen **plus** fester Phrase, konsistent mit `CREATE BACKUP`/
-  `DELETE BACKUP`) **plus** serverseitige **Plan-/Fingerprint-Bindung + Einmal-Token**. Die exakte
-  Phrase/Kombination ist eine Human-Maintainer-Entscheidung.
+  `DELETE BACKUP`) **plus** serverseitige **Plan-/Fingerprint-Bindung + Einmal-Token**.
+- **Verbindliche Entscheidung (Accepted, Step 044a) für Restore v1:** Restore **nur `OWNER`**;
+  **keine separate Restore-Rolle in v1**; Berechtigungsprüfung **serverseitig bei Planung UND
+  Ausführung**; **keine Autorität im Browser**; **kurzlebiger, einmalig nutzbarer** Restore-Plan
+  gebunden an Benutzer + Instanz + Backup + **Backup-Fingerprint** + **Plan-ID** + **Ablaufzeit**;
+  jede relevante Änderung am Backup-/Instanzzustand **invalidiert den Plan**; **kein**
+  Cross-Instance-Restore, **keine** fremden/hochgeladenen Archive, **keine** frei eingebbaren
+  Hostpfade. **Gewählte Bestätigungsphrase (exakt):** `RESTORE <INSTANZNAME> FROM <BACKUP-DATEINAME>`
+  — serverseitig aus dem gültigen Plan erzeugt, vollständig+exakt einzugeben, **nur
+  Bestätigungsfaktor** (ersetzt keine serverseitige Autorisierung), **nicht wiederverwendbar**.
+  **Nicht gewählt:** einfache Ja/Nein-Bestätigung, alleinige Dateinamen-Eingabe, alleinige
+  Instanznamen-Eingabe, alleinige feste Phrase ohne Plan-Bindung (zur Nachvollziehbarkeit erhalten,
+  aber verworfen).
 - **Sicherheitsauswirkung:** verhindert UI-Autoritäts-Spoofing, Replay alter Anforderungen und
   TOCTOU-Backup-Austausch zwischen Plan und Apply; hält das Vertrauensmodell serverseitig.
-- **Konsequenzen:** Der spätere Plan-Endpunkt erzeugt Plan-ID + Fingerprint; der Execute-Endpunkt
-  revalidiert Rolle/Instanz/Backup/Bestätigung. **Human-Maintainer-Entscheidung offen:** genaue
-  Bestätigungsphrase/-kombination; ob Restore eine eigene Rolle/Recht erhält.
+- **Konsequenzen:** Der spätere Plan-Endpunkt erzeugt Plan-ID + Fingerprint + die exakte
+  Bestätigungsphrase; der Execute-Endpunkt revalidiert Rolle/Instanz/Backup/Bestätigung. Umsetzung
+  erst nach freigegebenem Restore-WP (Step 045 nur read-only Inspection).
 
 ---
 
 ## ADR-0040 – Restore Manifest and Legacy Backup Policy
 
-- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **Status:** **Accepted** (Step 044a, **2026-07-12**) — Entscheider: **Kay / Human Maintainer**;
+  Grundlage: ausdrückliche Freigabe gemäß Nova-Empfehlung. **Acceptance erlaubt noch KEINE
+  Restore-Ausführung/Manifest-Implementierung.**
 - **executable:** false
 - **Kontext:** Aktuelle Backups sind gzip-Tar des Volume-Inhalts **ohne eingebettetes Manifest**;
   der Sidecar `.metadata.json` (unsigniert) trägt Basisfelder + optionale SHA-256 über die gesamte
@@ -687,21 +702,36 @@
   Kompatibilitätsinformationen. **Vier getrennte Eigenschaften nicht vermischen:** **Integrität**
   (SHA-256) · **Herkunft** (derzeit nicht kryptografisch belegbar) · **Instanzbindung** (instanceId
   in Name **und** Manifest) · **Versionskompatibilität** (Schema-/SpeakCore-/TS3-Version).
-- **Alternativen:** (a) kein Manifest, Vertrauen aus Sidecar *(abgelehnt: kein Herkunftsnachweis,
-  manipulierbar)*; (b) Manifest optional *(abgelehnt: uneinheitliche Restore-Sicherheit)*;
-  (c) Manifest zwingend + Legacy fail-closed *(empfohlen)*.
+- **Alternativen:** (a) kein Manifest, Vertrauen aus Sidecar · (b) Manifest optional ·
+  (c) **Manifest zwingend + Legacy fail-closed** — **(c) gewählt**; (a) und (b) **nicht gewählt**
+  (kein Herkunftsnachweis bzw. uneinheitliche Restore-Sicherheit; zur Nachvollziehbarkeit erhalten).
+- **Verbindliche Entscheidung (Accepted, Step 044a) für Restore v1:** Restore-fähige Backups
+  benötigen ein **versioniertes Manifest**. **Zwingende Manifest-(inner)-Felder:**
+  Manifest-Schema-Version · Backup-ID · Instanz-ID · Erstellungszeitpunkt · Backup-Typ ·
+  SpeakCore-Version · Agent-Version · Archivformat · Layout-Version · erwartete unkomprimierte
+  Gesamtgröße · erwartete Dateianzahl · normalisierte relative Pfade · Eintragstypen · Dateigrößen ·
+  **SHA-256 je regulärer Datei**. **Zusätzliche äußere Backup-Metadaten:** Archivdateiname ·
+  komprimierte Archivgröße · **SHA-256 des vollständigen Archivs**. **Optional:** TeamSpeak-Version/
+  Build · Quellplattform · zusätzliche Kompatibilitätsmerkmale. **Sicherheitsgrenzen:** SHA-256 =
+  Integrität gegen Veränderung, **keine Signatur**, **kein** alleiniger Herkunftsnachweis;
+  **Integrität / Herkunft / Instanzbindung / Versionskompatibilität bleiben getrennte Prüfziele.**
+  **Legacy-Backups ohne Manifest:** werden erkannt, dürfen **angezeigt**, sind **eindeutig als nicht
+  restorefähig markiert**, erhalten in v1 **keinen automatischen Backfill**, dürfen **weder geplant
+  noch ausgeführt** werden; Behandlung erst durch ein **separates späteres NDF-WP**.
 - **Sicherheitsauswirkung:** verhindert Restore aus unvollständig verifizierbaren/manipulierten
-  Backups; macht Bomb-/Größen-/Struktur-Gates (Blueprint §5.8) überhaupt belastbar.
-- **Konsequenzen:** Die Manifest-Erzeugung berührt einen **späteren** Backup-Erstellungs-WP
-  (nicht hier); Legacy-Backups bleiben bis zu einem optionalen Backfill nicht restorefähig.
-  **Human-Maintainer-Entscheidung offen:** endgültige Pflicht-/Optionalfelder; ob/wann ein
-  Legacy-Backfill kommt.
+  Backups; macht Bomb-/Größen-/Struktur-Gates (Blueprint §5.8) überhaupt belastbar; Per-Datei-SHA-256
+  ermöglicht Post-Extraktions-Validierung.
+- **Konsequenzen:** Manifest-Erzeugung (inkl. Per-Datei-SHA-256) berührt einen **späteren**
+  Backup-Erstellungs-WP; Legacy-Backups bleiben ohne separates Backfill-WP nicht restorefähig. Die
+  Restore-Inspection (Step 045) darf Legacy erkennen/anzeigen, **nicht** freigeben.
 
 ---
 
 ## ADR-0041 – Mandatory Pre-Restore Safety Backup
 
-- **Status:** Proposed (Step 044) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **Status:** **Accepted** (Step 044a, **2026-07-12**) — Entscheider: **Kay / Human Maintainer**;
+  Grundlage: ausdrückliche Freigabe gemäß Nova-Empfehlung. **Acceptance erlaubt noch KEINE
+  Restore-Ausführung.**
 - **executable:** false
 - **Kontext:** Restore überschreibt den Live-Volume-Zustand. Ohne eine unmittelbar vorher erstellte,
   validierte Sicherung gibt es keine verlässliche Rollback-Quelle (Blueprint §5.11/§5.15).
@@ -714,14 +744,26 @@
   **fehlender Speicherplatz ist ein harter Blocker**. **(7)** Der Sicherungspunkt ist die
   **bevorzugte Rollback-Quelle**. **(8)** Aufbewahrungs-/Rotationseinbindung wird **später separat**
   entschieden.
-- **Alternativen:** (a) verpflichtende Sicherung **ohne Override** *(empfohlen für v1)*;
-  (b) Owner-Override mit zusätzlicher Bestätigung *(nur nach eigener späterer ADR)*;
-  (c) Restore ohne Sicherung *(abgelehnt: kein sicherer Rollback)*.
+- **Alternativen:** (a) **verpflichtende Sicherung ohne Override** — **(a) gewählt für v1**;
+  (b) Owner-Override mit Zusatzbestätigung — **nicht gewählt** (nur nach eigener späterer ADR);
+  (c) Restore ohne Sicherung — **nicht gewählt/abgelehnt** (kein sicherer Rollback). Verworfene
+  Alternativen zur Nachvollziehbarkeit erhalten.
+- **Verbindliche Entscheidung (Accepted, Step 044a) für Restore v1:** vor **jedem** Apply ein
+  **neuer managed Pre-Restore-Sicherungspunkt**; **kein Owner-Override in v1**; **Fehlschlag der
+  Erstellung ODER Validierung blockiert** den Restore; **unzureichender Speicher = harter Blocker**;
+  Sicherungspunkt ist **bevorzugte Rollback-Quelle**. **Retention/Schutz:** nach erfolgreichem
+  Restore **mindestens 7 Tage** gegen Rotation geschützt; die **7-Tage-Frist beginnt erst nach
+  erfolgreichem Start UND erfolgreichem Health-Check**; bei **fehlgeschlagenem Restore** bzw.
+  **fehlgeschlagenem Rollback** bleibt der Sicherungspunkt **bis zur manuellen Klärung geschützt**;
+  **keine automatische Löschung** bei `ROLLBACK_FAILED`, `CLEANUP_REQUIRED` oder vergleichbaren
+  ungeklärten Fehlerzuständen. Die **technische Umsetzung der Rotation-Ausnahme** ist ein **separates
+  Work Package**.
 - **Sicherheitsauswirkung:** garantiert eine Rollback-Grundlage; verwandelt einen fehlgeschlagenen
-  Apply von „Datenverlust" in „rücksicherbar"; koppelt Speicher-Preflight an die Sicherheit.
+  Apply von „Datenverlust" in „rücksicherbar"; koppelt Speicher-Preflight an die Sicherheit; die
+  7-Tage-/Fehlerschutz-Regel verhindert, dass die Rettungskopie vorschnell rotiert wird.
 - **Konsequenzen:** zusätzlicher Speicherbedarf (Staging + Pre-Restore + Rollback) im Space-Gate;
-  Rotation muss den Marker respektieren. **Human-Maintainer-Entscheidung offen:** ob je ein
-  Override erlaubt wird; Retention-Politik des Pre-Restore-Backups.
+  die Rotation (Einzel-Delete 040 / spätere Bulk-Rotation) muss den Pre-Restore-Marker + die
+  Schutzfristen respektieren — als eigenes WP umzusetzen.
 
 ---
 

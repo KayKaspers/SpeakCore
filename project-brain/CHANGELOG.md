@@ -5,6 +5,36 @@
 
 ## [Unreleased]
 
+### NDF Step 044a – Accept Restore Foundation ADRs (2026-07-12)
+
+> **Docs-only Entscheidungs-Step – keine Runtime-Auswirkung.** Der Human Maintainer (**Kay**) hat
+> am **2026-07-12** ADR-0039, ADR-0040 und ADR-0041 gemäß Nova-Empfehlung **`Accepted`**.
+> **Acceptance ≠ Implementierung:** Restore bleibt nicht implementiert; alle drei ADRs bleiben
+> `executable: false`. Step 045 darf ausschließlich read-only Restore Inspection behandeln.
+
+#### Changed
+- `DECISIONS.md`: ADR-0039/0040/0041 von `Proposed` → **`Accepted`** (Datum 2026-07-12, Entscheider
+  Kay), mit den verbindlichen v1-Entscheidungen: **ADR-0039** Bestätigungsphrase
+  `RESTORE <INSTANZNAME> FROM <BACKUP-DATEINAME>`, OWNER-only ohne separate Rolle, einmaliger
+  plan-/fingerprint-gebundener Bestätigung; **ADR-0040** zwingendes versioniertes Manifest inkl.
+  **Per-Datei-SHA-256**, Legacy ohne Manifest nicht restorefähig (kein Auto-Backfill); **ADR-0041**
+  Pflicht-Pre-Restore-Sicherungspunkt ohne Override, **≥ 7 Tage Rotationsschutz ab erfolgreichem
+  Start+Health-Check**, Dauerschutz bei `ROLLBACK_FAILED`/`CLEANUP_REQUIRED`. Verworfene Alternativen
+  bleiben markiert erhalten.
+- `docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md`: alle drei auf `Accepted` (Datum, gewählte
+  Optionen, verworfene/vertagte Alternativen, Sicherheitsauswirkung, Effekt auf Step 045).
+- SSOTs: `CONTEXT_PACK_SPEAKCORE_CURRENT.md`, `project-system/WORK_PACKAGE_QUEUE.md` (045 „geplant,
+  freigegeben für Planung nach Nova-Review"; 044a „abgeschlossen, lokal"), `WORKFLOW.md`.
+
+#### Nicht enthalten (bewusst)
+- Keine Restore-/Inspection-/Manifest-/API-/UI-Implementierung, keine `apps/**`, `packages/**`,
+  `.claude/skills/**`, keine DB/Docker/CI/Dependency-Änderung. Offene Folge-ADRs OPEN-6…OPEN-12
+  bleiben offen. Step 045 nicht begonnen.
+
+#### Verifiziert
+- `git diff --check` sauber; alle Änderungen in `docs/**`/`project-brain/**`/`project-system/**`.
+  Kein `pnpm`-Lint/Build/Test (docs-only).
+
 ### NDF Step 044 – Restore Foundation ADR Decision Package (2026-07-11)
 
 > **Docs-only, `executable: false` – kein Restore, kein Code.** Legt die Grundlagen für einen

@@ -21,16 +21,17 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
   (037), gezieltes Einzel-Delete (040), Rotation-Dry-Run-Vorschau (041). **Restore/Import fehlen
   bewusst.**
 - **Abgeschlossene Governance-/Blueprint-Steps:** **042** NDF-Adoption · **042a** SSOT-Alignment ·
-  **043** **Restore-Blueprint**
-  ([docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md),
-  `executable: false`) · **044** **Restore-Foundation-ADR-Paket** (ADR-0039–0041 **Proposed**,
-  [docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md)).
-  **Restore weiterhin NICHT implementiert; Proposed ≠ Accepted.**
+  **043** **Restore-Blueprint** (`executable: false`) · **044** **Restore-Foundation-ADR-Paket** ·
+  **044a** **Accept Restore Foundation ADRs** — ADR-0039–0041 **Accepted** (Kay / Human Maintainer,
+  **2026-07-12**), bleiben `executable: false`
+  ([docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md)).
+  **Acceptance ≠ Ausführung: Restore weiterhin NICHT implementiert.**
 - **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
-- **Nächster Schritt:** **045 – Read-only Restore Inspection** (geplant, **blockiert bis
-  Human-Maintainer-Freigabe der ADR-0039–0041**): reine Analyse/Guard-Logik, **keine** Extraktion/
-  Write/Apply. Vertagte Folge-ADRs: Apply/Rollback · Portabilität · State-/Lock-Persistenz ·
-  Audit-Datenmodell · Wiederanlauf · Diagnose-Retention (OPEN-6…OPEN-12 in DECISIONS.md).
+- **Nächster Schritt:** **045 – Read-only Restore Inspection** (geplant, **freigegeben für Planung
+  nach Nova-Review**): **strikt read-only** (Namensmuster/Fingerprint/Manifest-/Legacy-/
+  Kompatibilitätsanzeige) — **keine** Extraktion/Write/Apply/Stop/Swap/Rollback. Vertagte
+  Folge-ADRs OPEN-6…OPEN-12 (Apply/Rollback · Portabilität · State-/Lock-Persistenz · Audit-Modell ·
+  Wiederanlauf · Diagnose-Retention) bleiben **offen**.
 
 ## Architektur in Kurzform
 
@@ -68,21 +69,21 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 015–016 Secret-Rotation · 017–023 Container-Lifecycle (create/start/stop/remove/restart/status) ·
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
 031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
-**042a SSOT-Alignment** · **043 Restore-Blueprint** · **044 Restore-Foundation-ADRs (Proposed)**.
-Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
-[../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
+**042a SSOT-Alignment** · **043 Restore-Blueprint** · **044 Restore-Foundation-ADRs** ·
+**044a ADRs Accepted (2026-07-12)**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md);
+Arbeitspaket-Queue: [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- **Human-Maintainer-Freigabe** von ADR-0039–0041 (Proposed) einholen; danach **Step 045 –
-  read-only Restore Inspection** (reine Guard-/Analyse-Logik, keine Write/Apply). Weitere
-  Restore-WPs (Blueprint §5.21) und die vertagten Folge-ADRs (OPEN-6…OPEN-12) danach.
-  Alternativ (Backlog): editierbare Rotation-Policy + Bulk-Rotation. Priorisierung durch Nova.
+- **Step 045 – read-only Restore Inspection** (freigegeben für Planung nach Nova-Review; strikt
+  read-only, keine Write/Apply). Danach weitere Restore-WPs (Blueprint §5.21) + vertagte Folge-ADRs
+  (OPEN-6…OPEN-12). Alternativ (Backlog): editierbare Rotation-Policy + Bulk-Rotation. Priorisierung
+  durch Nova. Step 045 in diesem Step **nicht** begonnen.
 
 ## Git-/Push-Status
 
-- **Gepusht auf `origin/main`:** … `40404a2` (042a) · `7f29b2a` (043).
-- **Lokal, noch nicht gepusht:** Step-044-ADR-Commit (`docs(backup): propose restore foundation
+- **Gepusht auf `origin/main`:** … `7f29b2a` (043) · `2ce4e6c` (044).
+- **Lokal, noch nicht gepusht:** Step-044a-Commit (`docs(backup): accept restore foundation
   decisions`) — Push-Freigabe durch Kay/Nova ausstehend.
 
 ## Verbotene Aktionen (Dauerregeln)

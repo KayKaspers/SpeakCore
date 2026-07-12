@@ -17,10 +17,10 @@
 ## Rahmen
 
 - **NDF-Standard:** v1.0.0 (Tag `v1.0.0`, Commit `9dcadc1`), **Skills-first**.
-- **Zuletzt abgeschlossen:** Governance **042**/**042a**; Blueprint **043**; ADR-Paket **044**.
-- **Aktueller Schritt:** **044** – Restore Foundation ADR Decision Package (docs-only,
-  ADR-0039–0041 **Proposed**, `executable: false`).
-- **Push-Status:** `40404a2` (042a) · `7f29b2a` (043) **gepusht** (`origin/main`); **044-Commit
+- **Zuletzt abgeschlossen:** Blueprint **043**; ADR-Paket **044**; **044a ADRs Accepted (2026-07-12)**.
+- **Aktueller Schritt:** **044a** – Accept Restore Foundation ADRs (docs-only; ADR-0039–0041
+  **Accepted**, weiterhin `executable: false` — **keine Restore-Ausführung freigegeben**).
+- **Push-Status:** `7f29b2a` (043) · `2ce4e6c` (044) **gepusht** (`origin/main`); **044a-Commit
   lokal, noch nicht gepusht**.
 
 ## Queue
@@ -31,8 +31,9 @@
 | 042 | NDF v1.0 Adoption & Claude Skills Enablement | abgeschlossen |
 | 042a | Context & Work-Package SSOT Alignment | abgeschlossen |
 | 043 | Managed Backup Restore Blueprint | abgeschlossen |
-| 044 | Restore Foundation ADR Decision Package | abgeschlossen, lokal |
-| 045 | Read-only Restore Inspection | geplant, blockiert bis ADR-Freigabe |
+| 044 | Restore Foundation ADR Decision Package | abgeschlossen |
+| 044a | Accept Restore Foundation ADRs | abgeschlossen, lokal |
+| 045 | Read-only Restore Inspection | geplant, freigegeben für Planung nach Nova-Review |
 | später | Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
 | später | Editable Rotation Policy / Bulk Rotation | Backlog |
 
@@ -40,11 +41,12 @@
 
 - **043** (abgeschlossen) ist reiner Blueprint auf Basis des Backup-Lebenszyklus 032–041; kein
   Restore-Code. Siehe [Restore-Blueprint](../docs/backup/MANAGED_BACKUP_RESTORE_BLUEPRINT.md).
-- **044** (abgeschlossen) legt die Restore-Grundlagen als **Proposed** ADRs 0039–0041 fest
-  (`executable: false`); siehe [Decision Summary](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md).
-- **045** (read-only Restore Inspection) setzt 043+044 voraus und ist **blockiert, bis der Human
-  Maintainer ADR-0039–0041 (bzw. die für 045 relevanten Teile) freigibt**; reine Guard-/Analyse-
-  Logik, keine Write/Apply. Vertagte Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
+- **044/044a** legen die Restore-Grundlagen als ADRs 0039–0041 fest — seit 044a **Accepted**
+  (2026-07-12), weiterhin `executable: false`; siehe
+  [Decision Summary](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md).
+- **045** (read-only Restore Inspection) setzt 043+044/044a voraus; die ADR-Freigabe ist mit 044a
+  erfolgt → **für Planung freigegeben (nach Nova-Review)**. Strikt read-only, keine Write/Apply.
+  Vertagte Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
 - **Editable Rotation Policy / Bulk Rotation** setzt die Rotation-Dry-Run-Vorschau (041) voraus.
 
 ## Offene Risiken
