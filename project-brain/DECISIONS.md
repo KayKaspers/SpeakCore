@@ -769,7 +769,9 @@
 
 ## ADR-0042 – Restore Manifest Format, Placement and Binding
 
-- **Status:** **Proposed** (Step 046) — **nicht Accepted**; Freigabe durch Human Maintainer (Kay) offen.
+- **Status:** **Accepted with Notes** (Step 046a, **2026-07-12**) — Entscheider: **Kay / Human
+  Maintainer**; Grundlage: ausdrückliche Freigabe gemäß Nova-Empfehlung mit den verbindlichen Notes
+  (siehe unten). **Acceptance erlaubt KEINE produktive Manifest-/Backup-Integration** (kein Code).
 - **executable:** false
 - **Kontext:** ADR-0040 (Accepted) verlangt für restorefähige Backups ein **versioniertes Manifest**.
   Zu klären sind Format, Dateiname, Ablage im Archiv, optionale externe Sidecar-Kopie, die Bindung
@@ -823,6 +825,38 @@
   wird akzeptiert. Reihenfolge: 047 Typen/Validator → 048 read-only Builder (Test-/Staging) → 049
   Staging/Snapshot (nach ADR-Freigabe) → später Backup-Integration. **Restore bleibt nicht
   implementiert.** Legacy-Backups ohne Manifest bleiben nicht restorefähig (ADR-0040/Step 045).
+- **Verbindliche Acceptance Notes (Step 046a):**
+  - **Note 1 – Keine behauptete Mehrdatei-Atomarität:** Archiv, Manifest-Sidecar und Metadata sind
+    getrennte Dateien; ein **einzelner** atomarer Datei-Rename kann sie nicht gemeinsam
+    veröffentlichen. Spätere Reihenfolge: (1) alle Artefakte unter **nicht listbaren temporären
+    Namen** erzeugen → (2) Archiv vollständig erzeugen+validieren → (3) Archiv-SHA-256 → (4)
+    Manifest-Sidecar schreiben+validieren → (5) Metadata erzeugen → (6) Bindungen (Metadata↔Archiv↔
+    Manifest) prüfen → (7) Archiv + Manifest in den managed Namensraum überführen → (8) **Metadata
+    zuletzt** veröffentlichen. Die **Metadata ist der `Publication Commit Marker`**: ein Backup gilt
+    nur als vollständig veröffentlicht, wenn Metadata gültig **und** Archiv **und** Manifest-Sidecar
+    vorhanden sind, alle referenzierten Namen übereinstimmen, Archivgröße/-Hash + Manifest-Hash
+    stimmen und die Schema-Version unterstützt ist. **Verwaiste/teilveröffentlichte Artefakte** dürfen
+    **nicht** in der Liste erscheinen, **nicht** als reguläres managed Backup inspiziert werden,
+    **keine** Restore-Freigabe erzeugen und werden durch einen späteren Cleanup-/Recovery-Prozess
+    behandelt. Ein späteres **Backup-Bundle-Verzeichnis mit atomarem Directory-Rename** bleibt eine
+    mögliche Alternative und ist durch ADR-0042 **nicht** ausgeschlossen.
+  - **Note 2 – Snapshot-Konsistenz ist Integrationsblocker:** Manifest und Archiv müssen aus **exakt
+    derselben unveränderlichen Staging-Struktur** stammen. **Unzulässig:** Manifest aus dem
+    Live-Volume erzeugen und danach separat archivieren; paralleles Hashing/Archivieren eines
+    veränderlichen Live-Zustands; Manifestdaten aus einem zeitlich anderen Dateizustand; schwächere
+    Konsistenzbehauptungen ohne technische Garantie. **Produktive Integration bleibt blockiert**, bis
+    eine agent-kontrollierte Staging-/Snapshot-Lösung entschieden **und** umgesetzt ist
+    (OPEN-13/OPEN-14).
+  - **Note 3 – Acceptance erlaubt noch keine Backup-Integration:** Akzeptiert sind **nur**
+    Manifestformat, Dateiname, Ablage, Sidecar-Modell, deterministische Serialisierung, Hash-Bindung
+    und das Publication-Grundmodell. **Nicht freigegeben:** Manifest-Erzeugung im produktiven
+    Backup-Ablauf, Änderungen an der bestehenden Backup-Erstellung, Staging, atomare Veröffentlichung,
+    Cleanup produktiver Teilzustände, Restore-Plan/-Ausführung.
+  - **Note 4 – Restore-Freigabe bleibt getrennt:** Ein formal gültiges Manifest bedeutet **nicht**
+    automatisch `restoreEligible: true`. Zusätzlich erforderlich bleiben mindestens: gültige
+    Instanzbindung, unterstützte Schema-Version, Versions-/Layout-Kompatibilität, sichere Prüfung des
+    Archiv-Inhalts, Prüfung des **archiv-internen** Manifests, vollständige Restore-Preflight-Gates,
+    ein gültiger Owner-gebundener Restore-Plan und **Accepted Folge-ADRs**.
 
 ---
 

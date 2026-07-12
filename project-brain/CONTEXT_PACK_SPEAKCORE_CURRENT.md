@@ -29,15 +29,17 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 - **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
 - **045 – Read-only Backup-Inspection:** Agent `POST /docker/provision/inspect-backup` prüft **ein**
   Backup (Name/Boundary/Dateityp/gestreamte SHA-256/Metadaten/Legacy), Legacy nicht restorefähig.
-- **046 – Restore Manifest Format/Placement/Binding (Decision Package, `executable: false`):**
-  **Proposed ADR-0042** + [Manifest-v1-Schema](../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md)
-  (Datei `speakcore-backup-manifest.json` im Archiv-Root + identischer Sidecar; deterministische
-  Serialisierung; Per-Datei-SHA-256; Bindung Archiv/Manifest/Metadata). **Befund:** aktuelle
-  Backup-Erzeugung liefert **weder Staging/Snapshot noch atomare Veröffentlichung** ⇒
-  **Manifest-Integration blockiert** bis Staging-WP (OPEN-13/14). **Restore weiterhin NICHT
-  implementiert; keine Backup-Erzeugung geändert.**
-- **Nächster Schritt:** **047 – Manifest v1 Types & Pure Validation** (geplant, **blockiert bis
-  ADR-0042-Acceptance**). Vertagte Folge-ADRs OPEN-6…OPEN-14 offen.
+- **046 – Manifest-v1-Decision-Package** + **046a – ADR-0042 Accepted with Notes (2026-07-12, Kay):**
+  Manifest-v1-Format verbindlich ([Schema](../docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md); Datei
+  `speakcore-backup-manifest.json` im Archiv-Root + identischer Sidecar; deterministische
+  Serialisierung; Per-Datei-SHA-256; Bindung Archiv/Manifest/Metadata). **Publication Commit Marker =
+  Metadata** (zuletzt veröffentlicht; keine Mehrdatei-Atomarität; Teilartefakte nicht listbar/
+  inspizierbar). **Manifest-Erzeugung noch nicht implementiert; Backup-Integration weiterhin
+  blockiert** (Snapshot-/Staging-Voraussetzung, OPEN-13/14). **Restore-Freigabe bleibt separates
+  Gate.**
+- **Nächster Schritt:** **047 – Manifest v1 Types & Pure Validation** (geplant, **freigegeben nach
+  Nova-Review**; reine Typen/Validator/Serialisierung, keine Backup-Integration). Vertagte
+  Folge-ADRs OPEN-6…OPEN-14 offen.
 
 ## Architektur in Kurzform
 
@@ -76,23 +78,23 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
 031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
 **042a SSOT-Alignment** · **043 Restore-Blueprint** · **044/044a Restore-Foundation-ADRs (Accepted
-2026-07-12)** · **045 Read-only Backup-Inspection** · **046 Manifest-v1-Decision-Package (Proposed
-ADR-0042)**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-Queue:
-[../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
+2026-07-12)** · **045 Read-only Backup-Inspection** · **046 Manifest-v1-Decision-Package** · **046a
+ADR-0042 Accepted with Notes**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md); Arbeitspaket-
+Queue: [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- **Human-Maintainer-Freigabe von ADR-0042** einholen; danach **Step 047 – Manifest v1 Types & Pure
-  Validation** (reine Typen/Validator/Serialisierung, keine Backup-Integration). Manifest-Integration
+- **Step 047 – Manifest v1 Types & Pure Validation** (freigegeben nach Nova-Review; reine Typen/
+  Validator/Serialisierung, keine Backup-Integration). Manifest-**Integration** in die Backup-Erzeugung
   bleibt **blockiert** bis Staging-/Atomic-Publish-WP (OPEN-13/14). Danach Restore-Plan/-Apply/
   -Rollback (Blueprint §5.6–§5.15). Alternativ (Backlog): editierbare Rotation-Policy + Bulk-Rotation.
   Priorisierung durch Nova. Step 047 **nicht** begonnen.
 
 ## Git-/Push-Status
 
-- **Gepusht auf `origin/main`:** … `c86c0a8` (044a) · `7ec9f32` (045).
-- **Lokal, noch nicht gepusht:** Step-046-Commit (`docs(backup): define restore manifest format and
-  binding`) — Push-Freigabe durch Kay/Nova ausstehend.
+- **Gepusht auf `origin/main`:** … `7ec9f32` (045) · `ebb9036` (046).
+- **Lokal, noch nicht gepusht:** Step-046a-Commit (`docs(backup): accept restore manifest decision`)
+  — Push-Freigabe durch Kay/Nova ausstehend.
 
 ## Verbotene Aktionen (Dauerregeln)
 

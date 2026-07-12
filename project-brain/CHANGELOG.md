@@ -5,6 +5,33 @@
 
 ## [Unreleased]
 
+### NDF Step 046a – Accept Restore Manifest ADR (2026-07-12)
+
+> **Docs-only Entscheidungs-Step, `executable: false`.** Der Human Maintainer (**Kay**) hat am
+> **2026-07-12** **ADR-0042 „Accepted with Notes"**. **Acceptance ≠ Integration:** keine
+> Manifest-Erzeugung, keine Änderung an der Backup-Erstellung, kein Restore.
+
+#### Changed
+- `DECISIONS.md`: ADR-0042 `Proposed` → **`Accepted with Notes`** (Datum, Entscheider Kay) mit vier
+  verbindlichen Notes: **(1)** keine Mehrdatei-Atomarität — spätere Veröffentlichung über nicht
+  listbare Temp-Namen, **Metadata zuletzt als `Publication Commit Marker`**, Teilartefakte nicht
+  listbar/inspizierbar; **(2)** Snapshot-Konsistenz als **harter Integrationsblocker** (OPEN-13/14);
+  **(3)** Format-Acceptance erlaubt **keine** produktive Manifest-/Backup-Integration; **(4)**
+  Restore-Freigabe bleibt separates Gate (gültiges Manifest ⇒ nicht automatisch `restoreEligible`).
+- `docs/backup/RESTORE_MANIFEST_V1_SCHEMA.md`: Status **Accepted with Notes** + Acceptance-Abschnitt
+  (Publication Commit Marker, Metadata zuletzt, keine Mehrdatei-Atomarität, Snapshot-Blocker,
+  Format ≠ Integration, Restore-Gate getrennt).
+- SSOTs: `CONTEXT_PACK_SPEAKCORE_CURRENT.md`, `project-system/WORK_PACKAGE_QUEUE.md` (047 „geplant,
+  freigegeben nach Nova-Review"; Staging/Publication + Backup-Integration blockiert), `WORKFLOW.md`.
+
+#### Nicht enthalten (bewusst)
+- Keine Manifest-Erzeugung, keine Backup-Flow-Änderung, keine `apps/**`/`packages/**`/
+  `.claude/skills/**`. Restore nicht implementiert; produktive Integration weiterhin gesperrt.
+
+#### Verifiziert
+- `git diff --check` sauber; alle Änderungen in `docs/**`/`project-brain/**`/`project-system/**`.
+  Kein `pnpm`-Lint/Build/Test (docs-only).
+
 ### NDF Step 046 – Restore Manifest Format, Placement & Binding Decision Package (2026-07-12)
 
 > **Docs-only Entscheidungs-Step, `executable: false` – kein Code, keine Manifest-Erzeugung, keine

@@ -1,19 +1,43 @@
 ---
 title: Restore Manifest v1 – Format, Placement & Binding
-step: 046
-status: Proposed
+step: 046 (accepted in 046a)
+status: Accepted with Notes
 executable: false
 ndf_version: v1.0.0
+accepted_on: 2026-07-12
+accepted_by: Kay (Human Maintainer)
 ---
 
-# Restore Manifest v1 – Schema (SpeakCore, NDF Step 046)
+# Restore Manifest v1 – Schema (SpeakCore, NDF Step 046 · Accepted 046a)
 
-> **`status: Proposed` / `executable: false`.** Dieses Dokument **implementiert nichts** und ändert
-> **keine** Backup-Erstellung. Es definiert das verbindlich zu entscheidende Format des
-> versionierten Restore-Manifests (ADR-0040 Accepted) und wird von **Proposed
-> [ADR-0042](../../project-brain/DECISIONS.md)** getragen. Grundlage:
+> **`status: Accepted with Notes` (2026-07-12, Kay / Human Maintainer) · `executable: false`.**
+> Dieses Dokument **implementiert nichts** und ändert **keine** Backup-Erstellung. Es definiert das
+> verbindliche Format des versionierten Restore-Manifests (ADR-0040 Accepted) und wird von
+> **[ADR-0042](../../project-brain/DECISIONS.md) (Accepted with Notes)** getragen. Grundlage:
 > [Restore-Blueprint](MANAGED_BACKUP_RESTORE_BLUEPRINT.md) · read-only Inspection:
 > [READ_ONLY_BACKUP_INSPECTION.md](READ_ONLY_BACKUP_INSPECTION.md).
+
+## Acceptance (Step 046a, 2026-07-12)
+
+ADR-0042 ist **Accepted with Notes** (Kay / Human Maintainer). Verbindliche Notes:
+
+- **Kein Format-Freibrief für Integration:** Akzeptiert sind nur Format, Dateiname, Ablage,
+  Sidecar-Modell, deterministische Serialisierung, Hash-Bindung und das Publication-Grundmodell.
+  Manifest-Erzeugung, Änderungen an der Backup-Erstellung, Staging, atomare Veröffentlichung und
+  Cleanup produktiver Teilzustände sind **nicht** freigegeben.
+- **Publication Commit Marker = Metadata:** Archiv, Manifest-Sidecar und Metadata sind getrennte
+  Dateien; es wird **keine Mehrdatei-Atomarität behauptet**. Spätere Veröffentlichung erfolgt über
+  temporäre, **nicht listbare** Namen; die **Metadata wird zuletzt** veröffentlicht und markiert das
+  Backup erst dann als vollständig (Archiv + Manifest-Sidecar vorhanden, Namen/Größe/Hashes/Schema
+  stimmen). **Teilweise veröffentlichte/verwaiste Artefakte sind nicht listbar und nicht
+  inspizierbar** und erzeugen keine Restore-Freigabe.
+- **Snapshot-Konsistenz = harter Integrationsblocker:** Manifest + Archiv müssen aus derselben
+  unveränderlichen Staging-Struktur stammen; die produktive Integration bleibt **blockiert**, bis ein
+  Staging-/Snapshot-WP entschieden und umgesetzt ist (OPEN-13/OPEN-14).
+- **Restore-Freigabe bleibt separates Gate:** Ein gültiges Manifest ⇒ **nicht** automatisch
+  `restoreEligible: true` (zusätzlich: Instanzbindung, Schema-/Layout-/Versionskompatibilität,
+  Archiv-Inhalts- und archiv-internes Manifest-Check, Preflight-Gates, Owner-Plan, Accepted
+  Folge-ADRs).
 
 ## Zweck
 
@@ -148,6 +172,15 @@ managed Backup-Namensraum veröffentlichen.
 Erzeugung schreibt direkt unter dem finalen Namen (kein Temp-Name, kein atomarer Rename) ⇒ auch
 dieser Punkt ist Teil des blockierenden Staging-/Atomic-Publish-WPs (OPEN-14).
 
+**Publication Commit Marker (Accepted 046a):** Da Archiv, Manifest-Sidecar und Metadata **getrennte
+Dateien** sind, wird **keine Mehrdatei-Atomarität** behauptet. Stattdessen wird die **Metadata als
+letztes Artefakt** veröffentlicht und dient als Commit-Marker: Erst wenn die (gültige) Metadata neben
+vorhandenem Archiv **und** Manifest-Sidecar liegt und alle Namen/Größe/Hashes/Schema stimmen, gilt das
+Backup als vollständig. Teilweise/verwaiste Artefakte sind **nicht listbar und nicht inspizierbar**
+und erzeugen **keine** Restore-Freigabe; sie werden durch einen späteren Cleanup-/Recovery-Prozess
+behandelt. Ein **Backup-Bundle-Verzeichnis mit atomarem Directory-Rename** bleibt eine mögliche,
+nicht ausgeschlossene Alternative.
+
 ## Fehler & Cleanup (fail-closed)
 
 Bei Fehlschlag von Manifest-Erzeugung · Datei-Änderung während Hashing · unsupported file type ·
@@ -173,9 +206,9 @@ Künftige Manifest-Zustände: `missing` · `invalid` · `unsupported` · `presen
 
 ## Offene Entscheidungen
 
-Freigabe von ADR-0042 (Human Maintainer); Staging-/Snapshot-Konsistenz + atomare Veröffentlichung
-(OPEN-13/OPEN-14, blockierend für die Integration); endgültige Kompatibilitätslogik (separates WP);
-ob/wie ein Legacy-Manifest-Backfill je erfolgt.
+ADR-0042 ist **Accepted with Notes** (046a). Weiterhin offen: Staging-/Snapshot-Konsistenz + atomare
+Veröffentlichung (OPEN-13/OPEN-14, **blockierend** für die Integration); endgültige
+Kompatibilitätslogik (separates WP); ob/wie ein Legacy-Manifest-Backfill je erfolgt.
 
 ## Spätere Testanforderungen (nicht hier implementiert)
 

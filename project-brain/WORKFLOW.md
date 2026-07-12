@@ -22,8 +22,9 @@ Die Entwicklung erfolgt in klar abgegrenzten **NDF Steps**. Jeder Step:
 | 044 | Restore Foundation ADR Decision Package (ADR-0039–0041, docs-only) | **abgeschlossen** |
 | 044a | Accept Restore Foundation ADRs (ADR-0039–0041 **Accepted** 2026-07-12, docs-only) | **abgeschlossen** |
 | 045 | Agent Read-only Managed Backup Inspection (`executable: true`, strikt read-only) | **abgeschlossen** |
-| 046 | Restore Manifest Format, Placement & Binding Decision Package (Proposed ADR-0042, docs-only) | **abgeschlossen** |
-| 047 | Manifest v1 Types and Pure Validation | geplant, **blockiert bis ADR-0042-Acceptance** |
+| 046 | Restore Manifest Format, Placement & Binding Decision Package (docs-only) | **abgeschlossen** |
+| 046a | Accept Restore Manifest ADR (ADR-0042 **Accepted with Notes** 2026-07-12, docs-only) | **abgeschlossen** |
+| 047 | Manifest v1 Types & Pure Validation | geplant, **freigegeben nach Nova-Review** |
 
 ## 2. Single Source of Truth
 
