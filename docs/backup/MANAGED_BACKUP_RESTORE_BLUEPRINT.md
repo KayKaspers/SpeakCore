@@ -13,6 +13,12 @@ authority_boundary: "Vorschlag/Planung. Human Maintainer (Kay) entscheidet und g
 > implementierungsreifes Sicherheitskonzept für das spätere Wiederherstellen **genau eines**
 > von SpeakCore verwalteten Backups. Es wird kein Archiv extrahiert, kein Dienst gestoppt und
 > nicht in Backup-/TeamSpeak-Datenverzeichnisse geschrieben. **fail-closed** ist Standard.
+>
+> **Umsetzungsstand:** Ein erster, **strikt read-only** Baustein existiert seit Step 045 — die
+> Agent-Backup-Inspection (`POST /docker/provision/inspect-backup`), die genau ein Backup prüft
+> (Name/Boundary/Dateityp/SHA-256/Metadaten/Legacy) und maschinenlesbare Blocker liefert, ohne zu
+> extrahieren oder freizugeben. Details: [READ_ONLY_BACKUP_INSPECTION.md](READ_ONLY_BACKUP_INSPECTION.md).
+> Restore-Plan/-Ausführung/Apply/Rollback bleiben unimplementiert.
 
 ## 5.1 Metadaten
 

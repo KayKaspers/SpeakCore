@@ -17,24 +17,24 @@
 ## Rahmen
 
 - **NDF-Standard:** v1.0.0 (Tag `v1.0.0`, Commit `9dcadc1`), **Skills-first**.
-- **Zuletzt abgeschlossen:** Blueprint **043**; ADR-Paket **044**; **044a ADRs Accepted (2026-07-12)**.
-- **Aktueller Schritt:** **044a** – Accept Restore Foundation ADRs (docs-only; ADR-0039–0041
-  **Accepted**, weiterhin `executable: false` — **keine Restore-Ausführung freigegeben**).
-- **Push-Status:** `7f29b2a` (043) · `2ce4e6c` (044) **gepusht** (`origin/main`); **044a-Commit
+- **Zuletzt abgeschlossen:** ADR-Paket **044**; **044a ADRs Accepted (2026-07-12)**; **045 Read-only
+  Backup-Inspection** (Agent, `executable: true`, strikt read-only).
+- **Aktueller Schritt:** **045** – Agent Read-only Managed Backup Inspection (kein Restore, keine
+  Extraktion; Legacy-Backups nicht restorefähig).
+- **Push-Status:** `2ce4e6c` (044) · `c86c0a8` (044a) **gepusht** (`origin/main`); **045-Commit
   lokal, noch nicht gepusht**.
 
 ## Queue
 
 | Step | Titel | Status |
 |------|-------|--------|
-| 041 | Letzter Produktstand vor NDF-v1-Adoption (Rotation-Dry-Run-Vorschau) | abgeschlossen |
-| 042 | NDF v1.0 Adoption & Claude Skills Enablement | abgeschlossen |
 | 042a | Context & Work-Package SSOT Alignment | abgeschlossen |
 | 043 | Managed Backup Restore Blueprint | abgeschlossen |
 | 044 | Restore Foundation ADR Decision Package | abgeschlossen |
-| 044a | Accept Restore Foundation ADRs | abgeschlossen, lokal |
-| 045 | Read-only Restore Inspection | geplant, freigegeben für Planung nach Nova-Review |
-| später | Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
+| 044a | Accept Restore Foundation ADRs | abgeschlossen |
+| 045 | Agent Read-only Managed Backup Inspection | abgeschlossen, lokal |
+| 046 | Restore Manifest Creation Foundation | geplant nach Nova-Review |
+| später | Restore-Plan-Endpunkt → sichere Archivvalidierung → Staging → Pre-Restore-Backup → Lock → Apply/Rollback → UI → Audit → Security-Tests → E2E (Blueprint §5.21) | Backlog |
 | später | Editable Rotation Policy / Bulk Rotation | Backlog |
 
 ## Abhängigkeiten
@@ -44,8 +44,11 @@
 - **044/044a** legen die Restore-Grundlagen als ADRs 0039–0041 fest — seit 044a **Accepted**
   (2026-07-12), weiterhin `executable: false`; siehe
   [Decision Summary](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md).
-- **045** (read-only Restore Inspection) setzt 043+044/044a voraus; die ADR-Freigabe ist mit 044a
-  erfolgt → **für Planung freigegeben (nach Nova-Review)**. Strikt read-only, keine Write/Apply.
+- **045** (abgeschlossen) liefert die strikt read-only Agent-Backup-Inspection
+  ([Doku](../docs/backup/READ_ONLY_BACKUP_INSPECTION.md)); Legacy-Backups nicht restorefähig.
+- **046** (Restore Manifest Creation Foundation) setzt ADR-0040 + 045 voraus; erzeugt beim
+  Backup-Erstellen ein versioniertes Manifest (inkl. Per-Datei-SHA-256) — Voraussetzung, damit
+  Backups überhaupt restorefähig werden. Danach Restore-Plan/-Apply/-Rollback (Backlog).
   Vertagte Folge-ADRs: OPEN-6…OPEN-12 in DECISIONS.md.
 - **Editable Rotation Policy / Bulk Rotation** setzt die Rotation-Dry-Run-Vorschau (041) voraus.
 

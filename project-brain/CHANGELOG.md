@@ -5,6 +5,41 @@
 
 ## [Unreleased]
 
+### NDF Step 045 – Agent Read-only Managed Backup Inspection (2026-07-12)
+
+> Erster ausführbarer Baustein des Restore-Strangs: eine **strikt read-only** Agent-Prüfung genau
+> **eines** managed Backups. **Kein Restore, keine Extraktion, keine Auflistung, keine
+> Schreiboperation.** Bestandsbackups sind ohne Manifest **nicht restorefähig** (ADR-0040).
+
+#### Added
+- **Agent `POST /docker/provision/inspect-backup`** (Token-Gate, **kein** Write-Flag;
+  `apps/agent/src/backup-inspect.ts`, reine injizierbare Logik + Route): prüft Namensmuster
+  (kanonische strikte Validierung, instanceId aus Name abgeleitet), Pfadgrenze, Dateityp (via
+  `lstat`; **Symlinks/Sonderdateien abgelehnt**), streamt SHA-256 (kein Voll-Buffering) mit
+  **Vor-/Nach-`stat`-TOCTOU-Kontrolle**, vergleicht den gespeicherten Sidecar-SHA-256, klassifiziert
+  Legacy/Manifest/Kompatibilität und liefert **maschinenlesbare Blocker-Codes**. Antwort ohne
+  Host-Pfade/Secrets/Archivinhalt; für alle heutigen Backups `restoreEligible: false`,
+  `manifest: missing`, `legacy: true`.
+- **Typen** in `@speakcore/types`: `Ts3BackupInspectRequest`, `BackupInspectResult`,
+  `BackupInspectCode` (16 Reason-Codes; minimal-nötige gemeinsame Agent-Typen).
+- **Doku** `docs/backup/READ_ONLY_BACKUP_INSPECTION.md` (Endpunkt, Request/Response, Codes,
+  Sicherheitsgrenzen, Legacy-/Manifest-/Plattformverhalten); kompakter Verweis im Restore-Blueprint.
+- **Tests** `apps/agent/test/backup-inspect.test.ts` (20, inkl. HTTP-Test mit **echter gestreamter
+  SHA-256** gegen realen Temp-Ordner, Symlink-Ablehnung mit dokumentiertem Plattform-Skip,
+  Verzeichnis unverändert = read-only): Traversal/absolut/Separatoren/Endung, not-found/Verzeichnis/
+  Symlink, leeres Archiv, Metadaten fehlt/ungültig, Checksum match/mismatch/missing,
+  Änderung-während-Inspection, Legacy-Contract, Auth-Gate, Source-Scan (kein docker/exec/shell/
+  Extraktion/Listing/Write).
+
+#### Nicht enthalten (bewusst)
+- Kein Restore-Plan/-Ausführung, keine Manifest-Erstellung/-Backfill, keine Archiv-Auflistung/
+  -Extraktion, kein Stop/Start, kein Lock/Staging/Apply/Rollback, keine DB/Web/UI-Änderung.
+
+#### Verifiziert
+- `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm test` ✅ · `pnpm build` ✅ (siehe Rückmeldung). Nur
+  `apps/agent/**`, `packages/types` (minimal), `docs/backup/**`, `project-brain/**`,
+  `project-system/**` berührt; `apps/web/**` und `.claude/skills/**` unverändert.
+
 ### NDF Step 044a – Accept Restore Foundation ADRs (2026-07-12)
 
 > **Docs-only Entscheidungs-Step – keine Runtime-Auswirkung.** Der Human Maintainer (**Kay**) hat

@@ -27,11 +27,15 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
   ([docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md](../docs/backup/RESTORE_FOUNDATION_DECISION_SUMMARY.md)).
   **Acceptance ≠ Ausführung: Restore weiterhin NICHT implementiert.**
 - **NDF-Standard:** **v1.0.0 aktiv**; **38** lokale docs-only Skills unter `.claude/skills/`.
-- **Nächster Schritt:** **045 – Read-only Restore Inspection** (geplant, **freigegeben für Planung
-  nach Nova-Review**): **strikt read-only** (Namensmuster/Fingerprint/Manifest-/Legacy-/
-  Kompatibilitätsanzeige) — **keine** Extraktion/Write/Apply/Stop/Swap/Rollback. Vertagte
-  Folge-ADRs OPEN-6…OPEN-12 (Apply/Rollback · Portabilität · State-/Lock-Persistenz · Audit-Modell ·
-  Wiederanlauf · Diagnose-Retention) bleiben **offen**.
+- **045 – Read-only Backup-Inspection abgeschlossen:** Agent-Endpunkt
+  `POST /docker/provision/inspect-backup` prüft **genau ein** Backup (Name/Boundary/Dateityp/
+  gestreamte SHA-256/Sidecar-Metadaten/Legacy) und liefert maschinenlesbare Blocker — **keine**
+  Archivauflistung/Extraktion, **keine** Schreiboperation. **Legacy-Backups sind nicht restorefähig**
+  (`manifest: missing`, `legacy: true`, `restoreEligible: false`, `RESTORE_MANIFEST_MISSING`).
+  Doku: [docs/backup/READ_ONLY_BACKUP_INSPECTION.md](../docs/backup/READ_ONLY_BACKUP_INSPECTION.md).
+  **Restore weiterhin NICHT implementiert.**
+- **Nächster Schritt:** **046 – Restore Manifest Creation Foundation** (geplant nach Nova-Review;
+  Manifest beim Backup-Erstellen gemäß ADR-0040). Vertagte Folge-ADRs OPEN-6…OPEN-12 bleiben offen.
 
 ## Architektur in Kurzform
 
@@ -69,22 +73,22 @@ erweitern."** Ausführlich: [PROJECT.md](PROJECT.md), [MVP.md](MVP.md).
 015–016 Secret-Rotation · 017–023 Container-Lifecycle (create/start/stop/remove/restart/status) ·
 024–028 Deprovisioning (Volume-/Network-Remove, Archiv) · 029 Export · 030 Backup-Blueprint ·
 031 Release-Readiness · **032–041 Backup-Lebenszyklus** (siehe oben) · **042 NDF-v1.0-Adoption** ·
-**042a SSOT-Alignment** · **043 Restore-Blueprint** · **044 Restore-Foundation-ADRs** ·
-**044a ADRs Accepted (2026-07-12)**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md);
+**042a SSOT-Alignment** · **043 Restore-Blueprint** · **044/044a Restore-Foundation-ADRs (Accepted
+2026-07-12)** · **045 Read-only Backup-Inspection**. Vollständige Historie: [CHANGELOG.md](CHANGELOG.md);
 Arbeitspaket-Queue: [../project-system/WORK_PACKAGE_QUEUE.md](../project-system/WORK_PACKAGE_QUEUE.md).
 
 ## Offene nächste Arbeit
 
-- **Step 045 – read-only Restore Inspection** (freigegeben für Planung nach Nova-Review; strikt
-  read-only, keine Write/Apply). Danach weitere Restore-WPs (Blueprint §5.21) + vertagte Folge-ADRs
-  (OPEN-6…OPEN-12). Alternativ (Backlog): editierbare Rotation-Policy + Bulk-Rotation. Priorisierung
-  durch Nova. Step 045 in diesem Step **nicht** begonnen.
+- **Step 046 – Restore Manifest Creation Foundation** (geplant nach Nova-Review; Manifest beim
+  Backup-Erstellen, ADR-0040) — macht Backups erst restorefähig. Danach Restore-Plan/-Apply/-Rollback
+  (Blueprint §5.6–§5.15) + vertagte Folge-ADRs (OPEN-6…OPEN-12). Alternativ (Backlog): editierbare
+  Rotation-Policy + Bulk-Rotation. Priorisierung durch Nova. Step 046 **nicht** begonnen.
 
 ## Git-/Push-Status
 
-- **Gepusht auf `origin/main`:** … `7f29b2a` (043) · `2ce4e6c` (044).
-- **Lokal, noch nicht gepusht:** Step-044a-Commit (`docs(backup): accept restore foundation
-  decisions`) — Push-Freigabe durch Kay/Nova ausstehend.
+- **Gepusht auf `origin/main`:** … `2ce4e6c` (044) · `c86c0a8` (044a).
+- **Lokal, noch nicht gepusht:** Step-045-Commit (`feat(agent): add read-only backup inspection`)
+  — Push-Freigabe durch Kay/Nova ausstehend.
 
 ## Verbotene Aktionen (Dauerregeln)
 

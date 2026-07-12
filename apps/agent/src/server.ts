@@ -1,8 +1,8 @@
 import http from 'node:http';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { lstat, mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
+import { join, resolve, sep } from 'node:path';
 import { getVersionInfo } from '@speakcore/shared';
 import type { HealthStatus, VersionInfo } from '@speakcore/types';
 import type { AgentConfig } from './config';
@@ -14,6 +14,7 @@ import type {
   Ts3ContainerStopRequest,
   Ts3BackupChecksumBackfillRequest,
   Ts3BackupDeleteRequest,
+  Ts3BackupInspectRequest,
   Ts3BackupListRequest,
   Ts3BackupVerifyRequest,
   Ts3ProvisionInput,
@@ -36,6 +37,7 @@ import { verifyTs3VolumeBackup } from './backup-verify';
 import { resolveBackupDownload } from './backup-download';
 import { backfillBackupChecksum } from './backup-checksum-backfill';
 import { deleteTs3BackupFile } from './backup-file-delete';
+import { inspectBackup } from './backup-inspect';
 import { getManagedContainerStatus } from './docker-status';
 import { dockerExec } from './docker-cli';
 
@@ -360,6 +362,66 @@ async function handle(
           const s = await stat(join(listBackupDir, fileName));
           if (!s.isFile() || s.size > METADATA_MAX_BYTES) return null;
           return await readFile(join(listBackupDir, fileName), 'utf8');
+        } catch {
+          return null;
+        }
+      },
+    });
+    sendJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/docker/provision/inspect-backup') {
+    // READ-ONLY Inspection genau EINES managed Backups (Step 045). Token-Gate, KEIN Write-Flag:
+    // kein Docker, kein Entpacken, keine Auflistung, keine Schreiboperation. Die tar.gz wird NUR
+    // gelesen, um den SHA-256 zu streamen. Bestandsbackups sind ohne Manifest nie restorefähig.
+    if (config.bootstrapToken && !isValidToken(extractBearerToken(req), config.bootstrapToken)) {
+      sendJson(res, 401, { error: 'unauthorized' });
+      return;
+    }
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, 400, { error: 'bad_request' });
+      return;
+    }
+    const inspectBackupDir = process.env.AGENT_BACKUP_DIR ?? '/var/lib/speakcore/backups';
+    const resolvedDir = resolve(inspectBackupDir);
+    const result = await inspectBackup(body as Ts3BackupInspectRequest, {
+      // Der intern aufgelöste Pfad muss innerhalb des managed Backup-Verzeichnisses liegen
+      // (der Name enthält bereits keine Separatoren – Defense-in-Depth).
+      withinBoundary: (fileName) => {
+        const full = resolve(resolvedDir, fileName);
+        return full === join(resolvedDir, fileName) && full.startsWith(resolvedDir + sep);
+      },
+      lstatFile: async (fileName) => {
+        try {
+          const s = await lstat(join(inspectBackupDir, fileName));
+          return {
+            isSymlink: s.isSymbolicLink(),
+            isFile: s.isFile(),
+            sizeBytes: s.size,
+            mtimeMs: s.mtimeMs,
+          };
+        } catch {
+          return null;
+        }
+      },
+      computeSha256: (fileName) => sha256OfFile(inspectBackupDir, fileName),
+      statAfter: async (fileName) => {
+        try {
+          const s = await stat(join(inspectBackupDir, fileName));
+          return { sizeBytes: s.size, mtimeMs: s.mtimeMs };
+        } catch {
+          return null;
+        }
+      },
+      readMetadataFile: async (fileName) => {
+        try {
+          const s = await stat(join(inspectBackupDir, fileName));
+          if (!s.isFile() || s.size > METADATA_MAX_BYTES) return null;
+          return await readFile(join(inspectBackupDir, fileName), 'utf8');
         } catch {
           return null;
         }

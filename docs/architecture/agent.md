@@ -43,6 +43,7 @@ Operationen aus, die WebUI und API selbst nicht ausführen dürfen.
 | GET | `/docker/provision/download-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Stream** – genau eine strikt validierte tar.gz aus `AGENT_BACKUP_DIR` (nie metadata.json, kein Listing/Entpacken) |
 | POST | `/docker/provision/backfill-backup-checksum` | **metadata-write** (Token-gated, ohne Docker-Write-Flag): **SHA-256 nachtragen** – nur metadata.json wird normalisiert ergänzt, tar.gz bleibt unverändert |
 | POST | `/docker/provision/delete-backup` | **destruktiv** (Token-gated, ohne Docker-Write-Flag): **Einzel-Backup-Delete** – genau eine tar.gz + ihre metadata.json, irreversibel, alle Bestätigungen re-validiert |
+| POST | `/docker/provision/inspect-backup` | **read-only** (Token-gated, ohne Write-Flag): **Backup-Inspection** – genau ein Backup (Name/Boundary/Dateityp/gestreamte SHA-256/Metadaten/Legacy), kein Entpacken/Listing/Write, Legacy nicht restorefähig |
 | POST | `/docker/provision/container-status` | **read-only** (Token-gated): managed **Laufzeitstatus** (`docker container ls`, kein inspect/logs) |
 
 ## `/system/snapshot` – was gelesen wird (Step 006/007)

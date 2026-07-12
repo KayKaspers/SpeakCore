@@ -606,6 +606,63 @@ export interface BackupFileDeleteResult {
   metadataRemoved?: boolean;
 }
 
+// --- Read-only Backup-Inspection (NDF Step 045: genau EIN Backup prüfen, KEINE Extraktion) ----
+
+/** Maschinenlesbare Blocker-/Reason-Codes der read-only Inspection (Step 045). */
+export type BackupInspectCode =
+  | 'BACKUP_NOT_FOUND'
+  | 'BACKUP_NAME_INVALID'
+  | 'BACKUP_OUTSIDE_MANAGED_BOUNDARY'
+  | 'BACKUP_NOT_REGULAR_FILE'
+  | 'BACKUP_LINK_REJECTED'
+  | 'BACKUP_EMPTY'
+  | 'BACKUP_CHANGED_DURING_INSPECTION'
+  | 'ARCHIVE_READ_FAILED'
+  | 'METADATA_MISSING'
+  | 'METADATA_INVALID'
+  | 'ARCHIVE_CHECKSUM_MISSING'
+  | 'ARCHIVE_CHECKSUM_MISMATCH'
+  | 'RESTORE_MANIFEST_MISSING'
+  | 'RESTORE_MANIFEST_UNSUPPORTED'
+  | 'INSTANCE_BINDING_UNKNOWN'
+  | 'RESTORE_COMPATIBILITY_UNKNOWN';
+
+/** Request der read-only Inspection: **nur** der managed Dateiname (kein Pfad, keine instanceId). */
+export interface Ts3BackupInspectRequest {
+  backupFileName: string;
+}
+
+/**
+ * Ergebnis der read-only Inspection genau **eines** managed Backups (Step 045). Enthält nur
+ * Dateiname/Größe/Zeitstempel/SHA-256 + sanitisierte Metadaten-/Manifest-/Kompatibilitätsstatus –
+ * **kein** Host-Pfad, **kein** Archivinhalt, **keine** Secrets. `restoreEligible` ist heute für
+ * Bestandsbackups **immer** `false` (ADR-0040: Manifest fehlt).
+ */
+export interface BackupInspectResult {
+  backupFileName: string;
+  /** Dateiname entspricht dem strikten managed Muster. */
+  managed: boolean;
+  /** Existiert, reguläre Datei, kein Symlink/Sonderdatei. */
+  regularFile: boolean;
+  sizeBytes: number | null;
+  modifiedAt: string | null;
+  fingerprint: {
+    algorithm: 'sha256';
+    value: string;
+    /** In der `.metadata.json` gespeicherter Archiv-Hash (falls vorhanden). */
+    storedValue: string | null;
+    /** `null`, wenn kein gespeicherter Hash zum Vergleich existiert. */
+    matchesStoredValue: boolean | null;
+  } | null;
+  metadata: { status: 'valid' | 'missing' | 'invalid'; fileName: string | null };
+  manifest: { status: 'missing' | 'present' | 'unsupported'; schemaVersion: number | null };
+  legacy: boolean;
+  compatibility: { status: 'compatible' | 'incompatible' | 'unknown'; reasons: BackupInspectCode[] };
+  restoreEligible: boolean;
+  blockers: BackupInspectCode[];
+  snapshot: { sizeBytes: number; modifiedAt: string; sha256: string } | null;
+}
+
 // --- Checksum-Backfill (NDF Step 038: fehlende Prüfsumme in metadata.json nachtragen) --------
 
 export type BackupChecksumBackfillStatus =
